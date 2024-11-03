@@ -21,6 +21,9 @@ const manifest: PluginManifest = {
     // TODO: facility configuration form
   },
   navItems: [],
+  consultationTabs: {
+    ABDM: lazy(() => import("./components/ABDMRecordsTab")),
+  },
 };
 
 export default manifest;

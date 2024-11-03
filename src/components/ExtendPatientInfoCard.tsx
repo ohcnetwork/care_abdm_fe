@@ -1,14 +1,14 @@
-import ABHAProfileModal from "@/components/ABDM/ABHAProfileModal";
-import FetchRecordsModal from "@/components/ABDM/FetchRecordsModal";
 import * as Notification from "@/Utils/Notifications";
 import routes from "../api";
-import LinkAbhaNumber from "@/components/ABDM/LinkAbhaNumber";
 import request from "@/Utils/request/request";
 import { useQueryParams } from "raviger";
 import { ExtendPatientInfoCardComponentType } from "@/pluginTypes";
 import { useTranslation } from "react-i18next";
 import { useConsultation } from "@/components/Facility/ConsultationDetails/ConsultationContext";
 import { AbhaNumberModel } from "../types";
+import LinkAbhaNumber from "./LinkAbhaNumber";
+import ABHAProfileModal from "./ABHAProfileModal";
+import FetchRecordsModal from "./FetchRecordsModal";
 
 const ExtendPatientInfoCard: ExtendPatientInfoCardComponentType = ({
   patient,
