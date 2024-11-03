@@ -16,7 +16,9 @@ const manifest: PluginManifest = {
     ManagePatientOptions: lazy(
       () => import("./components/ManagePatientOptions"),
     ),
-    // TODO: manage facility options
+    ManageFacilityOptions: lazy(
+      () => import("./components/ManageFacilityOptions"),
+    ),
     // TODO: patient registration form
     // TODO: facility configuration form
   },
