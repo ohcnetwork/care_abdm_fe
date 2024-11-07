@@ -8,7 +8,7 @@ import {
   MultiSelectFormField,
   SelectFormField,
 } from "@/components/Form/FormFields/SelectFormField";
-import { ABDM_CONSENT_PURPOSE, ABDM_HI_TYPE } from "@/common/constants";
+import { ABDM_CONSENT_PURPOSE, ABDM_HI_TYPE } from "../constants";
 import DateRangeFormField from "@/components/Form/FormFields/DateRangeFormField";
 import dayjs from "dayjs";
 import { navigate } from "raviger";

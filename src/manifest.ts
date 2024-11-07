@@ -19,8 +19,12 @@ const manifest: PluginManifest = {
     ManageFacilityOptions: lazy(
       () => import("./components/ManageFacilityOptions"),
     ),
-    // TODO: patient registration form
-    // TODO: facility configuration form
+    ExtendFacilityConfigure: lazy(
+      () => import("./components/ExtendFacilityConfigure"),
+    ),
+    ExtendPatientRegisterForm: lazy(
+      () => import("./components/ExtendPatientRegisterForm"),
+    ),
   },
   navItems: [],
   consultationTabs: {
