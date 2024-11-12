@@ -1,8 +1,11 @@
-import CareIcon from "@/CAREUI/icons/CareIcon";
-import { DropdownItem } from "@/components/Common/components/Menu";
-import { ManageFacilityOptionsComponentType } from "@/pluginTypes";
 import { useNavigate } from "raviger";
 import { useTranslation } from "react-i18next";
+
+import CareIcon from "@/CAREUI/icons/CareIcon";
+
+import { DropdownItem } from "@/components/Common/Menu";
+
+import { ManageFacilityOptionsComponentType } from "@/pluginTypes";
 
 const ManageFacilityOptions: ManageFacilityOptionsComponentType = ({
   facility,

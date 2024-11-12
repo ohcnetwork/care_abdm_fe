@@ -1,19 +1,25 @@
 import { triggerGoal } from "@core/Integrations/Plausible";
-import useAuthUser from "@core/common/hooks/useAuthUser";
-
-import { ManagePatientOptionsComponentType } from "@/pluginTypes";
-import CareIcon from "@/CAREUI/icons/CareIcon";
-import { useTranslation } from "react-i18next";
-import { useConsultation } from "@/components/Facility/ConsultationDetails/ConsultationContext";
 import { MenuItem } from "@headlessui/react";
+import { useQueryParams } from "raviger";
+import { useTranslation } from "react-i18next";
+
+import { cn } from "@/lib/utils";
+
+import CareIcon from "@/CAREUI/icons/CareIcon";
+
 import {
   Tooltip,
   TooltipContent,
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-import { cn } from "@/lib/utils";
-import { useQueryParams } from "raviger";
+
+import { useConsultation } from "@/components/Facility/ConsultationDetails/ConsultationContext";
+
+import useAuthUser from "@/hooks/useAuthUser";
+
+import { ManagePatientOptionsComponentType } from "@/pluginTypes";
+
 import { AbhaNumberModel, HealthFacilityModel } from "../types";
 
 const ManagePatientOptions: ManagePatientOptionsComponentType = ({

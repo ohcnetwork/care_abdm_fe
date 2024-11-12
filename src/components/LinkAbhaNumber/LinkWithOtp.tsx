@@ -1,18 +1,19 @@
-import { useTranslation } from "react-i18next";
-import { AbhaNumberModel } from "../../types";
-import useMultiStepForm, { InjectedStepProps } from "./useMultiStepForm";
 import { useMemo, useState } from "react";
-import TextFormField from "@/components/Form/FormFields/TextFormField";
-import { classNames } from "@/Utils/utils";
-import ButtonV2, {
-  ButtonWithTimer,
-} from "@/components/Common/components/ButtonV2";
-import Dropdown, { DropdownItem } from "@/components/Common/components/Menu";
+import { useTranslation } from "react-i18next";
+
+import ButtonV2, { ButtonWithTimer } from "@/components/Common/ButtonV2";
+import DropdownMenu, { DropdownItem } from "@/components/Common/Menu";
+import CheckBoxFormField from "@/components/Form/FormFields/CheckBoxFormField";
 import OtpFormField from "@/components/Form/FormFields/OtpFormField";
+import TextFormField from "@/components/Form/FormFields/TextFormField";
+
 import * as Notify from "@/Utils/Notifications";
 import request from "@/Utils/request/request";
-import CheckBoxFormField from "@/components/Form/FormFields/CheckBoxFormField";
+import { classNames } from "@/Utils/utils";
+
 import routes from "../../api";
+import { AbhaNumberModel } from "../../types";
+import useMultiStepForm, { InjectedStepProps } from "./useMultiStepForm";
 
 const MAX_OTP_RESEND_ALLOWED = 2;
 
@@ -212,7 +213,7 @@ function EnterId({ memory, setMemory, next }: IEnterIdProps) {
             {t("get_auth_methods")}
           </ButtonV2>
         ) : (
-          <Dropdown
+          <DropdownMenu
             itemClassName="!w-full md:!w-full"
             containerClassName="w-full"
             title={t("verify_using")}
@@ -222,7 +223,7 @@ function EnterId({ memory, setMemory, next }: IEnterIdProps) {
                 {t(`abha__auth_method__${method}`)}
               </DropdownItem>
             ))}
-          </Dropdown>
+          </DropdownMenu>
         )}
       </div>
     </div>

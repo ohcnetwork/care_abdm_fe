@@ -1,5 +1,6 @@
-import { Type } from "@/Redux/api";
+import { Type } from "@/Utils/request/api";
 import { PaginatedResponse } from "@/Utils/request/types";
+
 import {
   AbhaNumberModel,
   ConsentRequestModel,

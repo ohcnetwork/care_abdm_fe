@@ -1,15 +1,19 @@
-import { ConsentArtefactModel, ConsentRequestModel } from "../types";
 import dayjs from "dayjs";
-import CareIcon from "@/CAREUI/icons/CareIcon";
-import ButtonV2 from "@/components/Common/components/ButtonV2";
-import * as Notification from "@/Utils/Notifications";
-import Loading from "@/components/Common/Loading";
-import { classNames, formatName } from "@/Utils/utils";
 import { Link } from "raviger";
+import { useTranslation } from "react-i18next";
+
+import CareIcon from "@/CAREUI/icons/CareIcon";
+
+import ButtonV2 from "@/components/Common/ButtonV2";
+import Loading from "@/components/Common/Loading";
+
+import * as Notification from "@/Utils/Notifications";
 import request from "@/Utils/request/request";
 import useQuery from "@/Utils/request/useQuery";
-import { useTranslation } from "react-i18next";
+import { classNames, formatName } from "@/Utils/utils";
+
 import routes from "../api";
+import { ConsentArtefactModel, ConsentRequestModel } from "../types";
 
 interface IConsentArtefactCardProps {
   artefact: ConsentArtefactModel;

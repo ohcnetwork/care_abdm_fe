@@ -1,8 +1,11 @@
-import { useTranslation } from "react-i18next";
-import useQuery from "@/Utils/request/useQuery";
-import Loading from "@/components/Common/Loading";
-import Page from "@/components/Common/components/Page";
 import { HIProfile } from "hi-profiles";
+import { useTranslation } from "react-i18next";
+
+import Loading from "@/components/Common/Loading";
+import Page from "@/components/Common/Page";
+
+import useQuery from "@/Utils/request/useQuery";
+
 import routes from "../api";
 
 interface IProps {

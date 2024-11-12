@@ -1,19 +1,20 @@
-import { useTranslation } from "react-i18next";
-import useMultiStepForm, { InjectedStepProps } from "./useMultiStepForm";
-import { classNames } from "@/Utils/utils";
-import TextFormField from "@/components/Form/FormFields/TextFormField";
 import { useEffect, useState } from "react";
-import ButtonV2, {
-  ButtonWithTimer,
-} from "@/components/Common/components/ButtonV2";
+import { useTranslation } from "react-i18next";
+
+import ButtonV2, { ButtonWithTimer } from "@/components/Common/ButtonV2";
+import CheckBoxFormField from "@/components/Form/FormFields/CheckBoxFormField";
 import OtpFormField from "@/components/Form/FormFields/OtpFormField";
 import PhoneNumberFormField from "@/components/Form/FormFields/PhoneNumberFormField";
-import { AbhaNumberModel } from "../../types";
+import TextFormField from "@/components/Form/FormFields/TextFormField";
 import { validateRule } from "@/components/Users/UserAdd";
-import request from "@/Utils/request/request";
+
 import * as Notify from "@/Utils/Notifications";
-import CheckBoxFormField from "@/components/Form/FormFields/CheckBoxFormField";
+import request from "@/Utils/request/request";
+import { classNames } from "@/Utils/utils";
+
 import routes from "../../api";
+import { AbhaNumberModel } from "../../types";
+import useMultiStepForm, { InjectedStepProps } from "./useMultiStepForm";
 
 const MAX_OTP_RESEND_ALLOWED = 2;
 

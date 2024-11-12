@@ -1,10 +1,13 @@
 import { useState } from "react";
-import DialogModal from "@/components/Common/Dialog";
-import { AbhaNumberModel } from "../../types";
-import ButtonV2 from "@/components/Common/components/ButtonV2";
-import { classNames } from "@/Utils/utils";
-import CreateWithAadhaar from "./CreateWithAadhaar";
 import { useTranslation } from "react-i18next";
+
+import ButtonV2 from "@/components/Common/ButtonV2";
+import DialogModal from "@/components/Common/Dialog";
+
+import { classNames } from "@/Utils/utils";
+
+import { AbhaNumberModel } from "../../types";
+import CreateWithAadhaar from "./CreateWithAadhaar";
 import LinkWithOtp from "./LinkWithOtp";
 import LinkWithQr from "./LinkWithQr";
 
