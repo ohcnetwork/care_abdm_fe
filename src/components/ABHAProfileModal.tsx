@@ -2,7 +2,7 @@ import * as Notify from "@/Utils/Notifications";
 
 import CareIcon from "@/CAREUI/icons/CareIcon";
 import DialogModal from "@/components/Common/Dialog";
-import QRCode from "qrcode.react";
+import { QRCodeSVG } from "qrcode.react";
 import { formatDateTime } from "@/Utils/utils";
 import { useRef } from "react";
 import request from "@/Utils/request/request";
@@ -100,7 +100,7 @@ const ABHAProfileModal = ({ patientId, show, onClose, abha }: IProps) => {
         className="print flex flex-col gap-4 border-black sm:flex-row print:w-full print:border"
       >
         <div className="flex-1 sm:aspect-square sm:h-40 sm:flex-auto">
-          <QRCode
+          <QRCodeSVG
             className="h-full w-full border border-black p-1"
             value={JSON.stringify({
               hidn: abha?.abha_number,
@@ -136,7 +136,7 @@ const ABHAProfileModal = ({ patientId, show, onClose, abha }: IProps) => {
                 <div className="text-xs text-secondary-700">{item.label}</div>
                 <div>{item.value}</div>
               </div>
-            ) : null,
+            ) : null
           )}
         </div>
       </div>
