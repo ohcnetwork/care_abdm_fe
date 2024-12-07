@@ -61,7 +61,7 @@ export default function CreateWithAadhaar({
       transactionId: "",
       abhaNumber: null,
       resendOtpCount: 0,
-    },
+    }
   );
 
   return <div>{currentStep}</div>;
@@ -79,10 +79,7 @@ function EnterAadhaar({ memory, setMemory, next }: IEnterAadhaarProps) {
   ]);
 
   const validateAadhaar = () => {
-    if (
-      memory?.aadhaarNumber.length !== 12 &&
-      memory?.aadhaarNumber.length !== 16
-    ) {
+    if (memory?.aadhaarNumber.length !== 12) {
       setMemory((prev) => ({
         ...prev,
         validationError: t("aadhaar_validation_length_error"),
@@ -112,7 +109,7 @@ function EnterAadhaar({ memory, setMemory, next }: IEnterAadhaarProps) {
         body: {
           aadhaar: memory!.aadhaarNumber,
         },
-      },
+      }
     );
 
     if (res?.status === 200 && data) {
@@ -140,14 +137,17 @@ function EnterAadhaar({ memory, setMemory, next }: IEnterAadhaarProps) {
           disabled={memory?.isLoading}
           value={memory?.aadhaarNumber}
           onChange={({ value }) =>
-            setMemory((prev) => ({ ...prev, aadhaarNumber: value }))
+            setMemory((prev) => ({
+              ...prev,
+              aadhaarNumber: value.replace(/\D/g, ""),
+            }))
           }
           error={memory?.validationError}
         />
         <span
           className={classNames(
             "ml-2 text-sm font-medium text-gray-600",
-            !memory?.validationError && "-mt-4",
+            !memory?.validationError && "-mt-4"
           )}
         >
           {t("aadhaar_number_will_not_be_stored")}
@@ -163,7 +163,7 @@ function EnterAadhaar({ memory, setMemory, next }: IEnterAadhaarProps) {
             value={isAccepted}
             onChange={(e) => {
               setDisclaimerAccepted(
-                disclaimerAccepted.map((v, j) => (j === i ? e.value : v)),
+                disclaimerAccepted.map((v, j) => (j === i ? e.value : v))
               );
             }}
             className="mr-2 rounded border-gray-700"
@@ -179,7 +179,7 @@ function EnterAadhaar({ memory, setMemory, next }: IEnterAadhaarProps) {
           loading={memory?.isLoading}
           disabled={
             disclaimerAccepted.some((v) => !v) ||
-            memory?.aadhaarNumber.length === 0
+            memory?.aadhaarNumber.length !== 12
           }
           onClick={handleSubmit}
         >
@@ -222,7 +222,7 @@ function VerifyAadhaar({ memory, setMemory, next }: IVerifyAadhaarProps) {
           transaction_id: memory?.transactionId,
           mobile: memory?.mobileNumber.replace("+91", "").replace(/ /g, ""),
         },
-      },
+      }
     );
 
     if (res?.status === 200 && data) {
@@ -252,7 +252,7 @@ function VerifyAadhaar({ memory, setMemory, next }: IVerifyAadhaarProps) {
           // transaction_id: memory?.transactionId,
         },
         silent: true,
-      },
+      }
     );
 
     if (res?.status === 200 && data) {
@@ -284,20 +284,18 @@ function VerifyAadhaar({ memory, setMemory, next }: IVerifyAadhaarProps) {
           type="password"
           name="aadhaar-number"
           label={t("aadhaar_number")}
-          min={12}
-          max={16}
+          minLength={12}
+          maxLength={12}
           inputClassName="text-black tracking-[0.3em] font-bold placeholder:font-normal placeholder:tracking-normal"
           placeholder={t("enter_aadhaar_number")}
           disabled={true}
           value={memory?.aadhaarNumber}
-          onChange={({ value }) =>
-            setMemory((prev) => ({ ...prev, aadhaarNumber: value }))
-          }
+          onChange={() => null}
         />
         <span
           className={classNames(
             "ml-2 text-sm font-medium text-gray-600",
-            !memory?.validationError && "-mt-4",
+            !memory?.validationError && "-mt-4"
           )}
         >
           {t("aadhaar_number_will_not_be_stored")}
@@ -436,7 +434,7 @@ function LinkMobileNumber({
           mobile: memory?.mobileNumber.replace("+91", "").replace(/ /g, ""),
           transaction_id: memory?.transactionId,
         },
-      },
+      }
     );
 
     if (res?.status === 200 && data) {
@@ -504,7 +502,7 @@ function VerifyMobileNumber({
           transaction_id: memory?.transactionId,
           otp: otp,
         },
-      },
+      }
     );
 
     if (res?.status === 200 && data) {
@@ -532,7 +530,7 @@ function VerifyMobileNumber({
           mobile: memory?.mobileNumber.replace("+91", "").replace(/ /g, ""),
           transaction_id: memory?.transactionId,
         },
-      },
+      }
     );
 
     if (res?.status === 200 && data) {
@@ -626,7 +624,7 @@ function ChooseAbhaAddress({
           body: {
             transaction_id: memory?.transactionId,
           },
-        },
+        }
       );
 
       if (res?.status === 200 && data) {
@@ -648,7 +646,7 @@ function ChooseAbhaAddress({
           abha_address: healthId,
           transaction_id: memory?.transactionId,
         },
-      },
+      }
     );
 
     if (res?.status === 200 && data) {
@@ -682,19 +680,19 @@ function ChooseAbhaAddress({
       <div className="-mt-4 mb-2 pl-2 text-sm text-secondary-500">
         {validateRule(
           healthId.length >= 4,
-          t("abha_address_validation_length_error"),
+          t("abha_address_validation_length_error")
         )}
         {validateRule(
           isNaN(Number(healthId[0])) && healthId[0] !== ".",
-          t("abha_address_validation_start_error"),
+          t("abha_address_validation_start_error")
         )}
         {validateRule(
           healthId[healthId.length - 1] !== ".",
-          t("abha_address_validation_end_error"),
+          t("abha_address_validation_end_error")
         )}
         {validateRule(
           /^[0-9a-zA-Z._]+$/.test(healthId),
-          t("abha_address_validation_character_error"),
+          t("abha_address_validation_character_error")
         )}
       </div>
 
