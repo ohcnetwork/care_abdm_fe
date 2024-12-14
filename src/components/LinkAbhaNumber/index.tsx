@@ -4,12 +4,11 @@ import { useTranslation } from "react-i18next";
 import ButtonV2 from "@/components/Common/ButtonV2";
 import DialogModal from "@/components/Common/Dialog";
 
-import { classNames } from "@/Utils/utils";
-
 import { AbhaNumberModel } from "../../types";
 import CreateWithAadhaar from "./CreateWithAadhaar";
 import LinkWithOtp from "./LinkWithOtp";
 import LinkWithQr from "./LinkWithQr";
+import { cn } from "@/lib/utils";
 
 interface ILinkAbhaNumberProps {
   show: boolean;
@@ -89,7 +88,7 @@ export default function LinkAbhaNumber({
             setCurrentAbhaLinkOption(
               ABHA_LINK_OPTIONS[currentAbhaLinkOption].create
                 ? "link_with_otp"
-                : "create_with_aadhaar",
+                : "create_with_aadhaar"
             )
           }
           className="cursor-pointer text-center text-sm text-blue-800"
@@ -110,14 +109,14 @@ export default function LinkAbhaNumber({
               (option) =>
                 option.value !== currentAbhaLinkOption &&
                 ABHA_LINK_OPTIONS[currentAbhaLinkOption]?.create ===
-                  option.create,
+                  option.create
             )
             .sort((a) => (a.disabled ? 1 : -1))
             .map((option) => (
               <ButtonV2
                 onClick={() =>
                   setCurrentAbhaLinkOption(
-                    option.value as keyof typeof ABHA_LINK_OPTIONS,
+                    option.value as keyof typeof ABHA_LINK_OPTIONS
                   )
                 }
                 ghost
@@ -128,9 +127,9 @@ export default function LinkAbhaNumber({
                 }
                 disabled={option.disabled}
                 tooltipClassName="top-full mt-1"
-                className={classNames(
+                className={cn(
                   "w-full border border-gray-400 text-secondary-800",
-                  !option.disabled && "hover:border-primary-100",
+                  !option.disabled && "hover:border-primary-100"
                 )}
               >
                 {t(option.title)}

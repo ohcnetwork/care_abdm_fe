@@ -10,10 +10,10 @@ import { FieldChangeEvent } from "@/components/Form/FormFields/Utils";
 import * as Notification from "@/Utils/Notifications";
 import request from "@/Utils/request/request";
 import useQuery from "@/Utils/request/useQuery";
-import { classNames } from "@/Utils/utils";
 
 import routes from "../api";
 import { HealthFacilityModel } from "../types";
+import { cn } from "@/lib/utils";
 
 const initForm = {
   health_facility: null as HealthFacilityModel | null,
@@ -178,11 +178,11 @@ export const ConfigureHealthFacility = (
               label={t("health_facility__hf_id")}
               trailing={
                 <p
-                  className={classNames(
+                  className={cn(
                     "tooltip cursor-pointer text-sm",
                     state.form.health_facility?.registered
                       ? "text-primary-600 hover:text-primary-800"
-                      : "text-warning-600 hover:text-warning-800",
+                      : "text-warning-600 hover:text-warning-800"
                   )}
                 >
                   {state.form.health_facility?.registered ? (

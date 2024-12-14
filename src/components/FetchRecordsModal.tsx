@@ -114,7 +114,7 @@ export default function FetchRecordsModal({ abha, show, onClose }: IProps) {
               notificationSubscriptionState,
             )
           }
-          className={classNames(
+          className={cn(
             "mt-1.5 !py-3",
             idVerificationStatus === "verified" &&
               "disabled:cursor-auto disabled:bg-transparent disabled:text-primary-600",
@@ -227,7 +227,7 @@ export default function FetchRecordsModal({ abha, show, onClose }: IProps) {
               });
 
               navigate(
-                `/facility/${abha?.patient_object?.facility}/abdm`,
+                `/facility/${abha?.patient_object?.facility}/abdm`
                 // ?? `/facility/${abha?.patient_object?.facility}/patient/${abha?.patient_object?.id}/consultation/${abha?.patient_object?.last_consultation?.id}/abdm`,
               );
             }

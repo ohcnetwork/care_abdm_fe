@@ -9,11 +9,11 @@ import TextFormField from "@/components/Form/FormFields/TextFormField";
 
 import * as Notify from "@/Utils/Notifications";
 import request from "@/Utils/request/request";
-import { classNames } from "@/Utils/utils";
 
 import routes from "../../api";
 import { AbhaNumberModel } from "../../types";
 import useMultiStepForm, { InjectedStepProps } from "./useMultiStepForm";
+import { cn } from "@/lib/utils";
 
 const MAX_OTP_RESEND_ALLOWED = 2;
 
@@ -172,9 +172,9 @@ function EnterId({ memory, setMemory, next }: IEnterIdProps) {
           error={memory?.validationError}
         />
         <span
-          className={classNames(
+          className={cn(
             "ml-2 text-sm font-medium text-gray-600",
-            !memory?.validationError && "-mt-4",
+            !memory?.validationError && "-mt-4"
           )}
         >
           {t("any_id_description")}
@@ -190,7 +190,7 @@ function EnterId({ memory, setMemory, next }: IEnterIdProps) {
             value={isAccepted}
             onChange={(e) => {
               setDisclaimerAccepted(
-                disclaimerAccepted.map((v, j) => (j === i ? e.value : v)),
+                disclaimerAccepted.map((v, j) => (j === i ? e.value : v))
               );
             }}
             className="mr-2 rounded border-gray-700"
@@ -301,9 +301,9 @@ function VerifyId({ memory, setMemory, onSuccess }: IVerifyIdProps) {
           onChange={() => null}
         />
         <span
-          className={classNames(
+          className={cn(
             "ml-2 text-sm font-medium text-gray-600",
-            !memory?.validationError && "-mt-4",
+            !memory?.validationError && "-mt-4"
           )}
         >
           {t("any_id_description")}

@@ -10,10 +10,11 @@ import Loading from "@/components/Common/Loading";
 import * as Notification from "@/Utils/Notifications";
 import request from "@/Utils/request/request";
 import useQuery from "@/Utils/request/useQuery";
-import { classNames, formatName } from "@/Utils/utils";
+import { formatName } from "@/Utils/utils";
 
 import routes from "../api";
 import { ConsentArtefactModel, ConsentRequestModel } from "../types";
+import { cn } from "@/lib/utils";
 
 interface IConsentArtefactCardProps {
   artefact: ConsentArtefactModel;
@@ -143,11 +144,11 @@ function ConsentRequestCard({ consent }: IConsentRequestCardProps) {
           return (
             <div
               key={hiType}
-              className={classNames(
+              className={cn(
                 "flex items-center justify-center rounded-full px-4 py-1.5 text-xs font-medium text-white",
                 consent.consent_artefacts?.length
                   ? "bg-secondary-400"
-                  : "bg-secondary-600",
+                  : "bg-secondary-600"
               )}
             >
               {t(`consent__hi_type__${hiType}`)}

@@ -8,9 +8,10 @@ import Loading from "@/components/Common/Loading";
 import Page from "@/components/Common/Page";
 
 import useQuery from "@/Utils/request/useQuery";
-import { classNames, formatDateTime } from "@/Utils/utils";
+import { formatDateTime } from "@/Utils/utils";
 
 import routes from "../api";
+import { cn } from "@/lib/utils";
 
 interface IProps {
   facilityId: string;
@@ -88,14 +89,14 @@ export default function ABDMFacilityRecords({ facilityId }: IProps) {
                         <td className="px-3 py-4 text-center text-sm capitalize">
                           {new Date(
                             consent.consent_artefacts?.[0]?.expiry ??
-                              consent.expiry,
+                              consent.expiry
                           ) < new Date()
                             ? t("consent__status__EXPIRED")
                             : t(
                                 `consent__status__${
                                   consent.consent_artefacts?.[0]?.status ??
                                   consent.status
-                                }`,
+                                }`
                               )}
                         </td>
 
@@ -107,12 +108,12 @@ export default function ABDMFacilityRecords({ facilityId }: IProps) {
                           {consent.status === "EXPIRED" ||
                           new Date(
                             consent.consent_artefacts?.[0]?.expiry ??
-                              consent.expiry,
+                              consent.expiry
                           ) < new Date() ? (
                             <p className="flex flex-col items-center gap-1">
                               {formatDateTime(
                                 consent.consent_artefacts?.[0]?.expiry ??
-                                  consent.expiry,
+                                  consent.expiry
                               )}
                               <span className="text-sm text-secondary-600">
                                 {t("expired_on")}
@@ -133,19 +134,19 @@ export default function ABDMFacilityRecords({ facilityId }: IProps) {
                         <td className="px-3 py-4 text-center text-sm">
                           {formatDateTime(
                             consent.consent_artefacts?.[0]?.from_time ??
-                              consent.from_time,
+                              consent.from_time
                           )}{" "}
                           <br />
                           {formatDateTime(
                             consent.consent_artefacts?.[0]?.to_time ??
-                              consent.to_time,
+                              consent.to_time
                           )}
                         </td>
 
                         <td className="px-3 py-4 text-center text-sm">
                           {formatDateTime(
                             consent.consent_artefacts?.[0]?.expiry ??
-                              consent.expiry,
+                              consent.expiry
                           )}
                         </td>
 
@@ -167,15 +168,15 @@ export default function ABDMFacilityRecords({ facilityId }: IProps) {
                             <Link
                               key={consent.id}
                               href={`/abdm/health-information/${consent.id}`}
-                              className={classNames(
+                              className={cn(
                                 (consent.consent_artefacts?.[0]?.status ??
                                   consent.status) === "GRANTED" &&
                                   new Date(
                                     consent.consent_artefacts?.[0]?.expiry ??
-                                      consent.expiry,
+                                      consent.expiry
                                   ) > new Date()
                                   ? "cursor-pointer text-primary-600 hover:text-primary-900"
-                                  : "pointer-events-none cursor-not-allowed text-secondary-600 opacity-70",
+                                  : "pointer-events-none cursor-not-allowed text-secondary-600 opacity-70"
                               )}
                             >
                               {t("view")}

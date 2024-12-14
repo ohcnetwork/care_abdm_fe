@@ -168,7 +168,7 @@ const ExtendPatientRegisterForm: ExtendPatientRegisterFormComponentType = ({
             <Tooltip>
               <TooltipTrigger>
                 <Button
-                  variant="outline_primary"
+                  variant="outline"
                   disabled={!healthFacility}
                   onClick={(e) => {
                     e.preventDefault();

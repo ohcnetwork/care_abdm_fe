@@ -10,11 +10,11 @@ import { validateRule } from "@/components/Users/UserAdd";
 
 import * as Notify from "@/Utils/Notifications";
 import request from "@/Utils/request/request";
-import { classNames } from "@/Utils/utils";
 
 import routes from "../../api";
 import { AbhaNumberModel } from "../../types";
 import useMultiStepForm, { InjectedStepProps } from "./useMultiStepForm";
+import { cn } from "@/lib/utils";
 
 const MAX_OTP_RESEND_ALLOWED = 2;
 
@@ -145,7 +145,7 @@ function EnterAadhaar({ memory, setMemory, next }: IEnterAadhaarProps) {
           error={memory?.validationError}
         />
         <span
-          className={classNames(
+          className={cn(
             "ml-2 text-sm font-medium text-gray-600",
             !memory?.validationError && "-mt-4"
           )}
@@ -293,7 +293,7 @@ function VerifyAadhaar({ memory, setMemory, next }: IVerifyAadhaarProps) {
           onChange={() => null}
         />
         <span
-          className={classNames(
+          className={cn(
             "ml-2 text-sm font-medium text-gray-600",
             !memory?.validationError && "-mt-4"
           )}
