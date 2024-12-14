@@ -4,7 +4,6 @@ import { ExtendPatientRegisterFormComponentType } from "@/pluginTypes";
 import LinkAbhaNumber from "./LinkAbhaNumber";
 import { AbhaNumberModel } from "../types";
 import { FormContextValue } from "@/components/Form/FormContext";
-import { parsePhoneNumber } from "@/Utils/utils";
 import { useCallback, useEffect, useState } from "react";
 import TextFormField from "@/components/Form/FormFields/TextFormField";
 import { PatientForm } from "@/components/Patient/PatientRegister";
@@ -22,6 +21,7 @@ import { usePubSub } from "@/Utils/pubsubContext";
 import request from "@/Utils/request/request";
 import { PatientModel } from "@/components/Patient/models";
 import { SquareUserIcon } from "lucide-react";
+import { parsePhoneNumber } from "@/lib/utils";
 
 const ExtendPatientRegisterForm: ExtendPatientRegisterFormComponentType = ({
   facilityId,

@@ -2,13 +2,13 @@ import * as Notify from "@/Utils/Notifications";
 
 import DialogModal from "@/components/Common/Dialog";
 import { QRCodeSVG } from "qrcode.react";
-import { formatDateTime } from "@/Utils/utils";
 import { useRef } from "react";
 import request from "@/Utils/request/request";
 import { AbhaNumberModel } from "../types";
 import { useTranslation } from "react-i18next";
 import routes from "../api";
 import { ImageDownIcon, PrinterIcon } from "lucide-react";
+import { formatDateTime } from "@/lib/utils";
 
 interface IProps {
   patientId?: string;

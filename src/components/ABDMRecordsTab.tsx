@@ -10,7 +10,6 @@ import Loading from "@/components/Common/Loading";
 import * as Notification from "@/Utils/Notifications";
 import request from "@/Utils/request/request";
 import useQuery from "@/Utils/request/useQuery";
-import { formatName } from "@/Utils/utils";
 
 import routes from "../api";
 import { ConsentArtefactModel, ConsentRequestModel } from "../types";
@@ -81,7 +80,9 @@ function ConsentRequestCard({ consent }: IConsentRequestCardProps) {
             {t(`consent__purpose__${consent.purpose}`)}
           </h5>
           <h6 className="mt-1 leading-6 text-secondary-700">
-            {formatName(consent.requester)}
+            {[consent.requester.first_name, consent.requester.last_name]
+              .filter(Boolean)
+              .join(" ")}
           </h6>
         </div>
         <div className="flex flex-col items-center">

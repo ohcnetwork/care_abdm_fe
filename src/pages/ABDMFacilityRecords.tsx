@@ -6,10 +6,9 @@ import Loading from "@/components/Common/Loading";
 import Page from "@/components/Common/Page";
 
 import useQuery from "@/Utils/request/useQuery";
-import { formatDateTime } from "@/Utils/utils";
 
 import routes from "../api";
-import { cn } from "@/lib/utils";
+import { cn, formatDateTime } from "@/lib/utils";
 import { RefreshCcwIcon } from "lucide-react";
 
 interface IProps {
