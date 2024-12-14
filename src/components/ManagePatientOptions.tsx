@@ -5,8 +5,6 @@ import { useTranslation } from "react-i18next";
 
 import { cn } from "@/lib/utils";
 
-import CareIcon from "@/CAREUI/icons/CareIcon";
-
 import {
   Tooltip,
   TooltipContent,
@@ -21,6 +19,7 @@ import useAuthUser from "@/hooks/useAuthUser";
 import { ManagePatientOptionsComponentType } from "@/pluginTypes";
 
 import { AbhaNumberModel, HealthFacilityModel } from "../types";
+import { FileInputIcon, LinkIcon, SquareUserIcon } from "lucide-react";
 
 const ManagePatientOptions: ManagePatientOptionsComponentType = ({
   consultation,
@@ -56,10 +55,7 @@ const ManagePatientOptions: ManagePatientOptionsComponentType = ({
                     });
                   }}
                 >
-                  <CareIcon
-                    icon="l-user-square"
-                    className="text-lg text-primary-500"
-                  />
+                  <SquareUserIcon className="text-lg text-primary-500" />
                   <span>{t("show_abha_profile")}</span>
                 </div>
                 <div
@@ -74,10 +70,7 @@ const ManagePatientOptions: ManagePatientOptionsComponentType = ({
                     });
                   }}
                 >
-                  <CareIcon
-                    icon="l-file-network"
-                    className="text-lg text-primary-500"
-                  />
+                  <FileInputIcon className="text-lg text-primary-500" />
                   <span>{t("hi__fetch_records")}</span>
                 </div>
               </>
@@ -93,7 +86,7 @@ const ManagePatientOptions: ManagePatientOptionsComponentType = ({
                   <div
                     className={cn(
                       "dropdown-item-primary pointer-events-auto m-2 flex cursor-pointer items-center justify-start gap-2 rounded border-0 p-2 text-sm font-normal transition-all duration-200 ease-in-out",
-                      disabled && "pointer-events-none opacity-30",
+                      disabled && "pointer-events-none opacity-30"
                     )}
                     onClick={() => {
                       close();
@@ -104,10 +97,7 @@ const ManagePatientOptions: ManagePatientOptionsComponentType = ({
                     }}
                   >
                     <span className="flex w-full items-center justify-start gap-2">
-                      <CareIcon
-                        icon="l-link"
-                        className="text-lg text-primary-500"
-                      />
+                      <LinkIcon className="text-lg text-primary-500" />
                       <p>{t("generate_link_abha")}</p>
                     </span>
                   </div>

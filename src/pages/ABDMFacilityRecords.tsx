@@ -1,8 +1,6 @@
 import { Link } from "raviger";
 import { useTranslation } from "react-i18next";
 
-import CareIcon from "@/CAREUI/icons/CareIcon";
-
 import ButtonV2 from "@/components/Common/ButtonV2";
 import Loading from "@/components/Common/Loading";
 import Page from "@/components/Common/Page";
@@ -12,6 +10,7 @@ import { formatDateTime } from "@/Utils/utils";
 
 import routes from "../api";
 import { cn } from "@/lib/utils";
+import { RefreshCcwIcon } from "lucide-react";
 
 interface IProps {
   facilityId: string;
@@ -70,7 +69,7 @@ export default function ABDMFacilityRecords({ facilityId }: IProps) {
                           ghost
                           className="max-w-2xl text-sm text-secondary-700 hover:text-secondary-900"
                         >
-                          <CareIcon icon="l-refresh" /> {t("refresh")}
+                          <RefreshCcwIcon /> {t("refresh")}
                         </ButtonV2>
                         <span className="sr-only">{t("view")}</span>
                       </th>

@@ -15,13 +15,13 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { Button } from "@/components/ui/button";
-import CareIcon from "@/CAREUI/icons/CareIcon";
 import routes from "../api";
 import useQuery from "@/Utils/request/useQuery";
 import { useTranslation } from "react-i18next";
 import { usePubSub } from "@/Utils/pubsubContext";
 import request from "@/Utils/request/request";
 import { PatientModel } from "@/components/Patient/models";
+import { SquareUserIcon } from "lucide-react";
 
 const ExtendPatientRegisterForm: ExtendPatientRegisterFormComponentType = ({
   facilityId,
@@ -64,7 +64,7 @@ const ExtendPatientRegisterForm: ExtendPatientRegisterFormComponentType = ({
               patient: patient.id,
               abha_number: state.form.abha_number,
             },
-          },
+          }
         );
 
         if (res?.status === 200 && data) {
@@ -74,7 +74,7 @@ const ExtendPatientRegisterForm: ExtendPatientRegisterFormComponentType = ({
         }
       }
     },
-    [state.form.abha_number, t],
+    [state.form.abha_number, t]
   );
 
   useEffect(() => {
@@ -85,7 +85,7 @@ const ExtendPatientRegisterForm: ExtendPatientRegisterFormComponentType = ({
     // manually setting the subscribers (old instance of linkAbhaNumberAndPatient is replaced with new instance) as subscribe and unsubscribe cannot be used here because this component is not rendered while PatientForm is in loading state
     setSubscribers((prev) => {
       const handlers = Array.from(prev[topic] ?? []).filter(
-        (handler) => handler.toString() !== linkAbhaNumberAndPatient.toString(),
+        (handler) => handler.toString() !== linkAbhaNumberAndPatient.toString()
       );
 
       handlers.push(linkAbhaNumberAndPatient);
@@ -100,7 +100,7 @@ const ExtendPatientRegisterForm: ExtendPatientRegisterFormComponentType = ({
 
   const populateAbhaValues = (
     abhaProfile: AbhaNumberModel,
-    field: FormContextValue<PatientForm>,
+    field: FormContextValue<PatientForm>
   ) => {
     const values = {
       abha_number: abhaProfile.external_id,
@@ -175,7 +175,7 @@ const ExtendPatientRegisterForm: ExtendPatientRegisterFormComponentType = ({
                     setShowLinkAbhaNumberModal(true);
                   }}
                 >
-                  <CareIcon icon="l-user-square" className="mr-2" />
+                  <SquareUserIcon className="mr-2" />
                   <span>{t("generate_link_abha")}</span>
                 </Button>
               </TooltipTrigger>

@@ -2,7 +2,7 @@ import dayjs from "dayjs";
 import { Link } from "raviger";
 import { useTranslation } from "react-i18next";
 
-import CareIcon from "@/CAREUI/icons/CareIcon";
+import { RefreshCcwIcon } from "lucide-react";
 
 import ButtonV2 from "@/components/Common/ButtonV2";
 import Loading from "@/components/Common/Loading";
@@ -114,7 +114,7 @@ function ConsentRequestCard({ consent }: IConsentRequestCardProps) {
             ghost
             className="max-w-2xl text-sm text-secondary-700 hover:text-secondary-900"
           >
-            <CareIcon icon="l-refresh" /> {t("check_status")}
+            <RefreshCcwIcon /> {t("check_status")}
           </ButtonV2>
           <p className="mt-1 max-w-2xl text-sm text-secondary-500">
             {t("created_on")} {dayjs(consent.created_date).fromNow()}

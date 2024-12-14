@@ -76,7 +76,7 @@ export default function FetchRecordsModal({ abha, show, onClose }: IProps) {
         notificationSubscriptionState,
       ) && (
         <p className="my-4 text-sm text-warning-600">
-          <CareIcon icon="l-exclamation-triangle" className="h-4 w-4" />{" "}
+          <TriangleAlertIcon className="h-4 w-4" />{" "}
           Notifications needs to be enabled on this device to verify the
           patient.
         </p>
@@ -123,7 +123,7 @@ export default function FetchRecordsModal({ abha, show, onClose }: IProps) {
           {idVerificationStatus === "in-progress" && (
             <CircularProgress className="!h-5 !w-5 !text-secondary-500" />
           )}
-          {idVerificationStatus === "verified" && <CareIcon icon="l-check" />}
+          {idVerificationStatus === "verified" && <CheckIcon />}
           {
             {
               pending: "Verify Patient",

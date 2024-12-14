@@ -1,6 +1,5 @@
 import * as Notify from "@/Utils/Notifications";
 
-import CareIcon from "@/CAREUI/icons/CareIcon";
 import DialogModal from "@/components/Common/Dialog";
 import { QRCodeSVG } from "qrcode.react";
 import { formatDateTime } from "@/Utils/utils";
@@ -9,6 +8,7 @@ import request from "@/Utils/request/request";
 import { AbhaNumberModel } from "../types";
 import { useTranslation } from "react-i18next";
 import routes from "../api";
+import { ImageDownIcon, PrinterIcon } from "lucide-react";
 
 interface IProps {
   patientId?: string;
@@ -76,14 +76,12 @@ const ABHAProfileModal = ({ patientId, show, onClose, abha }: IProps) => {
         <div className="flex items-center justify-between">
           <h4>{t("abha_profile")}</h4>
           <div className="flex items-center gap-2">
-            <CareIcon
+            <PrinterIcon
               onClick={() => downloadAbhaCard("pdf")}
-              icon="l-print"
               className="cursor-pointer"
             />
-            <CareIcon
+            <ImageDownIcon
               onClick={() => downloadAbhaCard("png")}
-              icon="l-import"
               className="cursor-pointer"
             />
           </div>
