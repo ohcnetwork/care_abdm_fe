@@ -3,6 +3,7 @@ import { Slot } from "@radix-ui/react-slot"
 import { cva, type VariantProps } from "class-variance-authority"
 
 import { cn } from "@/lib/utils"
+import { Loader2Icon } from "lucide-react";
 
 const buttonVariants = cva(
   "inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-gray-950 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 dark:focus-visible:ring-gray-300",
@@ -17,7 +18,8 @@ const buttonVariants = cva(
           "border border-gray-200 bg-white shadow-sm hover:bg-gray-100 hover:text-gray-900 dark:border-gray-800 dark:bg-gray-950 dark:hover:bg-gray-800 dark:hover:text-gray-50",
         secondary:
           "bg-gray-100 text-gray-900 shadow-sm hover:bg-gray-100/80 dark:bg-gray-800 dark:text-gray-50 dark:hover:bg-gray-800/80",
-        ghost: "hover:bg-gray-100 hover:text-gray-900 dark:hover:bg-gray-800 dark:hover:text-gray-50",
+        ghost:
+          "hover:bg-gray-100 hover:text-gray-900 dark:hover:bg-gray-800 dark:hover:text-gray-50",
         link: "text-gray-900 underline-offset-4 hover:underline dark:text-gray-50",
       },
       size: {
@@ -32,26 +34,92 @@ const buttonVariants = cva(
       size: "default",
     },
   }
-)
+);
 
 export interface ButtonProps
   extends React.ButtonHTMLAttributes<HTMLButtonElement>,
     VariantProps<typeof buttonVariants> {
-  asChild?: boolean
+  asChild?: boolean;
+  loading?: boolean;
 }
 
 const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
-  ({ className, variant, size, asChild = false, ...props }, ref) => {
-    const Comp = asChild ? Slot : "button"
+  (
+    { className, variant, size, asChild = false, loading = false, ...props },
+    ref
+  ) => {
+    const Comp = asChild ? Slot : "button";
     return (
       <Comp
         className={cn(buttonVariants({ variant, size, className }))}
         ref={ref}
+        disabled={loading || props.disabled}
         {...props}
-      />
-    )
+      >
+        {loading ? (
+          <div className="flex items-center justify-center gap-2">
+            <Loader2Icon className="animate-spin" />
+            {props.children}
+          </div>
+        ) : (
+          props.children
+        )}
+      </Comp>
+    );
   }
-)
-Button.displayName = "Button"
+);
+Button.displayName = "Button";
 
-export { Button, buttonVariants }
+export type ButtonWithTimerProps = ButtonProps & {
+  initialInterval?: number;
+  interval?: number;
+};
+
+const ButtonWithTimer = ({
+  initialInterval,
+  interval = 60,
+  ...buttonProps
+}: ButtonWithTimerProps) => {
+  const [seconds, setSeconds] = React.useState(initialInterval ?? interval);
+  const [isButtonDisabled, setIsButtonDisabled] = React.useState(true);
+
+  React.useEffect(() => {
+    let interval = undefined;
+    if (seconds > 0) {
+      interval = setInterval(() => {
+        setSeconds((prevSeconds) => prevSeconds - 1);
+      }, 1000);
+    } else {
+      setIsButtonDisabled(false);
+      clearInterval(interval);
+    }
+    return () => clearInterval(interval);
+  }, [seconds]);
+
+  return (
+    <div>
+      <Button
+        {...buttonProps}
+        disabled={isButtonDisabled}
+        onClick={async (e) => {
+          await buttonProps.onClick?.(e);
+          setSeconds(interval);
+          setIsButtonDisabled(true);
+        }}
+      >
+        {!!(seconds && isButtonDisabled) && (
+          <div className="mr-2 flex items-center">
+            <Loader2Icon className="animate-spin" />
+            {seconds}
+          </div>
+        )}
+
+        {buttonProps.children}
+      </Button>
+    </div>
+  );
+};
+
+// FIXME: Add tooltip
+
+export { Button, ButtonWithTimer, buttonVariants };

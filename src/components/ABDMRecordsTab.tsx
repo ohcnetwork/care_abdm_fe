@@ -4,7 +4,6 @@ import { useTranslation } from "react-i18next";
 
 import { RefreshCcwIcon } from "lucide-react";
 
-import ButtonV2 from "@/components/Common/ButtonV2";
 import Loading from "@/components/Common/Loading";
 
 import * as Notification from "@/Utils/Notifications";
@@ -14,6 +13,7 @@ import useQuery from "@/Utils/request/useQuery";
 import routes from "../api";
 import { ConsentArtefactModel, ConsentRequestModel } from "../types";
 import { cn } from "@/lib/utils";
+import { Button } from "@/components/ui/button";
 
 interface IConsentArtefactCardProps {
   artefact: ConsentArtefactModel;
@@ -95,7 +95,7 @@ function ConsentRequestCard({ consent }: IConsentRequestCardProps) {
           </p>
         </div>
         <div className="flex flex-col items-center">
-          <ButtonV2
+          <Button
             onClick={async () => {
               const { res, data } = await request(routes.consent.checkStatus, {
                 body: {
@@ -112,11 +112,11 @@ function ConsentRequestCard({ consent }: IConsentRequestCardProps) {
                 });
               }
             }}
-            ghost
+            variant="ghost"
             className="max-w-2xl text-sm text-secondary-700 hover:text-secondary-900"
           >
             <RefreshCcwIcon /> {t("check_status")}
-          </ButtonV2>
+          </Button>
           <p className="mt-1 max-w-2xl text-sm text-secondary-500">
             {t("created_on")} {dayjs(consent.created_date).fromNow()}
           </p>

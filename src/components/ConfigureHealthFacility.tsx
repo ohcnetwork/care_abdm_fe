@@ -2,7 +2,6 @@ import { navigate } from "raviger";
 import { useReducer, useState } from "react";
 import { useTranslation } from "react-i18next";
 
-import { Submit } from "@/components/Common/ButtonV2";
 import Loading from "@/components/Common/Loading";
 import TextFormField from "@/components/Form/FormFields/TextFormField";
 import { FieldChangeEvent } from "@/components/Form/FormFields/Utils";
@@ -14,6 +13,7 @@ import useQuery from "@/Utils/request/useQuery";
 import routes from "../api";
 import { HealthFacilityModel } from "../types";
 import { cn } from "@/lib/utils";
+import { Button } from "@/components/ui/button";
 
 const initForm = {
   health_facility: null as HealthFacilityModel | null,
@@ -35,7 +35,7 @@ const FormReducer = (
     | {
         type: "set_error";
         errors: typeof initialState.errors;
-      },
+      }
 ) => {
   switch (action.type) {
     case "set_form": {
@@ -60,7 +60,7 @@ export interface IConfigureHealthFacilityProps {
 }
 
 export const ConfigureHealthFacility = (
-  props: IConfigureHealthFacilityProps,
+  props: IConfigureHealthFacilityProps
 ) => {
   const { t } = useTranslation();
 
@@ -107,7 +107,7 @@ export const ConfigureHealthFacility = (
           pathParams: {
             facility_id: facilityId,
           },
-        },
+        }
       );
       response = res;
       responseData = data;
@@ -226,14 +226,15 @@ export const ConfigureHealthFacility = (
           </div>
         </div>
         <div className="flex flex-col gap-3 sm:flex-row sm:justify-end">
-          <Submit
+          <Button
             onClick={handleSubmit}
             disabled={
               state.form.hf_id === state.form.health_facility?.hf_id &&
               state.form.health_facility?.registered
             }
-            label={t("health_facility__link")}
-          />
+          >
+            {t("health_facility__link")}
+          </Button>
         </div>
       </form>
     </div>

@@ -3,7 +3,7 @@ import { navigate } from "raviger";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 
-import ButtonV2 from "@/components/Common/ButtonV2";
+import { Button } from "@/components/ui/button";
 import DialogModal from "@/components/Common/Dialog";
 import DateFormField from "@/components/Form/FormFields/DateFormField";
 import DateRangeFormField from "@/components/Form/FormFields/DateRangeFormField";
@@ -39,13 +39,13 @@ export default function FetchRecordsModal({ abha, show, onClose }: IProps) {
   >("verified");
   const [purpose, setPurpose] = useState<ConsentPurpose>("CAREMGT");
   const [fromDate, setFromDate] = useState<Date>(
-    dayjs().subtract(30, "day").toDate(),
+    dayjs().subtract(30, "day").toDate()
   );
   const [toDate, setToDate] = useState<Date>(dayjs().toDate());
   const [isMakingConsentRequest, setIsMakingConsentRequest] = useState(false);
   const [hiTypes, setHiTypes] = useState<ConsentHIType[]>([]);
   const [expiryDate, setExpiryDate] = useState<Date>(
-    dayjs().add(30, "day").toDate(),
+    dayjs().add(30, "day").toDate()
   );
   const [errors, setErrors] = useState<Record<string, string>>({});
   // const notificationSubscriptionState = useNotificationSubscriptionState([
@@ -93,7 +93,7 @@ export default function FetchRecordsModal({ abha, show, onClose }: IProps) {
           className="flex-1"
         />
 
-        {/* <ButtonV2
+        {/* <Button
           onClick={async () => {
             const { res } = await request(routes.abha.findPatient, {
               body: {
@@ -132,7 +132,7 @@ export default function FetchRecordsModal({ abha, show, onClose }: IProps) {
               failed: "Retry",
             }[idVerificationStatus]
           }
-        </ButtonV2> */}
+        </Button> */}
       </div>
       <SelectFormField
         label={t("consent_request__purpose")}
@@ -170,14 +170,14 @@ export default function FetchRecordsModal({ abha, show, onClose }: IProps) {
         placeholder={t("consent_request__hi_types_placeholder")}
         labelSuffix={
           hiTypes.length !== ABDM_HI_TYPE.length && (
-            <ButtonV2
-              ghost
+            <Button
+              variant="ghost"
               onClick={() => {
                 setHiTypes(ABDM_HI_TYPE);
               }}
             >
               {t("select_all")}
-            </ButtonV2>
+            </Button>
           )
         }
         value={hiTypes}
@@ -198,7 +198,7 @@ export default function FetchRecordsModal({ abha, show, onClose }: IProps) {
       />
 
       <div className="mt-6 flex items-center justify-end">
-        <ButtonV2
+        <Button
           onClick={async () => {
             if (idVerificationStatus !== "verified") {
               setErrors({
@@ -238,7 +238,7 @@ export default function FetchRecordsModal({ abha, show, onClose }: IProps) {
           loading={isMakingConsentRequest}
         >
           {t("request_consent")}
-        </ButtonV2>
+        </Button>
       </div>
     </DialogModal>
   );

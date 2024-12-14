@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 
-import ButtonV2, { ButtonWithTimer } from "@/components/Common/ButtonV2";
+import { ButtonWithTimer, Button } from "@/components/ui/button";
 import CheckBoxFormField from "@/components/Form/FormFields/CheckBoxFormField";
 import OtpFormField from "@/components/Form/FormFields/OtpFormField";
 import PhoneNumberFormField from "@/components/Form/FormFields/PhoneNumberFormField";
@@ -174,7 +174,7 @@ function EnterAadhaar({ memory, setMemory, next }: IEnterAadhaarProps) {
       </div>
 
       <div className="mt-4 flex items-center">
-        <ButtonV2
+        <Button
           className="w-full"
           loading={memory?.isLoading}
           disabled={
@@ -184,7 +184,7 @@ function EnterAadhaar({ memory, setMemory, next }: IEnterAadhaarProps) {
           onClick={handleSubmit}
         >
           {t("send_otp")}
-        </ButtonV2>
+        </Button>
       </div>
     </div>
   );
@@ -336,20 +336,20 @@ function VerifyAadhaar({ memory, setMemory, next }: IVerifyAadhaarProps) {
       </div>
 
       <div className="mt-4 flex flex-col items-center gap-2">
-        <ButtonV2
+        <Button
           className="w-full"
           loading={memory?.isLoading}
           disabled={otp.length > 6 || memory?.mobileNumber.length === 0}
           onClick={handleSubmit}
         >
           {t("verify_otp")}
-        </ButtonV2>
+        </Button>
 
         {(memory?.resendOtpCount ?? 0) < MAX_OTP_RESEND_ALLOWED && (
           <ButtonWithTimer
-            ghost
+            variant="ghost"
             className="w-full"
-            initialInverval={60}
+            initialInterval={60}
             onClick={handleResendOtp}
           >
             {t("resend_otp")}
@@ -387,16 +387,16 @@ function HandleExistingAbhaNumber({
         {t("abha_number_exists_description")}
       </p>
       <div className="mt-4 flex flex-col items-center justify-center gap-2">
-        <ButtonV2 className="w-full" onClick={next}>
+        <Button className="w-full" onClick={next}>
           {t("create_new_abha_address")}
-        </ButtonV2>
-        <ButtonV2
+        </Button>
+        <Button
           variant="secondary"
           className="w-full"
           onClick={() => onSuccess(memory?.abhaNumber as AbhaNumberModel)}
         >
           {t("use_existing_abha_address")}
-        </ButtonV2>
+        </Button>
         <p className="text-xs text-secondary-800">
           {memory?.abhaNumber?.health_id}
         </p>
@@ -470,13 +470,13 @@ function LinkMobileNumber({
       </p>
 
       <div className="mt-4 flex items-center">
-        <ButtonV2
+        <Button
           className="w-full"
           loading={memory?.isLoading}
           onClick={handleSubmit}
         >
           {t("send_otp")}
-        </ButtonV2>
+        </Button>
       </div>
     </div>
   );
@@ -580,19 +580,19 @@ function VerifyMobileNumber({
       </div>
 
       <div className="mt-4 flex flex-col items-center gap-2">
-        <ButtonV2
+        <Button
           className="w-full"
           loading={memory?.isLoading}
           onClick={handleSubmit}
         >
           {t("verify_otp")}
-        </ButtonV2>
+        </Button>
 
         {(memory?.resendOtpCount ?? 0) < MAX_OTP_RESEND_ALLOWED && (
           <ButtonWithTimer
-            ghost
+            variant="ghost"
             className="w-full"
-            initialInverval={60}
+            initialInterval={60}
             onClick={handleResendOtp}
           >
             {t("resend_otp")}
@@ -717,7 +717,7 @@ function ChooseAbhaAddress({
       )}
 
       <div className="mt-4 flex items-center justify-center gap-2">
-        <ButtonV2
+        <Button
           className="w-full"
           disabled={
             memory?.isLoading ||
@@ -726,7 +726,7 @@ function ChooseAbhaAddress({
           onClick={handleSubmit}
         >
           {t("create_abha_address")}
-        </ButtonV2>
+        </Button>
       </div>
     </div>
   );

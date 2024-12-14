@@ -1,7 +1,7 @@
 import { Link } from "raviger";
 import { useTranslation } from "react-i18next";
 
-import ButtonV2 from "@/components/Common/ButtonV2";
+import { Button } from "@/components/ui/button";
 import Loading from "@/components/Common/Loading";
 import Page from "@/components/Common/Page";
 
@@ -63,13 +63,13 @@ export default function ABDMFacilityRecords({ facilityId }: IProps) {
                         scope="col"
                         className="sticky right-0 top-0 py-3.5 pl-3 pr-4 sm:pr-6"
                       >
-                        <ButtonV2
+                        <Button
                           onClick={() => refetch()}
-                          ghost
+                          variant="ghost"
                           className="max-w-2xl text-sm text-secondary-700 hover:text-secondary-900"
                         >
                           <RefreshCcwIcon /> {t("refresh")}
-                        </ButtonV2>
+                        </Button>
                         <span className="sr-only">{t("view")}</span>
                       </th>
                     </tr>

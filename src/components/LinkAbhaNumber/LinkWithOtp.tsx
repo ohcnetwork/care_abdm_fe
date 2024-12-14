@@ -1,7 +1,6 @@
 import { useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 
-import ButtonV2, { ButtonWithTimer } from "@/components/Common/ButtonV2";
 import DropdownMenu, { DropdownItem } from "@/components/Common/Menu";
 import CheckBoxFormField from "@/components/Form/FormFields/CheckBoxFormField";
 import OtpFormField from "@/components/Form/FormFields/OtpFormField";
@@ -14,6 +13,7 @@ import routes from "../../api";
 import { AbhaNumberModel } from "../../types";
 import useMultiStepForm, { InjectedStepProps } from "./useMultiStepForm";
 import { cn } from "@/lib/utils";
+import { Button, ButtonWithTimer } from "@/components/ui/button";
 
 const MAX_OTP_RESEND_ALLOWED = 2;
 
@@ -50,7 +50,7 @@ export default function LinkWithOtp({ onSuccess }: ILoginWithOtpProps) {
       otp_system: "aadhaar",
       abhaNumber: null,
       resendOtpCount: 0,
-    },
+    }
   );
 
   return <div>{currentStep}</div>;
@@ -99,12 +99,12 @@ function EnterId({ memory, setMemory, next }: IEnterIdProps) {
             abha_address: memory?.id.replace(/-/g, "").replace(/ /g, ""),
           },
           silent: true,
-        },
+        }
       );
 
       if (res?.status === 200 && data) {
         const methods = data.auth_methods.filter((method: string) =>
-          supportedAuthMethods.find((supported) => supported === method),
+          supportedAuthMethods.find((supported) => supported === method)
         );
 
         if (methods.length === 0) {
@@ -202,7 +202,7 @@ function EnterId({ memory, setMemory, next }: IEnterIdProps) {
 
       <div className="mt-4 flex items-center">
         {authMethods.length === 0 ? (
-          <ButtonV2
+          <Button
             className="w-full"
             loading={memory?.isLoading}
             disabled={
@@ -211,7 +211,7 @@ function EnterId({ memory, setMemory, next }: IEnterIdProps) {
             onClick={handleGetAuthMethods}
           >
             {t("get_auth_methods")}
-          </ButtonV2>
+          </Button>
         ) : (
           <DropdownMenu
             itemClassName="!w-full md:!w-full"
@@ -321,20 +321,20 @@ function VerifyId({ memory, setMemory, onSuccess }: IVerifyIdProps) {
       </div>
 
       <div className="mt-4 flex flex-col items-center gap-2">
-        <ButtonV2
+        <Button
           className="w-full"
           loading={memory?.isLoading}
           disabled={otp.length !== 6}
           onClick={handleSubmit}
         >
           {t("verify_and_link")}
-        </ButtonV2>
+        </Button>
 
         {(memory?.resendOtpCount ?? 0) < MAX_OTP_RESEND_ALLOWED && (
           <ButtonWithTimer
-            ghost
+            variant="ghost"
             className="w-full"
-            initialInverval={60}
+            initialInterval={60}
             onClick={handleResendOtp}
           >
             {t("resend_otp")}

@@ -1,7 +1,5 @@
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
-
-import ButtonV2 from "@/components/Common/ButtonV2";
 import DialogModal from "@/components/Common/Dialog";
 
 import { AbhaNumberModel } from "../../types";
@@ -9,6 +7,7 @@ import CreateWithAadhaar from "./CreateWithAadhaar";
 import LinkWithOtp from "./LinkWithOtp";
 import LinkWithQr from "./LinkWithQr";
 import { cn } from "@/lib/utils";
+import { Button } from "@/components/ui/button";
 
 interface ILinkAbhaNumberProps {
   show: boolean;
@@ -113,27 +112,28 @@ export default function LinkAbhaNumber({
             )
             .sort((a) => (a.disabled ? 1 : -1))
             .map((option) => (
-              <ButtonV2
+              <Button
                 onClick={() =>
                   setCurrentAbhaLinkOption(
                     option.value as keyof typeof ABHA_LINK_OPTIONS
                   )
                 }
-                ghost
-                tooltip={
-                  option.disabled
-                    ? t("abha_link_options__disabled_tooltip")
-                    : t(option.description)
-                }
+                variant="ghost"
+                // FIXME: Add tooltip
+                // tooltip={
+                //   option.disabled
+                //     ? t("abha_link_options__disabled_tooltip")
+                //     : t(option.description)
+                // }
                 disabled={option.disabled}
-                tooltipClassName="top-full mt-1"
+                // tooltipClassName="top-full mt-1"
                 className={cn(
                   "w-full border border-gray-400 text-secondary-800",
                   !option.disabled && "hover:border-primary-100"
                 )}
               >
                 {t(option.title)}
-              </ButtonV2>
+              </Button>
             ))}
         </div>
       </div>
