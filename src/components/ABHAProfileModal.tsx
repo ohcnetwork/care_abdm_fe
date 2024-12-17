@@ -1,14 +1,14 @@
-import * as Notify from "@/Utils/Notifications";
+import * as Notify from "@/lib/notify";
 
 import DialogModal from "@/components/Common/Dialog";
 import { QRCodeSVG } from "qrcode.react";
 import { useRef } from "react";
-import request from "@/Utils/request/request";
 import { AbhaNumberModel } from "../types";
 import { useTranslation } from "react-i18next";
-import routes from "../api";
 import { ImageDownIcon, PrinterIcon } from "lucide-react";
 import { formatDateTime } from "@/lib/utils";
+import { useMutation } from "@tanstack/react-query";
+import apis from "../api";
 
 interface IProps {
   patientId?: string;
@@ -22,52 +22,55 @@ const ABHAProfileModal = ({ patientId, show, onClose, abha }: IProps) => {
 
   const printRef = useRef(null);
 
+  const getAbhaCardMutation = useMutation({
+    mutationFn: apis.healthId.getAbhaCard,
+    onSuccess: (data, { type }) => {
+      if (data) {
+        const imageUrl = URL.createObjectURL(data);
+
+        if (type === "png") {
+          const downloadLink = document.createElement("a");
+          downloadLink.href = imageUrl;
+          downloadLink.download = "abha.png";
+          downloadLink.click();
+          URL.revokeObjectURL(imageUrl);
+        } else {
+          const printWindow = window.open("", "_blank");
+          const htmlPopup = `
+              <html>
+                <head>
+                  <title>Print Image</title>
+                  <style>
+                  @media print {
+                    @page {
+                      size: landscape;
+                    }
+                    body, html { margin: 0; padding: 0; display: flex; justify-content: center; align-items: center; height: 100%; }
+                  }
+                  </style>
+                </head>
+                <body>
+                  <embed width="100%" height="100%" src="${imageUrl}" type="image/png"></embed>
+                </body>
+              </html>
+            `;
+          printWindow?.document.write(htmlPopup);
+          printWindow?.document.close();
+          printWindow?.addEventListener("load", () => {
+            printWindow?.print();
+            URL.revokeObjectURL(imageUrl);
+          });
+        }
+      }
+    },
+  });
+
   const downloadAbhaCard = async (type: "pdf" | "png") => {
     if (!patientId || !abha?.abha_number) return;
 
     Notify.Success({ msg: t("downloading_abha_card") });
 
-    const { res, data } = await request(routes.healthId.getAbhaCard, {
-      query: { abha_id: abha?.abha_number },
-    });
-
-    if (res?.status === 200 && data) {
-      const imageUrl = URL.createObjectURL(data);
-
-      if (type === "png") {
-        const downloadLink = document.createElement("a");
-        downloadLink.href = imageUrl;
-        downloadLink.download = "abha.png";
-        downloadLink.click();
-        URL.revokeObjectURL(imageUrl);
-      } else {
-        const printWindow = window.open("", "_blank");
-        const htmlPopup = `
-            <html>
-              <head>
-                <title>Print Image</title>
-                <style>
-                @media print {
-                  @page {
-                    size: landscape;
-                  }
-                  body, html { margin: 0; padding: 0; display: flex; justify-content: center; align-items: center; height: 100%; }
-                }
-                </style>
-              </head>
-              <body>
-                <embed width="100%" height="100%" src="${imageUrl}" type="image/png"></embed>
-              </body>
-            </html>
-          `;
-        printWindow?.document.write(htmlPopup);
-        printWindow?.document.close();
-        printWindow?.addEventListener("load", () => {
-          printWindow?.print();
-          URL.revokeObjectURL(imageUrl);
-        });
-      }
-    }
+    getAbhaCardMutation.mutate({ abha_id: abha?.abha_number, type });
   };
 
   return (

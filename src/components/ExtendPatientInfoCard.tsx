@@ -1,6 +1,4 @@
-import * as Notification from "@/Utils/Notifications";
-import routes from "../api";
-import request from "@/Utils/request/request";
+import * as Notification from "@/lib/notify";
 import { useQueryParams } from "raviger";
 import { ExtendPatientInfoCardComponentType } from "@/pluginTypes";
 import { useTranslation } from "react-i18next";
@@ -9,6 +7,8 @@ import { AbhaNumberModel } from "../types";
 import LinkAbhaNumber from "./LinkAbhaNumber";
 import ABHAProfileModal from "./ABHAProfileModal";
 import FetchRecordsModal from "./FetchRecordsModal";
+import { useMutation } from "@tanstack/react-query";
+import apis from "../api";
 
 const ExtendPatientInfoCard: ExtendPatientInfoCardComponentType = ({
   patient,
@@ -20,6 +20,29 @@ const ExtendPatientInfoCard: ExtendPatientInfoCardComponentType = ({
     abhaNumber?: AbhaNumberModel;
   }>();
 
+  const linkAbhaNumberAndPatientMutation = useMutation({
+    mutationFn: apis.healthId.linkAbhaNumberAndPatient,
+    onSuccess: (data) => {
+      if (data) {
+        Notification.Success({
+          msg: t("abha_number_linked_successfully"),
+        });
+
+        fetchPatientData?.({ aborted: false });
+        setQParams({
+          ...qParams,
+          show_link_abha_number: undefined,
+          show_abha_profile: "true",
+        });
+      }
+    },
+    onError: () => {
+      Notification.Error({
+        msg: t("failed_to_link_abha_number"),
+      });
+    },
+  });
+
   return (
     <>
       <LinkAbhaNumber
@@ -28,32 +51,10 @@ const ExtendPatientInfoCard: ExtendPatientInfoCardComponentType = ({
           setQParams({ ...qParams, show_link_abha_number: undefined });
         }}
         onSuccess={async (abhaProfile) => {
-          const { res, data } = await request(
-            routes.healthId.linkAbhaNumberAndPatient,
-            {
-              body: {
-                patient: patient.id,
-                abha_number: abhaProfile.external_id,
-              },
-            },
-          );
-
-          if (res?.status === 200 && data) {
-            Notification.Success({
-              msg: t("abha_number_linked_successfully"),
-            });
-
-            fetchPatientData?.({ aborted: false });
-            setQParams({
-              ...qParams,
-              show_link_abha_number: undefined,
-              show_abha_profile: "true",
-            });
-          } else {
-            Notification.Error({
-              msg: t("failed_to_link_abha_number"),
-            });
-          }
+          linkAbhaNumberAndPatientMutation.mutate({
+            patient: patient.id,
+            abha_number: abhaProfile.external_id,
+          });
         }}
       />
       <ABHAProfileModal

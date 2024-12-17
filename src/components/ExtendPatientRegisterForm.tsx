@@ -1,4 +1,4 @@
-import * as Notification from "@/Utils/Notifications";
+import * as Notification from "@/lib/notify";
 
 import { ExtendPatientRegisterFormComponentType } from "@/pluginTypes";
 import LinkAbhaNumber from "./LinkAbhaNumber";
@@ -14,14 +14,13 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { Button } from "@/components/ui/button";
-import routes from "../api";
-import useQuery from "@/Utils/request/useQuery";
 import { useTranslation } from "react-i18next";
 import { usePubSub } from "@/Utils/pubsubContext";
-import request from "@/Utils/request/request";
 import { PatientModel } from "@/components/Patient/models";
 import { SquareUserIcon } from "lucide-react";
 import { parsePhoneNumber } from "@/lib/utils";
+import { useMutation, useQuery } from "@tanstack/react-query";
+import apis from "@/api";
 
 const ExtendPatientRegisterForm: ExtendPatientRegisterFormComponentType = ({
   facilityId,
@@ -34,21 +33,32 @@ const ExtendPatientRegisterForm: ExtendPatientRegisterFormComponentType = ({
   const [showLinkAbhaNumberModal, setShowLinkAbhaNumberModal] = useState(false);
   const { setSubscribers } = usePubSub();
 
-  useQuery(routes.abhaNumber.get, {
-    pathParams: { abhaNumberId: patientId ?? "" },
-    silent: true,
-    onResponse(res) {
-      if (res.data) {
-        dispatch({
-          type: "set_form",
-          form: {
-            ...state.form,
-            abha_number: res.data.external_id,
-            health_id_number: res.data.abha_number,
-            health_id: res.data.health_id,
-          },
-        });
-      }
+  const { data } = useQuery({
+    queryKey: ["abhaNumber", patientId],
+    queryFn: () => apis.abhaNumber.get(patientId),
+    enabled: !!patientId,
+  });
+
+  useEffect(() => {
+    if (data) {
+      dispatch({
+        type: "set_form",
+        form: {
+          ...state.form,
+          abha_number: data.external_id,
+          health_id_number: data.abha_number,
+          health_id: data.health_id,
+        },
+      });
+    }
+  }, [data]);
+
+  const linkAbhaNumberAndPatientMutation = useMutation({
+    mutationFn: apis.healthId.linkAbhaNumberAndPatient,
+    onSuccess: () => {
+      Notification.Success({
+        msg: t("abha_number_linked_successfully"),
+      });
     },
   });
 
@@ -57,21 +67,10 @@ const ExtendPatientRegisterForm: ExtendPatientRegisterFormComponentType = ({
       const patient = message as PatientModel;
 
       if (state.form.abha_number) {
-        const { res, data } = await request(
-          routes.healthId.linkAbhaNumberAndPatient,
-          {
-            body: {
-              patient: patient.id,
-              abha_number: state.form.abha_number,
-            },
-          }
-        );
-
-        if (res?.status === 200 && data) {
-          Notification.Success({
-            msg: t("abha_number_linked_successfully"),
-          });
-        }
+        linkAbhaNumberAndPatientMutation.mutate({
+          patient: patient.id,
+          abha_number: state.form.abha_number,
+        });
       }
     },
     [state.form.abha_number, t]
@@ -93,9 +92,10 @@ const ExtendPatientRegisterForm: ExtendPatientRegisterFormComponentType = ({
     });
   }, [linkAbhaNumberAndPatient, state.form.abha_number]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  const { data: healthFacility } = useQuery(routes.healthFacility.get, {
-    pathParams: { facility_id: facilityId },
-    silent: true,
+  const { data: healthFacility } = useQuery({
+    queryKey: ["healthFacility", facilityId],
+    queryFn: () => apis.healthFacility.get(facilityId),
+    enabled: !!facilityId,
   });
 
   const populateAbhaValues = (

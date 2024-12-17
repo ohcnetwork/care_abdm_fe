@@ -2,14 +2,13 @@ import { Link } from "raviger";
 import { useTranslation } from "react-i18next";
 
 import { Button } from "@/components/ui/button";
-import Loading from "@/components/Common/Loading";
+import Loading from "@/components/ui/loading";
 import Page from "@/components/Common/Page";
 
-import useQuery from "@/Utils/request/useQuery";
-
-import routes from "../api";
 import { cn, formatDateTime } from "@/lib/utils";
 import { RefreshCcwIcon } from "lucide-react";
+import { useQuery } from "@tanstack/react-query";
+import apis from "@/api";
 
 interface IProps {
   facilityId: string;
@@ -30,13 +29,18 @@ export default function ABDMFacilityRecords({ facilityId }: IProps) {
 
   const {
     data: consentsResult,
-    loading,
+    isLoading,
     refetch,
-  } = useQuery(routes.consent.list, {
-    query: { facility: facilityId, ordering: "-created_date" },
+  } = useQuery({
+    queryKey: ["consents", facilityId],
+    queryFn: () =>
+      apis.consent.list({
+        facility: facilityId,
+        ordering: "-created_date",
+      }),
   });
 
-  if (loading) {
+  if (isLoading) {
     return <Loading />;
   }
 

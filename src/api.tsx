@@ -1,6 +1,3 @@
-import { Type } from "@/Utils/request/api";
-import { PaginatedResponse } from "@/Utils/request/types";
-
 import {
   AbhaNumberModel,
   ConsentRequestModel,
@@ -11,244 +8,315 @@ import {
   IpartialUpdateHealthFacilityTBody,
 } from "./types";
 
-const routes = {
+type PaginatedResponse<T> = {
+  count: number;
+  next: string | null;
+  previous: string | null;
+  results: T[];
+};
+
+const CARE_BASE_URL = "https://care-staging-api.ohc.network";
+const CARE_ACCESS_TOKEN_LOCAL_STORAGE_KEY = "care_token";
+
+async function request<Response>(
+  path: string,
+  options?: RequestInit
+): Promise<Response> {
+  const url = `${CARE_BASE_URL}/${path}`;
+
+  const defaultHeaders = {
+    Authorization: `Bearer ${localStorage.getItem(
+      CARE_ACCESS_TOKEN_LOCAL_STORAGE_KEY
+    )}`,
+  };
+
+  const requestInit = {
+    ...(options ?? {}),
+    headers: {
+      ...defaultHeaders,
+      ...(options?.headers ?? {}),
+    },
+  };
+
+  const response = await fetch(url, requestInit);
+
+  // TODO: parse response based on content type
+  const data = response.json();
+
+  if (!response.ok) {
+    if (response.status === 401) {
+      // TODO: implement refresh token logic
+    }
+
+    throw new Error(String(data));
+  }
+
+  return data as Response;
+}
+
+const queryString = (params?: Record<string, string | number | boolean>) => {
+  if (!params) {
+    return "";
+  }
+
+  const paramString = Object.keys(params)
+    .map((key) => `${key}=${params[key]}`)
+    .join("&");
+
+  return paramString ? `?${paramString}` : "";
+};
+
+const apis = {
   consent: {
-    list: {
-      path: "/api/abdm/consent/",
-      method: "GET",
-      TRes: Type<PaginatedResponse<ConsentRequestModel>>(),
+    list: async (query?: {
+      facility?: string;
+      patient?: string;
+      ordering?: string;
+    }) => {
+      return await request<PaginatedResponse<ConsentRequestModel>>(
+        "/api/abdm/consent/" + queryString(query)
+      );
     },
 
-    create: {
-      path: "/api/abdm/consent/",
-      method: "POST",
-      TRes: Type<ConsentRequestModel>(),
-      TBody: Type<CreateConsentTBody>(),
+    create: async (body: CreateConsentTBody) => {
+      return await request<ConsentRequestModel>("/api/abdm/consent/", {
+        method: "POST",
+        body: JSON.stringify(body),
+      });
     },
 
-    get: {
-      path: "/api/abdm/consent/{id}/",
-      method: "GET",
+    get: async (id: string) => {
+      return await request<ConsentRequestModel>(`/api/abdm/consent/${id}/`);
     },
 
-    checkStatus: {
-      path: "/api/abdm/v3/hiu/consent_request_status/",
-      method: "POST",
-      TBody: Type<{
-        consent_request: string;
-      }>(),
-      TRes: Type<{
-        detail: string;
-      }>(),
+    checkStatus: async (consentRequest: string) => {
+      return await request<{ detail: string }>(
+        "/api/abdm/v3/hiu/consent_request_status/",
+        {
+          method: "POST",
+          body: JSON.stringify({ consent_request: consentRequest }),
+        }
+      );
     },
   },
 
   healthInformation: {
-    get: {
-      path: "/api/abdm/health_information/{artefactId}",
-      method: "GET",
-      TRes: Type<HealthInformationModel>(),
+    get: async (artefactId: string) => {
+      return await request<HealthInformationModel>(
+        `/api/abdm/health_information/${artefactId}`
+      );
     },
   },
 
   healthFacility: {
-    list: {
-      path: "/api/abdm/health_facility/",
-      method: "GET",
+    list: async () => {
+      return await request<PaginatedResponse<HealthFacilityModel>>(
+        "/api/abdm/health_facility/"
+      );
     },
 
-    create: {
-      path: "/api/abdm/health_facility/",
-      method: "POST",
-      TRes: Type<HealthFacilityModel>(),
-      TBody: Type<IcreateHealthFacilityTBody>(),
+    create: async (body: IcreateHealthFacilityTBody) => {
+      return await request<HealthFacilityModel>("/api/abdm/health_facility/", {
+        method: "POST",
+        body: JSON.stringify(body),
+      });
     },
 
-    get: {
-      path: "/api/abdm/health_facility/{facility_id}/",
-      method: "GET",
-      TRes: Type<HealthFacilityModel>(),
+    get: async (facilityId: string) => {
+      return await request<HealthFacilityModel>(
+        `/api/abdm/health_facility/${facilityId}/`
+      );
     },
 
-    update: {
-      path: "/api/abdm/health_facility/{facility_id}/",
-      method: "PUT",
-      TRes: Type<HealthFacilityModel>(),
-      TBody: Type<IcreateHealthFacilityTBody>(),
+    update: async (facilityId: string, body: IcreateHealthFacilityTBody) => {
+      return await request<HealthFacilityModel>(
+        `/api/abdm/health_facility/${facilityId}/`,
+        {
+          method: "PUT",
+          body: JSON.stringify(body),
+        }
+      );
     },
 
-    partialUpdate: {
-      path: "/api/abdm/health_facility/{facility_id}/",
-      method: "PATCH",
-      TRes: Type<HealthFacilityModel>(),
-      TBody: Type<IpartialUpdateHealthFacilityTBody>(),
+    partialUpdate: async (
+      facilityId: string,
+      body: IpartialUpdateHealthFacilityTBody
+    ) => {
+      return await request<HealthFacilityModel>(
+        `/api/abdm/health_facility/${facilityId}/`,
+        {
+          method: "PATCH",
+          body: JSON.stringify(body),
+        }
+      );
     },
 
-    registerAsService: {
-      path: "/api/abdm/health_facility/{facility_id}/register_service/",
-      method: "POST",
-      TRes: Type<HealthFacilityModel>(),
-      TBody: Type<IcreateHealthFacilityTBody>(),
+    registerAsService: async (facilityId: string) => {
+      return await request<HealthFacilityModel>(
+        `/api/abdm/health_facility/${facilityId}/register_service/`,
+        {
+          method: "POST",
+        }
+      );
     },
   },
 
   abhaNumber: {
-    get: {
-      path: "/api/abdm/abha_number/{abhaNumberId}/",
-      method: "GET",
-      TRes: Type<AbhaNumberModel>(),
+    get: async (abhaNumberId: string) => {
+      return await request<AbhaNumberModel>(
+        `/api/abdm/abha_number/${abhaNumberId}/`
+      );
     },
-    create: {
-      path: "/api/abdm/abha_number/",
-      method: "POST",
-      TBody: Type<Partial<AbhaNumberModel>>(),
-      TRes: Type<AbhaNumberModel>(),
+
+    create: async (body: Partial<AbhaNumberModel>) => {
+      return await request<AbhaNumberModel>("/api/abdm/abha_number/", {
+        method: "POST",
+        body: JSON.stringify(body),
+      });
     },
   },
 
   healthId: {
-    abhaCreateSendAadhaarOtp: {
-      path: "/api/abdm/v3/health_id/create/send_aadhaar_otp/",
-      method: "POST",
-      TBody: Type<{
-        aadhaar: string;
-        transaction_id?: string;
-      }>(),
-      TRes: Type<{
+    abhaCreateSendAadhaarOtp: async (body: {
+      aadhaar: string;
+      transaction_id?: string;
+    }) => {
+      return await request<{
         transaction_id: string;
         detail: string;
-      }>(),
+      }>("/api/abdm/v3/health_id/create/send_aadhaar_otp/", {
+        method: "POST",
+        body: JSON.stringify(body),
+      });
     },
 
-    abhaCreateVerifyAadhaarOtp: {
-      path: "/api/abdm/v3/health_id/create/verify_aadhaar_otp/",
-      method: "POST",
-      TBody: Type<{
-        transaction_id: string;
-        otp: string;
-        mobile: string;
-      }>(),
-      TRes: Type<{
+    abhaCreateVerifyAadhaarOtp: async (body: {
+      transaction_id: string;
+      otp: string;
+      mobile: string;
+    }) => {
+      return await request<{
         transaction_id: string;
         detail: string;
         is_new: boolean;
         abha_number: AbhaNumberModel;
-      }>(),
+      }>("/api/abdm/v3/health_id/create/verify_aadhaar_otp/", {
+        method: "POST",
+        body: JSON.stringify(body),
+      });
     },
 
-    abhaCreateLinkMobileNumber: {
-      path: "/api/abdm/v3/health_id/create/link_mobile_number/",
-      method: "POST",
-      TBody: Type<{
-        transaction_id: string;
-        mobile: string;
-      }>(),
-      TRes: Type<{
+    abhaCreateLinkMobileNumber: async (body: {
+      transaction_id: string;
+      mobile: string;
+    }) => {
+      return await request<{
         transaction_id: string;
         detail: string;
-      }>(),
+      }>("/api/abdm/v3/health_id/create/link_mobile_number/", {
+        method: "POST",
+        body: JSON.stringify(body),
+      });
     },
 
-    abhaCreateVerifyMobileNumber: {
-      path: "/api/abdm/v3/health_id/create/verify_mobile_otp/",
-      method: "POST",
-      TBody: Type<{
-        transaction_id: string;
-        otp: string;
-      }>(),
-      TRes: Type<{
+    abhaCreateVerifyMobileNumber: async (body: {
+      transaction_id: string;
+      otp: string;
+    }) => {
+      return await request<{
         transaction_id: string;
         detail: string;
-      }>(),
+      }>("/api/abdm/v3/health_id/create/verify_mobile_otp/", {
+        method: "POST",
+        body: JSON.stringify(body),
+      });
     },
 
-    abhaCreateAbhaAddressSuggestion: {
-      path: "/api/abdm/v3/health_id/create/abha_address_suggestion/",
-      method: "POST",
-      TBody: Type<{
-        transaction_id: string;
-      }>(),
-      TRes: Type<{
+    abhaCreateAbhaAddressSuggestion: async (body: {
+      transaction_id: string;
+    }) => {
+      return await request<{
         transaction_id: string;
         abha_addresses: string[];
-      }>(),
+      }>("/api/abdm/v3/health_id/create/abha_address_suggestion/", {
+        method: "POST",
+        body: JSON.stringify(body),
+      });
     },
 
-    abhaCreateEnrolAbhaAddress: {
-      path: "/api/abdm/v3/health_id/create/enrol_abha_address/",
-      method: "POST",
-      TBody: Type<{
-        transaction_id: string;
-        abha_address: string;
-      }>(),
-      TRes: Type<{
+    abhaCreateEnrolAbhaAddress: async (body: {
+      transaction_id: string;
+      abha_address: string;
+    }) => {
+      return await request<{
         detail?: string;
         transaction_id: string;
         health_id: string;
         preferred_abha_address: string;
         abha_number: AbhaNumberModel;
-      }>(),
+      }>("/api/abdm/v3/health_id/create/enrol_abha_address/", {
+        method: "POST",
+        body: JSON.stringify(body),
+      });
     },
 
-    linkAbhaNumberAndPatient: {
-      path: "/api/abdm/v3/health_id/link_patient/",
-      method: "POST",
-      TBody: Type<{
-        abha_number: string;
-        patient: string;
-      }>(),
-      TRes: Type<{
+    linkAbhaNumberAndPatient: async (body: {
+      abha_number: string;
+      patient: string;
+    }) => {
+      return await request<{
         detail: string;
-      }>(),
+      }>("/api/abdm/v3/health_id/link_patient/", {
+        method: "POST",
+        body: JSON.stringify(body),
+      });
     },
 
-    abhaLoginCheckAuthMethods: {
-      path: "/api/abdm/v3/health_id/login/check_auth_methods/",
-      method: "POST",
-      TBody: Type<{
-        abha_address: string;
-      }>(),
-      TRes: Type<{
+    abhaLoginCheckAuthMethods: async (body: { abha_address: string }) => {
+      return await request<{
         abha_number: string;
         auth_methods: string[];
-      }>(),
+      }>("/api/abdm/v3/health_id/login/check_auth_methods/", {
+        method: "POST",
+        body: JSON.stringify(body),
+      });
     },
 
-    abhaLoginSendOtp: {
-      path: "/api/abdm/v3/health_id/login/send_otp/",
-      method: "POST",
-      TBody: Type<{
-        type: "abha-number" | "abha-address" | "mobile" | "aadhaar";
-        value: string;
-        otp_system: "abdm" | "aadhaar";
-      }>(),
-      TRes: Type<{
+    abhaLoginSendOtp: async (body: {
+      value: string;
+      type: "abha-number" | "abha-address" | "mobile" | "aadhaar";
+      otp_system: "abdm" | "aadhaar";
+    }) => {
+      return await request<{
         transaction_id: string;
         detail: string;
-      }>(),
+      }>("/api/abdm/v3/health_id/login/send_otp/", {
+        method: "POST",
+        body: JSON.stringify(body),
+      });
     },
 
-    abhaLoginVerifyOtp: {
-      path: "/api/abdm/v3/health_id/login/verify_otp/",
-      method: "POST",
-      TBody: Type<{
-        type: "abha-number" | "abha-address" | "mobile" | "aadhaar";
-        otp: string;
-        transaction_id: string;
-        otp_system: "abdm" | "aadhaar";
-      }>(),
-      TRes: Type<{
+    abhaLoginVerifyOtp: async (body: {
+      type: "abha-number" | "abha-address" | "mobile" | "aadhaar";
+      otp: string;
+      transaction_id: string;
+      otp_system: "abdm" | "aadhaar";
+    }) => {
+      return await request<{
         abha_number: AbhaNumberModel;
         created: boolean;
-      }>(),
+      }>("/api/abdm/v3/health_id/login/verify_otp/", {
+        method: "POST",
+        body: JSON.stringify(body),
+      });
     },
 
-    getAbhaCard: {
-      path: "/api/abdm/v3/health_id/abha_card",
-      method: "GET",
-      TRes: Type<Blob>(),
+    getAbhaCard: async (query: { abha_id?: string; type: "pdf" | "png" }) => {
+      return await request<Blob>(
+        "/api/abdm/v3/health_id/login/get_abha_card/" + queryString(query)
+      );
     },
   },
-} as const;
+};
 
-export default routes;
+export default apis;

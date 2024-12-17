@@ -1,12 +1,10 @@
 import { HIProfile } from "hi-profiles";
 import { useTranslation } from "react-i18next";
 
-import Loading from "@/components/Common/Loading";
+import Loading from "@/components/ui/loading";
 import Page from "@/components/Common/Page";
-
-import useQuery from "@/Utils/request/useQuery";
-
-import routes from "../api";
+import { useQuery } from "@tanstack/react-query";
+import apis from "@/api";
 
 interface IProps {
   artefactId: string;
@@ -15,12 +13,13 @@ interface IProps {
 export default function HealthInformation({ artefactId }: IProps) {
   const { t } = useTranslation();
 
-  const { data, loading, error } = useQuery(routes.healthInformation.get, {
-    pathParams: { artefactId },
-    silent: true,
+  const { data, isLoading, error } = useQuery({
+    queryKey: ["healthInformation", artefactId],
+    queryFn: () => apis.healthInformation.get(artefactId),
+    enabled: !!artefactId,
   });
 
-  if (loading) {
+  if (isLoading) {
     return <Loading />;
   }
 
@@ -29,7 +28,7 @@ export default function HealthInformation({ artefactId }: IProps) {
       return JSON.parse(data);
     } catch (e) {
       return JSON.parse(
-        data.replace(/"/g, '\\"').replace(/'/g, '"'), // eslint-disable-line
+        data.replace(/"/g, '\\"').replace(/'/g, '"') // eslint-disable-line
       );
     }
   };

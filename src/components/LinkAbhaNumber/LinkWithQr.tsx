@@ -1,11 +1,10 @@
 import { useTranslation } from "react-i18next";
 import { AbhaNumberModel, ABHAQRContent } from "../../types";
-import * as Notification from "@/Utils/Notifications";
+import * as Notification from "@/lib/notify";
 
 import { Scanner, IDetectedBarcode } from "@yudiel/react-qr-scanner";
-import request from "@/Utils/request/request";
-import { useState } from "react";
-import routes from "../../api";
+import { useMutation } from "@tanstack/react-query";
+import apis from "../../api";
 
 type ILoginWithQrProps = {
   onSuccess: (abhaNumber: AbhaNumberModel) => void;
@@ -13,7 +12,11 @@ type ILoginWithQrProps = {
 
 export default function LinkWithQr({ onSuccess }: ILoginWithQrProps) {
   const { t } = useTranslation();
-  const [isLoading, setIsLoading] = useState(false);
+
+  const createAbhaNumberMutation = useMutation({
+    mutationFn: apis.abhaNumber.create,
+    onSuccess,
+  });
 
   return (
     <div>
@@ -22,30 +25,22 @@ export default function LinkWithQr({ onSuccess }: ILoginWithQrProps) {
           if (detectedCodes.length === 0) return;
 
           const scannedValue = detectedCodes[0].rawValue;
-          if (!scannedValue || isLoading) return;
+          if (!scannedValue || createAbhaNumberMutation.isPending) return;
 
           try {
             const qrData = JSON.parse(scannedValue) as ABHAQRContent;
 
-            setIsLoading(true);
-            const { res, data } = await request(routes.abhaNumber.create, {
-              body: {
-                abha_number: qrData.hidn,
-                health_id: qrData.hid || qrData.phr,
-                name: qrData.name,
-                gender: qrData.gender,
-                date_of_birth: qrData.dob,
-                address: qrData.address,
-                district: qrData.district_name || qrData["dist name"],
-                state: qrData.state_name || qrData["state name"],
-                mobile: qrData.mobile,
-              },
+            createAbhaNumberMutation.mutate({
+              abha_number: qrData.hidn,
+              health_id: qrData.hid || qrData.phr,
+              name: qrData.name,
+              gender: qrData.gender,
+              date_of_birth: qrData.dob,
+              address: qrData.address,
+              district: qrData.district_name || qrData["dist name"],
+              state: qrData.state_name || qrData["state name"],
+              mobile: qrData.mobile,
             });
-
-            if (res?.status === 201 && data) {
-              onSuccess(data);
-            }
-            setIsLoading(false);
           } catch (e) {
             Notification.Error({
               msg: t("abha__qr_scanning_error"),

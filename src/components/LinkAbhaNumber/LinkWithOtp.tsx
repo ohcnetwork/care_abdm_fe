@@ -6,14 +6,14 @@ import CheckBoxFormField from "@/components/Form/FormFields/CheckBoxFormField";
 import OtpFormField from "@/components/Form/FormFields/OtpFormField";
 import TextFormField from "@/components/Form/FormFields/TextFormField";
 
-import * as Notify from "@/Utils/Notifications";
-import request from "@/Utils/request/request";
+import * as Notify from "@/lib/notify";
 
-import routes from "../../api";
 import { AbhaNumberModel } from "../../types";
 import useMultiStepForm, { InjectedStepProps } from "./useMultiStepForm";
 import { cn } from "@/lib/utils";
 import { Button, ButtonWithTimer } from "@/components/ui/button";
+import { useMutation } from "@tanstack/react-query";
+import apis from "@/api";
 
 const MAX_OTP_RESEND_ALLOWED = 2;
 
@@ -84,25 +84,10 @@ function EnterId({ memory, setMemory, next }: IEnterIdProps) {
     }
   }, [memory?.id]);
 
-  const handleGetAuthMethods = async () => {
-    setMemory((prev) => ({ ...prev, isLoading: true }));
-
-    if (valueType === "aadhaar") {
-      setAuthMethods(["AADHAAR_OTP"]);
-    } else if (valueType === "mobile") {
-      setAuthMethods(["MOBILE_OTP"]);
-    } else {
-      const { res, data, error } = await request(
-        routes.healthId.abhaLoginCheckAuthMethods,
-        {
-          body: {
-            abha_address: memory?.id.replace(/-/g, "").replace(/ /g, ""),
-          },
-          silent: true,
-        }
-      );
-
-      if (res?.status === 200 && data) {
+  const checkAuthMethodsMutation = useMutation({
+    mutationFn: apis.healthId.abhaLoginCheckAuthMethods,
+    onSuccess: (data) => {
+      if (data) {
         const methods = data.auth_methods.filter((method: string) =>
           supportedAuthMethods.find((supported) => supported === method)
         );
@@ -110,9 +95,46 @@ function EnterId({ memory, setMemory, next }: IEnterIdProps) {
         if (methods.length === 0) {
           Notify.Warn({ msg: t("get_auth_mode_error") });
         }
-      } else {
-        Notify.Error({ msg: error?.message ?? t("get_auth_mode_error") });
       }
+
+      setMemory((prev) => ({ ...prev, isLoading: false }));
+    },
+    onError: (error) => {
+      Notify.Error({ msg: error?.message ?? t("get_auth_mode_error") });
+    },
+  });
+
+  const sendOtpMutation = useMutation({
+    mutationFn: apis.healthId.abhaLoginSendOtp,
+    onSuccess: (data) => {
+      if (data) {
+        setMemory((prev) => ({
+          ...prev,
+          transactionId: data.transaction_id,
+        }));
+        Notify.Success({ msg: data.detail ?? t("send_otp_success") });
+        next();
+      }
+
+      setMemory((prev) => ({ ...prev, isLoading: false }));
+    },
+  });
+
+  const handleGetAuthMethods = async () => {
+    if (!memory?.id) {
+      return;
+    }
+
+    setMemory((prev) => ({ ...prev, isLoading: true }));
+
+    if (valueType === "aadhaar") {
+      setAuthMethods(["AADHAAR_OTP"]);
+    } else if (valueType === "mobile") {
+      setAuthMethods(["MOBILE_OTP"]);
+    } else {
+      checkAuthMethodsMutation.mutate({
+        abha_address: memory.id.replace(/-/g, "").replace(/ /g, ""),
+      });
     }
 
     setMemory((prev) => ({ ...prev, isLoading: false }));
@@ -121,6 +143,10 @@ function EnterId({ memory, setMemory, next }: IEnterIdProps) {
   const handleSendOtp = async (authMethod: string) => {
     if (!supportedAuthMethods.includes(authMethod)) {
       Notify.Warn({ msg: t("auth_method_unsupported") });
+      return;
+    }
+
+    if (!memory?.id) {
       return;
     }
 
@@ -134,24 +160,11 @@ function EnterId({ memory, setMemory, next }: IEnterIdProps) {
       otp_system,
     }));
 
-    const { res, data } = await request(routes.healthId.abhaLoginSendOtp, {
-      body: {
-        value: memory?.id,
-        type: valueType,
-        otp_system,
-      },
+    sendOtpMutation.mutate({
+      value: memory.id,
+      type: valueType,
+      otp_system,
     });
-
-    if (res?.status === 200 && data) {
-      setMemory((prev) => ({
-        ...prev,
-        transactionId: data.transaction_id,
-      }));
-      Notify.Success({ msg: data.detail ?? t("send_otp_success") });
-      next();
-    }
-
-    setMemory((prev) => ({ ...prev, isLoading: false }));
   };
 
   return (
@@ -238,53 +251,70 @@ function VerifyId({ memory, setMemory, onSuccess }: IVerifyIdProps) {
   const { t } = useTranslation();
   const [otp, setOtp] = useState("");
 
-  const handleSubmit = async () => {
-    setMemory((prev) => ({ ...prev, isLoading: true }));
+  const verifyOtpMutation = useMutation({
+    mutationFn: apis.healthId.abhaLoginVerifyOtp,
+    onSuccess: (data) => {
+      if (data) {
+        Notify.Success({ msg: t("verify_otp_success") });
+        onSuccess(data.abha_number);
+      }
 
-    const { res, data } = await request(routes.healthId.abhaLoginVerifyOtp, {
-      body: {
-        type: memory?.type,
-        transaction_id: memory?.transactionId,
-        otp,
-        otp_system: memory?.otp_system,
-      },
-    });
+      setMemory((prev) => ({ ...prev, isLoading: false }));
+    },
+  });
 
-    if (res?.status === 200 && data) {
-      Notify.Success({ msg: t("verify_otp_success") });
-      onSuccess(data.abha_number);
-    }
+  const resendOtpMutation = useMutation({
+    mutationFn: apis.healthId.abhaLoginSendOtp,
+    onSuccess: (data) => {
+      if (data) {
+        setMemory((prev) => ({
+          ...prev,
+          transactionId: data.transaction_id,
+          resendOtpCount: (prev.resendOtpCount ?? 0) + 1,
+        }));
+        Notify.Success({ msg: data.detail ?? t("send_otp_success") });
+      }
 
-    setMemory((prev) => ({ ...prev, isLoading: false }));
-  };
-
-  const handleResendOtp = async () => {
-    setMemory((prev) => ({ ...prev, isLoading: true }));
-
-    const { res, data } = await request(routes.healthId.abhaLoginSendOtp, {
-      body: {
-        value: memory?.id,
-        type: memory?.type,
-        otp_system: memory?.otp_system,
-      },
-    });
-
-    if (res?.status === 200 && data) {
-      setMemory((prev) => ({
-        ...prev,
-        transactionId: data.transaction_id,
-        resendOtpCount: (prev.resendOtpCount ?? 0) + 1,
-      }));
-      Notify.Success({ msg: data.detail ?? t("send_otp_success") });
-    } else {
+      setMemory((prev) => ({ ...prev, isLoading: false }));
+    },
+    onError: () => {
       setMemory((prev) => ({
         ...prev,
         resendOtpCount: Infinity,
       }));
       Notify.Error({ msg: t("send_otp_error") });
+
+      setMemory((prev) => ({ ...prev, isLoading: false }));
+    },
+  });
+
+  const handleSubmit = async () => {
+    if (!memory?.type || !memory?.transactionId || !memory?.otp_system) {
+      return;
     }
 
-    setMemory((prev) => ({ ...prev, isLoading: false }));
+    setMemory((prev) => ({ ...prev, isLoading: true }));
+
+    verifyOtpMutation.mutate({
+      type: memory.type,
+      transaction_id: memory.transactionId,
+      otp,
+      otp_system: memory.otp_system,
+    });
+  };
+
+  const handleResendOtp = async () => {
+    if (!memory?.type || !memory?.transactionId || !memory?.otp_system) {
+      return;
+    }
+
+    setMemory((prev) => ({ ...prev, isLoading: true }));
+
+    resendOtpMutation.mutate({
+      value: memory.id,
+      type: memory.type,
+      otp_system: memory.otp_system,
+    });
   };
 
   return (
