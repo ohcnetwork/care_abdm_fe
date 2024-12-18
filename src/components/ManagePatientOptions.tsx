@@ -1,4 +1,3 @@
-import { triggerGoal } from "@core/Integrations/Plausible";
 import { MenuItem } from "@headlessui/react";
 import { useQueryParams } from "raviger";
 import { useTranslation } from "react-i18next";
@@ -20,6 +19,7 @@ import { ManagePatientOptionsComponentType } from "@/pluginTypes";
 
 import { AbhaNumberModel, HealthFacilityModel } from "../types";
 import { FileInputIcon, LinkIcon, SquareUserIcon } from "lucide-react";
+import { triggerGoal } from "@/lib/plausible";
 
 const ManagePatientOptions: ManagePatientOptionsComponentType = ({
   consultation,

@@ -1,4 +1,4 @@
-import dayjs from "dayjs";
+import dayjs from "@/lib/dayjs";
 import { navigate } from "raviger";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";

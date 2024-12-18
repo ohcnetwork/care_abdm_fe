@@ -6,7 +6,6 @@ import CheckBoxFormField from "@/components/Form/FormFields/CheckBoxFormField";
 import OtpFormField from "@/components/Form/FormFields/OtpFormField";
 import PhoneNumberFormField from "@/components/Form/FormFields/PhoneNumberFormField";
 import TextFormField from "@/components/Form/FormFields/TextFormField";
-import { validateRule } from "@/components/Users/UserAdd";
 
 import * as Notify from "@/lib/notify";
 
@@ -15,6 +14,7 @@ import useMultiStepForm, { InjectedStepProps } from "./useMultiStepForm";
 import { cn } from "@/lib/utils";
 import { useMutation } from "@tanstack/react-query";
 import apis from "../../api";
+import { CircleCheckIcon, CircleIcon, CircleXIcon } from "lucide-react";
 
 const MAX_OTP_RESEND_ALLOWED = 2;
 
@@ -760,3 +760,32 @@ function ChooseAbhaAddress({
     </div>
   );
 }
+
+export const validateRule = (
+  condition: boolean,
+  content: JSX.Element | string,
+  isInitialState: boolean = false
+) => {
+  return (
+    <div>
+      {isInitialState ? (
+        <CircleIcon className="text-xl text-gray-500" />
+      ) : condition ? (
+        <CircleCheckIcon className="text-xl text-green-500" />
+      ) : (
+        <CircleXIcon className="text-xl text-red-500" />
+      )}{" "}
+      <span
+        className={cn(
+          isInitialState
+            ? "text-black"
+            : condition
+            ? "text-primary-500"
+            : "text-red-500"
+        )}
+      >
+        {content}
+      </span>
+    </div>
+  );
+};

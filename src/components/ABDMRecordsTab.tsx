@@ -1,5 +1,4 @@
-import dayjs from "dayjs";
-import relativeTime from "dayjs/plugin/relativeTime";
+import dayjs from "@/lib/dayjs";
 import { Link } from "raviger";
 import { useTranslation } from "react-i18next";
 
@@ -14,8 +13,6 @@ import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import apis from "../api";
-
-dayjs.extend(relativeTime);
 
 interface IConsentArtefactCardProps {
   artefact: ConsentArtefactModel;
