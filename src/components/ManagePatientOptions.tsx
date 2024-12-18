@@ -15,11 +15,10 @@ import { useConsultation } from "@/components/Facility/ConsultationDetails/Consu
 
 import useAuthUser from "@/hooks/useAuthUser";
 
-import { ManagePatientOptionsComponentType } from "@/pluginTypes";
-
 import { AbhaNumberModel, HealthFacilityModel } from "../types";
 import { FileInputIcon, LinkIcon, SquareUserIcon } from "lucide-react";
 import { triggerGoal } from "@/lib/plausible";
+import { ManagePatientOptionsComponentType } from "@/types/plugable-props";
 
 const ManagePatientOptions: ManagePatientOptionsComponentType = ({
   consultation,

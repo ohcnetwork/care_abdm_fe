@@ -1,12 +1,10 @@
 import * as Notification from "@/lib/notify";
 
-import { ExtendPatientRegisterFormComponentType } from "@/pluginTypes";
 import LinkAbhaNumber from "./LinkAbhaNumber";
 import { AbhaNumberModel } from "../types";
 import { FormContextValue } from "@/components/Form/FormContext";
 import { useCallback, useEffect, useState } from "react";
 import TextFormField from "@/components/Form/FormFields/TextFormField";
-import { PatientForm } from "@/components/Patient/PatientRegister";
 import {
   Tooltip,
   TooltipContent,
@@ -16,11 +14,15 @@ import {
 import { Button } from "@/components/ui/button";
 import { useTranslation } from "react-i18next";
 import { usePubSub } from "@/Utils/pubsubContext";
-import { PatientModel } from "@/components/Patient/models";
 import { SquareUserIcon } from "lucide-react";
 import { parsePhoneNumber } from "@/lib/utils";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import apis from "@/api";
+import {
+  ExtendPatientRegisterFormComponentType,
+  PatientForm,
+} from "@/types/plugable-props";
+import { PatientModel } from "@/types/external";
 
 const ExtendPatientRegisterForm: ExtendPatientRegisterFormComponentType = ({
   facilityId,
@@ -35,7 +37,7 @@ const ExtendPatientRegisterForm: ExtendPatientRegisterFormComponentType = ({
 
   const { data } = useQuery({
     queryKey: ["abhaNumber", patientId],
-    queryFn: () => apis.abhaNumber.get(patientId),
+    queryFn: () => apis.abhaNumber.get(patientId!),
     enabled: !!patientId,
   });
 
@@ -65,6 +67,13 @@ const ExtendPatientRegisterForm: ExtendPatientRegisterFormComponentType = ({
   const linkAbhaNumberAndPatient = useCallback(
     async (message: unknown) => {
       const patient = message as PatientModel;
+
+      if (!patient.id) {
+        Notification.Error({
+          msg: t("patient_id_required_to_link_abha_number"),
+        });
+        return;
+      }
 
       if (state.form.abha_number) {
         linkAbhaNumberAndPatientMutation.mutate({

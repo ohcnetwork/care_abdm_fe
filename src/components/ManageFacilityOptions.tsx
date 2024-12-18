@@ -3,8 +3,8 @@ import { useTranslation } from "react-i18next";
 
 import { DropdownItem } from "@/components/Common/Menu";
 
-import { ManageFacilityOptionsComponentType } from "@/pluginTypes";
 import { FileInputIcon } from "lucide-react";
+import { ManageFacilityOptionsComponentType } from "@/types/plugable-props";
 
 const ManageFacilityOptions: ManageFacilityOptionsComponentType = ({
   facility,

@@ -1,5 +1,4 @@
-import { PatientModel } from "@/components/Patient/models";
-import { UserBaseModel } from "@/components/Users/models";
+import { PatientModel, UserBareMinimum } from "./external";
 
 export type AbhaNumberModel = {
   id: number;
@@ -127,7 +126,7 @@ export type ConsentArtefactModel = {
 } & ConsentModel;
 
 export type ConsentRequestModel = {
-  requester: UserBaseModel;
+  requester: UserBareMinimum;
   patient_abha_object: AbhaNumberModel;
   consent_artefacts: ConsentArtefactModel[];
 } & ConsentModel;

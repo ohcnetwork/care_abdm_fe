@@ -1,6 +1,6 @@
 import { lazy } from "react";
 import routes from "./routes";
-import { PluginManifest } from "@/pluginTypes";
+import { PluginManifest } from "./types/plugable-props";
 
 const manifest: PluginManifest = {
   plugin: "care_abdm",

@@ -1,6 +1,5 @@
 import * as Notification from "@/lib/notify";
 import { useQueryParams } from "raviger";
-import { ExtendPatientInfoCardComponentType } from "@/pluginTypes";
 import { useTranslation } from "react-i18next";
 import { useConsultation } from "@/components/Facility/ConsultationDetails/ConsultationContext";
 import { AbhaNumberModel } from "../types";
@@ -9,6 +8,7 @@ import ABHAProfileModal from "./ABHAProfileModal";
 import FetchRecordsModal from "./FetchRecordsModal";
 import { useMutation } from "@tanstack/react-query";
 import apis from "../api";
+import { ExtendPatientInfoCardComponentType } from "@/types/plugable-props";
 
 const ExtendPatientInfoCard: ExtendPatientInfoCardComponentType = ({
   patient,

@@ -1,4 +1,4 @@
-import { ExtendFacilityConfigureComponentType } from "@/pluginTypes";
+import { ExtendFacilityConfigureComponentType } from "@/types/plugable-props";
 import { ConfigureHealthFacility } from "./ConfigureHealthFacility";
 
 const ExtendFacilityConfigure: ExtendFacilityConfigureComponentType = ({
