@@ -1,19 +1,18 @@
-import dayjs from "dayjs";
+import dayjs from "@/lib/dayjs";
 import { Link } from "raviger";
 import { useTranslation } from "react-i18next";
 
-import CareIcon from "@/CAREUI/icons/CareIcon";
+import { RefreshCcwIcon } from "lucide-react";
 
-import ButtonV2 from "@/components/Common/ButtonV2";
-import Loading from "@/components/Common/Loading";
+import Loading from "@/components/ui/loading";
 
-import * as Notification from "@/Utils/Notifications";
-import request from "@/Utils/request/request";
-import useQuery from "@/Utils/request/useQuery";
-import { classNames, formatName } from "@/Utils/utils";
+import * as Notification from "@/lib/notify";
 
-import routes from "../api";
 import { ConsentArtefactModel, ConsentRequestModel } from "../types";
+import { cn } from "@/lib/utils";
+import { Button } from "@/components/ui/button";
+import { useMutation, useQuery } from "@tanstack/react-query";
+import apis from "../api";
 
 interface IConsentArtefactCardProps {
   artefact: ConsentArtefactModel;
@@ -72,6 +71,18 @@ interface IConsentRequestCardProps {
 function ConsentRequestCard({ consent }: IConsentRequestCardProps) {
   const { t } = useTranslation();
 
+  const checkStatusMutation = useMutation({
+    mutationFn: apis.consent.checkStatus,
+    onSuccess: (data) => {
+      Notification.Success({
+        msg: data?.detail ?? t("checking_consent_status"),
+      });
+      Notification.Warn({
+        msg: t("async_operation_warning"),
+      });
+    },
+  });
+
   return (
     <div className="overflow-hidden bg-white shadow sm:rounded-lg">
       <div className="flex flex-col items-center justify-between gap-4 px-4 py-5 sm:flex-row sm:gap-0 sm:px-6">
@@ -80,7 +91,9 @@ function ConsentRequestCard({ consent }: IConsentRequestCardProps) {
             {t(`consent__purpose__${consent.purpose}`)}
           </h5>
           <h6 className="mt-1 leading-6 text-secondary-700">
-            {formatName(consent.requester)}
+            {[consent.requester.first_name, consent.requester.last_name]
+              .filter(Boolean)
+              .join(" ")}
           </h6>
         </div>
         <div className="flex flex-col items-center">
@@ -93,28 +106,13 @@ function ConsentRequestCard({ consent }: IConsentRequestCardProps) {
           </p>
         </div>
         <div className="flex flex-col items-center">
-          <ButtonV2
-            onClick={async () => {
-              const { res, data } = await request(routes.consent.checkStatus, {
-                body: {
-                  consent_request: consent.id,
-                },
-              });
-
-              if (res?.status === 202) {
-                Notification.Success({
-                  msg: data?.detail ?? t("checking_consent_status"),
-                });
-                Notification.Warn({
-                  msg: t("async_operation_warning"),
-                });
-              }
-            }}
-            ghost
+          <Button
+            onClick={() => checkStatusMutation.mutate(consent.id)}
+            variant="ghost"
             className="max-w-2xl text-sm text-secondary-700 hover:text-secondary-900"
           >
-            <CareIcon icon="l-refresh" /> {t("check_status")}
-          </ButtonV2>
+            <RefreshCcwIcon /> {t("check_status")}
+          </Button>
           <p className="mt-1 max-w-2xl text-sm text-secondary-500">
             {t("created_on")} {dayjs(consent.created_date).fromNow()}
           </p>
@@ -143,11 +141,11 @@ function ConsentRequestCard({ consent }: IConsentRequestCardProps) {
           return (
             <div
               key={hiType}
-              className={classNames(
+              className={cn(
                 "flex items-center justify-center rounded-full px-4 py-1.5 text-xs font-medium text-white",
                 consent.consent_artefacts?.length
                   ? "bg-secondary-400"
-                  : "bg-secondary-600",
+                  : "bg-secondary-600"
               )}
             >
               {t(`consent__hi_type__${hiType}`)}
@@ -166,14 +164,17 @@ interface IProps {
 export default function ABDMRecordsTab({ patientId }: IProps) {
   const { t } = useTranslation();
 
-  const { data, loading } = useQuery(routes.consent.list, {
-    query: {
-      patient: patientId,
-      ordering: "-created_date",
-    },
+  const { data, isLoading } = useQuery({
+    queryKey: ["consents", patientId],
+    queryFn: () =>
+      apis.consent.list({
+        patient: patientId,
+        ordering: "-created_date",
+      }),
+    enabled: !!patientId,
   });
 
-  if (loading) {
+  if (isLoading) {
     <Loading />;
   }
 

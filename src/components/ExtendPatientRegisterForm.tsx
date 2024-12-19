@@ -1,13 +1,10 @@
-import * as Notification from "@/Utils/Notifications";
+import * as Notification from "@/lib/notify";
 
-import { ExtendPatientRegisterFormComponentType } from "@/pluginTypes";
 import LinkAbhaNumber from "./LinkAbhaNumber";
 import { AbhaNumberModel } from "../types";
 import { FormContextValue } from "@/components/Form/FormContext";
-import { parsePhoneNumber } from "@/Utils/utils";
 import { useCallback, useEffect, useState } from "react";
 import TextFormField from "@/components/Form/FormFields/TextFormField";
-import { PatientForm } from "@/components/Patient/PatientRegister";
 import {
   Tooltip,
   TooltipContent,
@@ -15,13 +12,17 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { Button } from "@/components/ui/button";
-import CareIcon from "@/CAREUI/icons/CareIcon";
-import routes from "../api";
-import useQuery from "@/Utils/request/useQuery";
 import { useTranslation } from "react-i18next";
 import { usePubSub } from "@/Utils/pubsubContext";
-import request from "@/Utils/request/request";
-import { PatientModel } from "@/components/Patient/models";
+import { SquareUserIcon } from "lucide-react";
+import { parsePhoneNumber } from "@/lib/utils";
+import { useMutation, useQuery } from "@tanstack/react-query";
+import apis from "@/api";
+import {
+  ExtendPatientRegisterFormComponentType,
+  PatientForm,
+} from "@/types/plugable-props";
+import { PatientModel } from "@/types/external";
 
 const ExtendPatientRegisterForm: ExtendPatientRegisterFormComponentType = ({
   facilityId,
@@ -34,21 +35,32 @@ const ExtendPatientRegisterForm: ExtendPatientRegisterFormComponentType = ({
   const [showLinkAbhaNumberModal, setShowLinkAbhaNumberModal] = useState(false);
   const { setSubscribers } = usePubSub();
 
-  useQuery(routes.abhaNumber.get, {
-    pathParams: { abhaNumberId: patientId ?? "" },
-    silent: true,
-    onResponse(res) {
-      if (res.data) {
-        dispatch({
-          type: "set_form",
-          form: {
-            ...state.form,
-            abha_number: res.data.external_id,
-            health_id_number: res.data.abha_number,
-            health_id: res.data.health_id,
-          },
-        });
-      }
+  const { data } = useQuery({
+    queryKey: ["abhaNumber", patientId],
+    queryFn: () => apis.abhaNumber.get(patientId!),
+    enabled: !!patientId,
+  });
+
+  useEffect(() => {
+    if (data) {
+      dispatch({
+        type: "set_form",
+        form: {
+          ...state.form,
+          abha_number: data.external_id,
+          health_id_number: data.abha_number,
+          health_id: data.health_id,
+        },
+      });
+    }
+  }, [data]);
+
+  const linkAbhaNumberAndPatientMutation = useMutation({
+    mutationFn: apis.healthId.linkAbhaNumberAndPatient,
+    onSuccess: () => {
+      Notification.Success({
+        msg: t("abha_number_linked_successfully"),
+      });
     },
   });
 
@@ -56,25 +68,21 @@ const ExtendPatientRegisterForm: ExtendPatientRegisterFormComponentType = ({
     async (message: unknown) => {
       const patient = message as PatientModel;
 
-      if (state.form.abha_number) {
-        const { res, data } = await request(
-          routes.healthId.linkAbhaNumberAndPatient,
-          {
-            body: {
-              patient: patient.id,
-              abha_number: state.form.abha_number,
-            },
-          },
-        );
+      if (!patient.id) {
+        Notification.Error({
+          msg: t("patient_id_required_to_link_abha_number"),
+        });
+        return;
+      }
 
-        if (res?.status === 200 && data) {
-          Notification.Success({
-            msg: t("abha_number_linked_successfully"),
-          });
-        }
+      if (state.form.abha_number) {
+        linkAbhaNumberAndPatientMutation.mutate({
+          patient: patient.id,
+          abha_number: state.form.abha_number,
+        });
       }
     },
-    [state.form.abha_number, t],
+    [state.form.abha_number, t]
   );
 
   useEffect(() => {
@@ -85,7 +93,7 @@ const ExtendPatientRegisterForm: ExtendPatientRegisterFormComponentType = ({
     // manually setting the subscribers (old instance of linkAbhaNumberAndPatient is replaced with new instance) as subscribe and unsubscribe cannot be used here because this component is not rendered while PatientForm is in loading state
     setSubscribers((prev) => {
       const handlers = Array.from(prev[topic] ?? []).filter(
-        (handler) => handler.toString() !== linkAbhaNumberAndPatient.toString(),
+        (handler) => handler.toString() !== linkAbhaNumberAndPatient.toString()
       );
 
       handlers.push(linkAbhaNumberAndPatient);
@@ -93,14 +101,15 @@ const ExtendPatientRegisterForm: ExtendPatientRegisterFormComponentType = ({
     });
   }, [linkAbhaNumberAndPatient, state.form.abha_number]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  const { data: healthFacility } = useQuery(routes.healthFacility.get, {
-    pathParams: { facility_id: facilityId },
-    silent: true,
+  const { data: healthFacility } = useQuery({
+    queryKey: ["healthFacility", facilityId],
+    queryFn: () => apis.healthFacility.get(facilityId),
+    enabled: !!facilityId,
   });
 
   const populateAbhaValues = (
     abhaProfile: AbhaNumberModel,
-    field: FormContextValue<PatientForm>,
+    field: FormContextValue<PatientForm>
   ) => {
     const values = {
       abha_number: abhaProfile.external_id,
@@ -168,14 +177,14 @@ const ExtendPatientRegisterForm: ExtendPatientRegisterFormComponentType = ({
             <Tooltip>
               <TooltipTrigger>
                 <Button
-                  variant="outline_primary"
+                  variant="outline"
                   disabled={!healthFacility}
                   onClick={(e) => {
                     e.preventDefault();
                     setShowLinkAbhaNumberModal(true);
                   }}
                 >
-                  <CareIcon icon="l-user-square" className="mr-2" />
+                  <SquareUserIcon className="mr-2" />
                   <span>{t("generate_link_abha")}</span>
                 </Button>
               </TooltipTrigger>

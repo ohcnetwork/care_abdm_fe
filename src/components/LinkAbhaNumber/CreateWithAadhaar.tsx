@@ -1,20 +1,20 @@
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 
-import ButtonV2, { ButtonWithTimer } from "@/components/Common/ButtonV2";
+import { ButtonWithTimer, Button } from "@/components/ui/button";
 import CheckBoxFormField from "@/components/Form/FormFields/CheckBoxFormField";
 import OtpFormField from "@/components/Form/FormFields/OtpFormField";
 import PhoneNumberFormField from "@/components/Form/FormFields/PhoneNumberFormField";
 import TextFormField from "@/components/Form/FormFields/TextFormField";
-import { validateRule } from "@/components/Users/UserAdd";
 
-import * as Notify from "@/Utils/Notifications";
-import request from "@/Utils/request/request";
-import { classNames } from "@/Utils/utils";
+import * as Notify from "@/lib/notify";
 
-import routes from "../../api";
 import { AbhaNumberModel } from "../../types";
 import useMultiStepForm, { InjectedStepProps } from "./useMultiStepForm";
+import { cn } from "@/lib/utils";
+import { useMutation } from "@tanstack/react-query";
+import apis from "../../api";
+import { CircleCheckIcon, CircleIcon, CircleXIcon } from "lucide-react";
 
 const MAX_OTP_RESEND_ALLOWED = 2;
 
@@ -98,29 +98,29 @@ function EnterAadhaar({ memory, setMemory, next }: IEnterAadhaarProps) {
     return true;
   };
 
+  const sendAadhaarOtpMutation = useMutation({
+    mutationFn: apis.healthId.abhaCreateSendAadhaarOtp,
+    onSuccess: (data) => {
+      if (data) {
+        setMemory((prev) => ({ ...prev, transactionId: data.transaction_id }));
+        Notify.Success({
+          msg: data.detail ?? t("aadhaar_otp_send_success"),
+        });
+        next();
+      }
+
+      setMemory((prev) => ({ ...prev, isLoading: false }));
+    },
+  });
+
   const handleSubmit = async () => {
     if (!validateAadhaar()) return;
 
     setMemory((prev) => ({ ...prev, isLoading: true }));
 
-    const { res, data } = await request(
-      routes.healthId.abhaCreateSendAadhaarOtp,
-      {
-        body: {
-          aadhaar: memory!.aadhaarNumber,
-        },
-      }
-    );
-
-    if (res?.status === 200 && data) {
-      setMemory((prev) => ({ ...prev, transactionId: data.transaction_id }));
-      Notify.Success({
-        msg: data.detail ?? t("aadhaar_otp_send_success"),
-      });
-      next();
-    }
-
-    setMemory((prev) => ({ ...prev, isLoading: false }));
+    sendAadhaarOtpMutation.mutate({
+      aadhaar: memory!.aadhaarNumber,
+    });
   };
 
   return (
@@ -145,7 +145,7 @@ function EnterAadhaar({ memory, setMemory, next }: IEnterAadhaarProps) {
           error={memory?.validationError}
         />
         <span
-          className={classNames(
+          className={cn(
             "ml-2 text-sm font-medium text-gray-600",
             !memory?.validationError && "-mt-4"
           )}
@@ -174,7 +174,7 @@ function EnterAadhaar({ memory, setMemory, next }: IEnterAadhaarProps) {
       </div>
 
       <div className="mt-4 flex items-center">
-        <ButtonV2
+        <Button
           className="w-full"
           loading={memory?.isLoading}
           disabled={
@@ -184,7 +184,7 @@ function EnterAadhaar({ memory, setMemory, next }: IEnterAadhaarProps) {
           onClick={handleSubmit}
         >
           {t("send_otp")}
-        </ButtonV2>
+        </Button>
       </div>
     </div>
   );
@@ -209,62 +209,43 @@ function VerifyAadhaar({ memory, setMemory, next }: IVerifyAadhaarProps) {
     return true;
   };
 
-  const handleSubmit = async () => {
-    if (!validateMobileNumber()) return;
-
-    setMemory((prev) => ({ ...prev, isLoading: true }));
-
-    const { res, data } = await request(
-      routes.healthId.abhaCreateVerifyAadhaarOtp,
-      {
-        body: {
-          otp: otp,
-          transaction_id: memory?.transactionId,
-          mobile: memory?.mobileNumber.replace("+91", "").replace(/ /g, ""),
-        },
+  const verifyAadhaarOtpMutation = useMutation({
+    mutationFn: apis.healthId.abhaCreateVerifyAadhaarOtp,
+    onSuccess: (data) => {
+      if (data) {
+        setMemory((prev) => ({
+          ...prev,
+          transactionId: data.transaction_id,
+          abhaNumber: data.abha_number,
+          resendOtpCount: 0,
+        }));
+        Notify.Success({
+          msg: data.detail ?? t("otp_verification_success"),
+        });
+        next();
       }
-    );
 
-    if (res?.status === 200 && data) {
-      setMemory((prev) => ({
-        ...prev,
-        transactionId: data.transaction_id,
-        abhaNumber: data.abha_number,
-        resendOtpCount: 0,
-      }));
-      Notify.Success({
-        msg: data.detail ?? t("otp_verification_success"),
-      });
-      next();
-    }
+      setMemory((prev) => ({ ...prev, isLoading: false }));
+    },
+  });
 
-    setMemory((prev) => ({ ...prev, isLoading: false }));
-  };
-
-  const handleResendOtp = async () => {
-    setMemory((prev) => ({ ...prev, isLoading: true }));
-
-    const { res, data } = await request(
-      routes.healthId.abhaCreateSendAadhaarOtp,
-      {
-        body: {
-          aadhaar: memory!.aadhaarNumber,
-          // transaction_id: memory?.transactionId,
-        },
-        silent: true,
+  const resendAadhaarOtpMutation = useMutation({
+    mutationFn: apis.healthId.abhaCreateSendAadhaarOtp,
+    onSuccess: (data) => {
+      if (data) {
+        setMemory((prev) => ({
+          ...prev,
+          transactionId: data.transaction_id,
+          resendOtpCount: prev.resendOtpCount + 1,
+        }));
+        Notify.Success({
+          msg: data.detail ?? t("aadhaar_otp_send_success"),
+        });
       }
-    );
 
-    if (res?.status === 200 && data) {
-      setMemory((prev) => ({
-        ...prev,
-        transactionId: data.transaction_id,
-        resendOtpCount: prev.resendOtpCount + 1,
-      }));
-      Notify.Success({
-        msg: data.detail ?? t("aadhaar_otp_send_success"),
-      });
-    } else {
+      setMemory((prev) => ({ ...prev, isLoading: false }));
+    },
+    onError: () => {
       setMemory((prev) => ({
         ...prev,
         resendOtpCount: Infinity,
@@ -272,9 +253,38 @@ function VerifyAadhaar({ memory, setMemory, next }: IVerifyAadhaarProps) {
       Notify.Success({
         msg: t("aadhaar_otp_send_error"),
       });
+
+      setMemory((prev) => ({ ...prev, isLoading: false }));
+    },
+  });
+
+  const handleSubmit = async () => {
+    if (!validateMobileNumber()) return;
+
+    if (!memory?.transactionId || !memory?.mobileNumber) {
+      return;
     }
 
-    setMemory((prev) => ({ ...prev, isLoading: false }));
+    setMemory((prev) => ({ ...prev, isLoading: true }));
+
+    verifyAadhaarOtpMutation.mutate({
+      otp: otp,
+      transaction_id: memory.transactionId,
+      mobile: memory.mobileNumber.replace("+91", "").replace(/ /g, ""),
+    });
+  };
+
+  const handleResendOtp = async () => {
+    if (!memory?.aadhaarNumber) {
+      return;
+    }
+
+    setMemory((prev) => ({ ...prev, isLoading: true }));
+
+    resendAadhaarOtpMutation.mutate({
+      aadhaar: memory.aadhaarNumber,
+      // transaction_id: memory?.transactionId,
+    });
   };
 
   return (
@@ -293,7 +303,7 @@ function VerifyAadhaar({ memory, setMemory, next }: IVerifyAadhaarProps) {
           onChange={() => null}
         />
         <span
-          className={classNames(
+          className={cn(
             "ml-2 text-sm font-medium text-gray-600",
             !memory?.validationError && "-mt-4"
           )}
@@ -336,20 +346,20 @@ function VerifyAadhaar({ memory, setMemory, next }: IVerifyAadhaarProps) {
       </div>
 
       <div className="mt-4 flex flex-col items-center gap-2">
-        <ButtonV2
+        <Button
           className="w-full"
           loading={memory?.isLoading}
           disabled={otp.length > 6 || memory?.mobileNumber.length === 0}
           onClick={handleSubmit}
         >
           {t("verify_otp")}
-        </ButtonV2>
+        </Button>
 
         {(memory?.resendOtpCount ?? 0) < MAX_OTP_RESEND_ALLOWED && (
           <ButtonWithTimer
-            ghost
+            variant="ghost"
             className="w-full"
-            initialInverval={60}
+            initialInterval={60}
             onClick={handleResendOtp}
           >
             {t("resend_otp")}
@@ -387,16 +397,16 @@ function HandleExistingAbhaNumber({
         {t("abha_number_exists_description")}
       </p>
       <div className="mt-4 flex flex-col items-center justify-center gap-2">
-        <ButtonV2 className="w-full" onClick={next}>
+        <Button className="w-full" onClick={next}>
           {t("create_new_abha_address")}
-        </ButtonV2>
-        <ButtonV2
+        </Button>
+        <Button
           variant="secondary"
           className="w-full"
           onClick={() => onSuccess(memory?.abhaNumber as AbhaNumberModel)}
         >
           {t("use_existing_abha_address")}
-        </ButtonV2>
+        </Button>
         <p className="text-xs text-secondary-800">
           {memory?.abhaNumber?.health_id}
         </p>
@@ -424,31 +434,35 @@ function LinkMobileNumber({
     }
   }, [memory?.abhaNumber, memory?.mobileNumber]); // eslint-disable-line
 
-  const handleSubmit = async () => {
-    setMemory((prev) => ({ ...prev, isLoading: true }));
-
-    const { res, data } = await request(
-      routes.healthId.abhaCreateLinkMobileNumber,
-      {
-        body: {
-          mobile: memory?.mobileNumber.replace("+91", "").replace(/ /g, ""),
-          transaction_id: memory?.transactionId,
-        },
+  const linkMobileNumberMutation = useMutation({
+    mutationFn: apis.healthId.abhaCreateLinkMobileNumber,
+    onSuccess: (data) => {
+      if (data) {
+        setMemory((prev) => ({
+          ...prev,
+          transactionId: data.transaction_id,
+        }));
+        Notify.Success({
+          msg: data.detail ?? t("mobile_otp_send_success"),
+        });
+        next();
       }
-    );
 
-    if (res?.status === 200 && data) {
-      setMemory((prev) => ({
-        ...prev,
-        transactionId: data.transaction_id,
-      }));
-      Notify.Success({
-        msg: data.detail ?? t("mobile_otp_send_success"),
-      });
-      next();
+      setMemory((prev) => ({ ...prev, isLoading: false }));
+    },
+  });
+
+  const handleSubmit = async () => {
+    if (!memory?.mobileNumber || !memory?.transactionId) {
+      return;
     }
 
-    setMemory((prev) => ({ ...prev, isLoading: false }));
+    setMemory((prev) => ({ ...prev, isLoading: true }));
+
+    linkMobileNumberMutation.mutate({
+      mobile: memory.mobileNumber.replace("+91", "").replace(/ /g, ""),
+      transaction_id: memory.transactionId,
+    });
   };
 
   return (
@@ -470,13 +484,13 @@ function LinkMobileNumber({
       </p>
 
       <div className="mt-4 flex items-center">
-        <ButtonV2
+        <Button
           className="w-full"
           loading={memory?.isLoading}
           onClick={handleSubmit}
         >
           {t("send_otp")}
-        </ButtonV2>
+        </Button>
       </div>
     </div>
   );
@@ -492,57 +506,42 @@ function VerifyMobileNumber({
   const { t } = useTranslation();
   const [otp, setOtp] = useState("");
 
-  const handleSubmit = async () => {
-    setMemory((prev) => ({ ...prev, isLoading: true }));
-
-    const { res, data } = await request(
-      routes.healthId.abhaCreateVerifyMobileNumber,
-      {
-        body: {
-          transaction_id: memory?.transactionId,
-          otp: otp,
-        },
+  const verifyMobileNumberMutation = useMutation({
+    mutationFn: apis.healthId.abhaCreateVerifyMobileNumber,
+    onSuccess: (data) => {
+      if (data) {
+        setMemory((prev) => ({
+          ...prev,
+          transactionId: data.transaction_id,
+          resendOtpCount: 0,
+        }));
+        Notify.Success({
+          msg: data.detail ?? t("mobile_otp_verify_success"),
+        });
+        next();
       }
-    );
 
-    if (res?.status === 200 && data) {
-      setMemory((prev) => ({
-        ...prev,
-        transactionId: data.transaction_id,
-        resendOtpCount: 0,
-      }));
-      Notify.Success({
-        msg: data.detail ?? t("mobile_otp_verify_success"),
-      });
-      next();
-    }
+      setMemory((prev) => ({ ...prev, isLoading: false }));
+    },
+  });
 
-    setMemory((prev) => ({ ...prev, isLoading: false }));
-  };
-
-  const handleResendOtp = async () => {
-    setMemory((prev) => ({ ...prev, isLoading: true }));
-
-    const { res, data } = await request(
-      routes.healthId.abhaCreateLinkMobileNumber,
-      {
-        body: {
-          mobile: memory?.mobileNumber.replace("+91", "").replace(/ /g, ""),
-          transaction_id: memory?.transactionId,
-        },
+  const resendMobileOtpMutation = useMutation({
+    mutationFn: apis.healthId.abhaCreateLinkMobileNumber,
+    onSuccess: (data) => {
+      if (data) {
+        setMemory((prev) => ({
+          ...prev,
+          transactionId: data.transaction_id,
+          resendOtpCount: prev.resendOtpCount + 1,
+        }));
+        Notify.Success({
+          msg: data.detail ?? t("mobile_otp_send_success"),
+        });
       }
-    );
 
-    if (res?.status === 200 && data) {
-      setMemory((prev) => ({
-        ...prev,
-        transactionId: data.transaction_id,
-        resendOtpCount: prev.resendOtpCount + 1,
-      }));
-      Notify.Success({
-        msg: data.detail ?? t("mobile_otp_send_success"),
-      });
-    } else {
+      setMemory((prev) => ({ ...prev, isLoading: false }));
+    },
+    onError: () => {
       setMemory((prev) => ({
         ...prev,
         resendOtpCount: Infinity,
@@ -550,9 +549,35 @@ function VerifyMobileNumber({
       Notify.Success({
         msg: t("mobile_otp_send_error"),
       });
+
+      setMemory((prev) => ({ ...prev, isLoading: false }));
+    },
+  });
+
+  const handleSubmit = async () => {
+    if (!memory?.transactionId) {
+      return;
     }
 
-    setMemory((prev) => ({ ...prev, isLoading: false }));
+    setMemory((prev) => ({ ...prev, isLoading: true }));
+
+    verifyMobileNumberMutation.mutate({
+      transaction_id: memory?.transactionId,
+      otp: otp,
+    });
+  };
+
+  const handleResendOtp = async () => {
+    if (!memory?.mobileNumber || !memory?.transactionId) {
+      return;
+    }
+
+    setMemory((prev) => ({ ...prev, isLoading: true }));
+
+    resendMobileOtpMutation.mutate({
+      mobile: memory.mobileNumber.replace("+91", "").replace(/ /g, ""),
+      transaction_id: memory.transactionId,
+    });
   };
 
   return (
@@ -580,19 +605,19 @@ function VerifyMobileNumber({
       </div>
 
       <div className="mt-4 flex flex-col items-center gap-2">
-        <ButtonV2
+        <Button
           className="w-full"
           loading={memory?.isLoading}
           onClick={handleSubmit}
         >
           {t("verify_otp")}
-        </ButtonV2>
+        </Button>
 
         {(memory?.resendOtpCount ?? 0) < MAX_OTP_RESEND_ALLOWED && (
           <ButtonWithTimer
-            ghost
+            variant="ghost"
             className="w-full"
-            initialInverval={60}
+            initialInterval={60}
             onClick={handleResendOtp}
           >
             {t("resend_otp")}
@@ -616,52 +641,56 @@ function ChooseAbhaAddress({
   const [healthId, setHealthId] = useState("");
   const [suggestions, setSuggestions] = useState<string[]>([]);
 
-  useEffect(() => {
-    const fetchSuggestions = async () => {
-      const { res, data } = await request(
-        routes.healthId.abhaCreateAbhaAddressSuggestion,
-        {
-          body: {
-            transaction_id: memory?.transactionId,
-          },
-        }
-      );
-
-      if (res?.status === 200 && data) {
+  const fetchSuggestionsMutation = useMutation({
+    mutationFn: apis.healthId.abhaCreateAbhaAddressSuggestion,
+    onSuccess: (data) => {
+      if (data) {
         setMemory((prev) => ({ ...prev, transactionId: data.transaction_id }));
         setSuggestions(data.abha_addresses);
       }
-    };
+    },
+  });
 
-    fetchSuggestions();
-  }, [healthId, memory?.transactionId, setMemory]);
-
-  const handleSubmit = async () => {
-    setMemory((prev) => ({ ...prev, isLoading: true }));
-
-    const { res, data } = await request(
-      routes.healthId.abhaCreateEnrolAbhaAddress,
-      {
-        body: {
-          abha_address: healthId,
-          transaction_id: memory?.transactionId,
-        },
-      }
-    );
-
-    if (res?.status === 200 && data) {
-      setMemory((prev) => ({
-        ...prev,
-        transactionId: data.transaction_id,
-        abhaNumber: data.abha_number,
-      }));
-      Notify.Success({
-        msg: data.detail ?? t("abha_address_created_success"),
-      });
-      onSuccess(data.abha_number);
+  useEffect(() => {
+    if (!memory?.transactionId) {
+      return;
     }
 
-    setMemory((prev) => ({ ...prev, isLoading: false }));
+    fetchSuggestionsMutation.mutate({
+      transaction_id: memory.transactionId,
+    });
+  }, [healthId, memory?.transactionId]);
+
+  const enrollAbhaAddressMutation = useMutation({
+    mutationFn: apis.healthId.abhaCreateEnrolAbhaAddress,
+    onSuccess: (data) => {
+      if (data) {
+        setMemory((prev) => ({
+          ...prev,
+          transactionId: data.transaction_id,
+          abhaNumber: data.abha_number,
+        }));
+        Notify.Success({
+          msg: data.detail ?? t("abha_address_created_success"),
+        });
+        onSuccess(data.abha_number);
+      }
+
+      setMemory((prev) => ({ ...prev, isLoading: false }));
+    },
+  });
+
+  const handleSubmit = async () => {
+    if (!memory?.transactionId) {
+      return;
+    }
+
+    setMemory((prev) => ({ ...prev, isLoading: true }));
+
+    enrollAbhaAddressMutation.mutate({
+      abha_address: healthId,
+      transaction_id: memory.transactionId,
+    });
   };
 
   return (
@@ -717,7 +746,7 @@ function ChooseAbhaAddress({
       )}
 
       <div className="mt-4 flex items-center justify-center gap-2">
-        <ButtonV2
+        <Button
           className="w-full"
           disabled={
             memory?.isLoading ||
@@ -726,8 +755,37 @@ function ChooseAbhaAddress({
           onClick={handleSubmit}
         >
           {t("create_abha_address")}
-        </ButtonV2>
+        </Button>
       </div>
     </div>
   );
 }
+
+export const validateRule = (
+  condition: boolean,
+  content: JSX.Element | string,
+  isInitialState: boolean = false
+) => {
+  return (
+    <div>
+      {isInitialState ? (
+        <CircleIcon className="text-xl text-gray-500" />
+      ) : condition ? (
+        <CircleCheckIcon className="text-xl text-green-500" />
+      ) : (
+        <CircleXIcon className="text-xl text-red-500" />
+      )}{" "}
+      <span
+        className={cn(
+          isInitialState
+            ? "text-black"
+            : condition
+            ? "text-primary-500"
+            : "text-red-500"
+        )}
+      >
+        {content}
+      </span>
+    </div>
+  );
+};

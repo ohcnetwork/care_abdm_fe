@@ -1,9 +1,9 @@
-import dayjs from "dayjs";
+import dayjs from "@/lib/dayjs";
 import { navigate } from "raviger";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 
-import ButtonV2 from "@/components/Common/ButtonV2";
+import { Button } from "@/components/ui/button";
 import DialogModal from "@/components/Common/Dialog";
 import DateFormField from "@/components/Form/FormFields/DateFormField";
 import DateRangeFormField from "@/components/Form/FormFields/DateRangeFormField";
@@ -15,12 +15,11 @@ import TextFormField from "@/components/Form/FormFields/TextFormField";
 
 import { useMessageListener } from "@/hooks/useMessageListener";
 
-import * as Notification from "@/Utils/Notifications";
-import request from "@/Utils/request/request";
-
-import routes from "../api";
+import * as Notification from "@/lib/notify";
 import { ABDM_CONSENT_PURPOSE, ABDM_HI_TYPE } from "../constants";
 import { AbhaNumberModel, ConsentHIType, ConsentPurpose } from "../types";
+import { useMutation } from "@tanstack/react-query";
+import apis from "../api";
 
 const getDate = (value: string | Date) =>
   (value && dayjs(value).isValid() && dayjs(value).toDate()) || undefined;
@@ -39,13 +38,12 @@ export default function FetchRecordsModal({ abha, show, onClose }: IProps) {
   >("verified");
   const [purpose, setPurpose] = useState<ConsentPurpose>("CAREMGT");
   const [fromDate, setFromDate] = useState<Date>(
-    dayjs().subtract(30, "day").toDate(),
+    dayjs().subtract(30, "day").toDate()
   );
   const [toDate, setToDate] = useState<Date>(dayjs().toDate());
-  const [isMakingConsentRequest, setIsMakingConsentRequest] = useState(false);
   const [hiTypes, setHiTypes] = useState<ConsentHIType[]>([]);
   const [expiryDate, setExpiryDate] = useState<Date>(
-    dayjs().add(30, "day").toDate(),
+    dayjs().add(30, "day").toDate()
   );
   const [errors, setErrors] = useState<Record<string, string>>({});
   // const notificationSubscriptionState = useNotificationSubscriptionState([
@@ -64,6 +62,22 @@ export default function FetchRecordsModal({ abha, show, onClose }: IProps) {
     }
   });
 
+  const createConsentMutation = useMutation({
+    mutationFn: apis.consent.create,
+    onSuccess: () => {
+      Notification.Success({
+        msg: t("consent_requested_successfully"),
+      });
+
+      navigate(
+        `/facility/${abha?.patient_object?.facility}/abdm`
+        // ?? `/facility/${abha?.patient_object?.facility}/patient/${abha?.patient_object?.id}/consultation/${abha?.patient_object?.last_consultation?.id}/abdm`,
+      );
+
+      onClose();
+    },
+  });
+
   return (
     <DialogModal
       className="max-w-xl"
@@ -76,7 +90,7 @@ export default function FetchRecordsModal({ abha, show, onClose }: IProps) {
         notificationSubscriptionState,
       ) && (
         <p className="my-4 text-sm text-warning-600">
-          <CareIcon icon="l-exclamation-triangle" className="h-4 w-4" />{" "}
+          <TriangleAlertIcon className="h-4 w-4" />{" "}
           Notifications needs to be enabled on this device to verify the
           patient.
         </p>
@@ -92,47 +106,6 @@ export default function FetchRecordsModal({ abha, show, onClose }: IProps) {
           error={errors.health_id}
           className="flex-1"
         />
-
-        {/* <ButtonV2
-          onClick={async () => {
-            const { res } = await request(routes.abha.findPatient, {
-              body: {
-                id: abha?.health_id,
-              },
-              reattempts: 0,
-            });
-
-            if (res?.status) {
-              setIdVerificationStatus("in-progress");
-            }
-          }}
-          loading={idVerificationStatus === "in-progress"}
-          ghost={idVerificationStatus === "verified"}
-          disabled={
-            idVerificationStatus === "verified" ||
-            ["unsubscribed", "subscribed_on_other_device"].includes(
-              notificationSubscriptionState,
-            )
-          }
-          className={classNames(
-            "mt-1.5 !py-3",
-            idVerificationStatus === "verified" &&
-              "disabled:cursor-auto disabled:bg-transparent disabled:text-primary-600",
-          )}
-        >
-          {idVerificationStatus === "in-progress" && (
-            <CircularProgress className="!h-5 !w-5 !text-secondary-500" />
-          )}
-          {idVerificationStatus === "verified" && <CareIcon icon="l-check" />}
-          {
-            {
-              pending: "Verify Patient",
-              "in-progress": "Verifying",
-              verified: "Verified",
-              failed: "Retry",
-            }[idVerificationStatus]
-          }
-        </ButtonV2> */}
       </div>
       <SelectFormField
         label={t("consent_request__purpose")}
@@ -170,14 +143,14 @@ export default function FetchRecordsModal({ abha, show, onClose }: IProps) {
         placeholder={t("consent_request__hi_types_placeholder")}
         labelSuffix={
           hiTypes.length !== ABDM_HI_TYPE.length && (
-            <ButtonV2
-              ghost
+            <Button
+              variant="ghost"
               onClick={() => {
                 setHiTypes(ABDM_HI_TYPE);
               }}
             >
               {t("select_all")}
-            </ButtonV2>
+            </Button>
           )
         }
         value={hiTypes}
@@ -198,7 +171,7 @@ export default function FetchRecordsModal({ abha, show, onClose }: IProps) {
       />
 
       <div className="mt-6 flex items-center justify-end">
-        <ButtonV2
+        <Button
           onClick={async () => {
             if (idVerificationStatus !== "verified") {
               setErrors({
@@ -209,36 +182,20 @@ export default function FetchRecordsModal({ abha, show, onClose }: IProps) {
               return;
             }
 
-            setIsMakingConsentRequest(true);
-            const { res } = await request(routes.consent.create, {
-              body: {
-                patient_abha: abha?.health_id as string,
-                hi_types: hiTypes,
-                purpose,
-                from_time: fromDate,
-                to_time: toDate,
-                expiry: expiryDate,
-              },
+            createConsentMutation.mutate({
+              patient_abha: abha?.health_id as string,
+              hi_types: hiTypes,
+              purpose,
+              from_time: fromDate,
+              to_time: toDate,
+              expiry: expiryDate,
             });
-
-            if (res?.status === 201) {
-              Notification.Success({
-                msg: t("consent_requested_successfully"),
-              });
-
-              navigate(
-                `/facility/${abha?.patient_object?.facility}/abdm`,
-                // ?? `/facility/${abha?.patient_object?.facility}/patient/${abha?.patient_object?.id}/consultation/${abha?.patient_object?.last_consultation?.id}/abdm`,
-              );
-            }
-            setIsMakingConsentRequest(false);
-            onClose();
           }}
           disabled={idVerificationStatus !== "verified"}
-          loading={isMakingConsentRequest}
+          loading={createConsentMutation.isPending}
         >
           {t("request_consent")}
-        </ButtonV2>
+        </Button>
       </div>
     </DialogModal>
   );

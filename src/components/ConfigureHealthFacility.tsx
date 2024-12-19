@@ -1,19 +1,21 @@
 import { navigate } from "raviger";
-import { useReducer, useState } from "react";
+import { useEffect, useReducer, useState } from "react";
 import { useTranslation } from "react-i18next";
 
-import { Submit } from "@/components/Common/ButtonV2";
-import Loading from "@/components/Common/Loading";
+import Loading from "@/components/ui/loading";
 import TextFormField from "@/components/Form/FormFields/TextFormField";
 import { FieldChangeEvent } from "@/components/Form/FormFields/Utils";
 
-import * as Notification from "@/Utils/Notifications";
-import request from "@/Utils/request/request";
-import useQuery from "@/Utils/request/useQuery";
-import { classNames } from "@/Utils/utils";
+import * as Notification from "@/lib/notify";
 
-import routes from "../api";
-import { HealthFacilityModel } from "../types";
+import {
+  HealthFacilityModel,
+  IpartialUpdateHealthFacilityTBody,
+} from "../types";
+import { cn } from "@/lib/utils";
+import { Button } from "@/components/ui/button";
+import { useMutation, useQuery } from "@tanstack/react-query";
+import apis from "../api";
 
 const initForm = {
   health_facility: null as HealthFacilityModel | null,
@@ -35,7 +37,7 @@ const FormReducer = (
     | {
         type: "set_error";
         errors: typeof initialState.errors;
-      },
+      }
 ) => {
   switch (action.type) {
     case "set_form": {
@@ -60,7 +62,7 @@ export interface IConfigureHealthFacilityProps {
 }
 
 export const ConfigureHealthFacility = (
-  props: IConfigureHealthFacilityProps,
+  props: IConfigureHealthFacilityProps
 ) => {
   const { t } = useTranslation();
 
@@ -68,21 +70,60 @@ export const ConfigureHealthFacility = (
   const { facilityId } = props;
   const [isLoading, setIsLoading] = useState(false);
 
-  const { loading } = useQuery(routes.healthFacility.get, {
-    pathParams: { facility_id: facilityId },
-    silent: true,
-    onResponse(res) {
-      if (res.data) {
-        dispatch({
-          type: "set_form",
-          form: {
-            ...state.form,
-            health_facility: res.data,
-            hf_id: res.data.hf_id,
-          },
+  const { isLoading: loading, data } = useQuery({
+    queryKey: ["healthFacility", facilityId],
+    queryFn: () => apis.healthFacility.get(facilityId),
+    enabled: !!facilityId,
+  });
+
+  useEffect(() => {
+    if (data) {
+      dispatch({
+        type: "set_form",
+        form: {
+          ...state.form,
+          health_facility: data,
+          hf_id: data.hf_id,
+        },
+      });
+    }
+  }, [data]);
+
+  const handleUpdate = (data: HealthFacilityModel) => {
+    if (data?.registered) {
+      Notification.Success({
+        msg: t("health_facility__config_update_success"),
+      });
+      navigate(`/facility/${facilityId}`);
+    } else {
+      if (data?.registered === false) {
+        Notification.Warn({
+          msg: data?.detail || t("health_facility__config_registration_error"),
+        });
+        navigate(`/facility/${facilityId}`);
+      } else {
+        Notification.Error({
+          msg: data?.detail || t("health_facility__config_update_error"),
         });
       }
-    },
+    }
+    setIsLoading(false);
+  };
+
+  const registerHealthFacilityAsServiceMutation = useMutation({
+    mutationFn: () => apis.healthFacility.registerAsService(facilityId),
+    onSuccess: handleUpdate,
+  });
+
+  const updateHealthFacilityMutation = useMutation({
+    mutationFn: (body: IpartialUpdateHealthFacilityTBody) =>
+      apis.healthFacility.partialUpdate(facilityId, body),
+    onSuccess: handleUpdate,
+  });
+
+  const createHealthFacilityMutation = useMutation({
+    mutationFn: apis.healthFacility.create,
+    onSuccess: handleUpdate,
   });
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -98,63 +139,18 @@ export const ConfigureHealthFacility = (
       return;
     }
 
-    let response = null;
-    let responseData = null;
     if (state.form.hf_id === state.form.health_facility?.hf_id) {
-      const { res, data } = await request(
-        routes.healthFacility.registerAsService,
-        {
-          pathParams: {
-            facility_id: facilityId,
-          },
-        },
-      );
-      response = res;
-      responseData = data;
+      registerHealthFacilityAsServiceMutation.mutate();
     } else if (state.form.health_facility) {
-      const { res, data } = await request(routes.healthFacility.partialUpdate, {
-        pathParams: {
-          facility_id: facilityId,
-        },
-        body: {
-          hf_id: state.form.hf_id,
-        },
+      updateHealthFacilityMutation.mutate({
+        hf_id: state.form.hf_id,
       });
-      response = res;
-      responseData = data;
     } else {
-      const { res, data } = await request(routes.healthFacility.create, {
-        body: {
-          facility: facilityId,
-          hf_id: state.form.hf_id,
-        },
-        silent: true,
+      createHealthFacilityMutation.mutate({
+        facility: facilityId,
+        hf_id: state.form.hf_id,
       });
-      response = res;
-      responseData = data;
     }
-
-    if (response?.ok && responseData?.registered) {
-      Notification.Success({
-        msg: t("health_facility__config_update_success"),
-      });
-      navigate(`/facility/${facilityId}`);
-    } else {
-      if (responseData?.registered === false) {
-        Notification.Warn({
-          msg:
-            responseData?.detail ||
-            t("health_facility__config_registration_error"),
-        });
-        navigate(`/facility/${facilityId}`);
-      } else {
-        Notification.Error({
-          msg:
-            responseData?.detail || t("health_facility__config_update_error"),
-        });
-      }
-    }
-    setIsLoading(false);
   };
 
   const handleChange = (e: FieldChangeEvent<string>) => {
@@ -178,11 +174,11 @@ export const ConfigureHealthFacility = (
               label={t("health_facility__hf_id")}
               trailing={
                 <p
-                  className={classNames(
+                  className={cn(
                     "tooltip cursor-pointer text-sm",
                     state.form.health_facility?.registered
                       ? "text-primary-600 hover:text-primary-800"
-                      : "text-warning-600 hover:text-warning-800",
+                      : "text-warning-600 hover:text-warning-800"
                   )}
                 >
                   {state.form.health_facility?.registered ? (
@@ -226,14 +222,15 @@ export const ConfigureHealthFacility = (
           </div>
         </div>
         <div className="flex flex-col gap-3 sm:flex-row sm:justify-end">
-          <Submit
+          <Button
             onClick={handleSubmit}
             disabled={
               state.form.hf_id === state.form.health_facility?.hf_id &&
               state.form.health_facility?.registered
             }
-            label={t("health_facility__link")}
-          />
+          >
+            {t("health_facility__link")}
+          </Button>
         </div>
       </form>
     </div>

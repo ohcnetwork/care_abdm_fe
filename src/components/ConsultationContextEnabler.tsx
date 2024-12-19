@@ -1,7 +1,8 @@
 import { useConsultation } from "@/components/Facility/ConsultationDetails/ConsultationContext";
-import useQuery from "@/Utils/request/useQuery";
-import routes from "../api";
 import { AbhaNumberModel, HealthFacilityModel } from "../types";
+import { useQuery } from "@tanstack/react-query";
+import apis from "../api";
+import { useEffect } from "react";
 
 const ConsultationContextEnabler = () => {
   const { patient, setValue } = useConsultation<{
@@ -9,21 +10,29 @@ const ConsultationContextEnabler = () => {
     healthFacility?: HealthFacilityModel;
   }>();
 
-  useQuery(routes.abhaNumber.get, {
-    pathParams: { abhaNumberId: patient?.id ?? "" },
-    silent: true,
-    onResponse(res) {
-      setValue("abhaNumber", res.data);
-    },
+  const { data: abhaNumber } = useQuery({
+    queryKey: ["abha_number", patient?.id],
+    queryFn: () => apis.abhaNumber.get(patient?.id ?? ""),
+    enabled: !!patient?.id,
   });
 
-  useQuery(routes.healthFacility.get, {
-    pathParams: { facility_id: patient?.facility ?? "" },
-    silent: true,
-    onResponse(res) {
-      setValue("healthFacility", res.data);
-    },
+  useEffect(() => {
+    if (abhaNumber) {
+      setValue("abhaNumber", abhaNumber);
+    }
+  }, [abhaNumber]);
+
+  const { data: healthFacility } = useQuery({
+    queryKey: ["health_facility", patient?.facility],
+    queryFn: () => apis.healthFacility.get(patient?.facility ?? ""),
+    enabled: !!patient?.facility,
   });
+
+  useEffect(() => {
+    if (healthFacility) {
+      setValue("healthFacility", healthFacility);
+    }
+  }, [healthFacility]);
 
   return <></>;
 };

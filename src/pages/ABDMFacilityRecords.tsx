@@ -1,16 +1,14 @@
 import { Link } from "raviger";
 import { useTranslation } from "react-i18next";
 
-import CareIcon from "@/CAREUI/icons/CareIcon";
-
-import ButtonV2 from "@/components/Common/ButtonV2";
-import Loading from "@/components/Common/Loading";
+import { Button } from "@/components/ui/button";
+import Loading from "@/components/ui/loading";
 import Page from "@/components/Common/Page";
 
-import useQuery from "@/Utils/request/useQuery";
-import { classNames, formatDateTime } from "@/Utils/utils";
-
-import routes from "../api";
+import { cn, formatDateTime } from "@/lib/utils";
+import { RefreshCcwIcon } from "lucide-react";
+import { useQuery } from "@tanstack/react-query";
+import apis from "@/api";
 
 interface IProps {
   facilityId: string;
@@ -31,13 +29,18 @@ export default function ABDMFacilityRecords({ facilityId }: IProps) {
 
   const {
     data: consentsResult,
-    loading,
+    isLoading,
     refetch,
-  } = useQuery(routes.consent.list, {
-    query: { facility: facilityId, ordering: "-created_date" },
+  } = useQuery({
+    queryKey: ["consents", facilityId],
+    queryFn: () =>
+      apis.consent.list({
+        facility: facilityId,
+        ordering: "-created_date",
+      }),
   });
 
-  if (loading) {
+  if (isLoading) {
     return <Loading />;
   }
 
@@ -64,13 +67,13 @@ export default function ABDMFacilityRecords({ facilityId }: IProps) {
                         scope="col"
                         className="sticky right-0 top-0 py-3.5 pl-3 pr-4 sm:pr-6"
                       >
-                        <ButtonV2
+                        <Button
                           onClick={() => refetch()}
-                          ghost
+                          variant="ghost"
                           className="max-w-2xl text-sm text-secondary-700 hover:text-secondary-900"
                         >
-                          <CareIcon icon="l-refresh" /> {t("refresh")}
-                        </ButtonV2>
+                          <RefreshCcwIcon /> {t("refresh")}
+                        </Button>
                         <span className="sr-only">{t("view")}</span>
                       </th>
                     </tr>
@@ -88,14 +91,14 @@ export default function ABDMFacilityRecords({ facilityId }: IProps) {
                         <td className="px-3 py-4 text-center text-sm capitalize">
                           {new Date(
                             consent.consent_artefacts?.[0]?.expiry ??
-                              consent.expiry,
+                              consent.expiry
                           ) < new Date()
                             ? t("consent__status__EXPIRED")
                             : t(
                                 `consent__status__${
                                   consent.consent_artefacts?.[0]?.status ??
                                   consent.status
-                                }`,
+                                }`
                               )}
                         </td>
 
@@ -107,12 +110,12 @@ export default function ABDMFacilityRecords({ facilityId }: IProps) {
                           {consent.status === "EXPIRED" ||
                           new Date(
                             consent.consent_artefacts?.[0]?.expiry ??
-                              consent.expiry,
+                              consent.expiry
                           ) < new Date() ? (
                             <p className="flex flex-col items-center gap-1">
                               {formatDateTime(
                                 consent.consent_artefacts?.[0]?.expiry ??
-                                  consent.expiry,
+                                  consent.expiry
                               )}
                               <span className="text-sm text-secondary-600">
                                 {t("expired_on")}
@@ -133,19 +136,19 @@ export default function ABDMFacilityRecords({ facilityId }: IProps) {
                         <td className="px-3 py-4 text-center text-sm">
                           {formatDateTime(
                             consent.consent_artefacts?.[0]?.from_time ??
-                              consent.from_time,
+                              consent.from_time
                           )}{" "}
                           <br />
                           {formatDateTime(
                             consent.consent_artefacts?.[0]?.to_time ??
-                              consent.to_time,
+                              consent.to_time
                           )}
                         </td>
 
                         <td className="px-3 py-4 text-center text-sm">
                           {formatDateTime(
                             consent.consent_artefacts?.[0]?.expiry ??
-                              consent.expiry,
+                              consent.expiry
                           )}
                         </td>
 
@@ -167,15 +170,15 @@ export default function ABDMFacilityRecords({ facilityId }: IProps) {
                             <Link
                               key={consent.id}
                               href={`/abdm/health-information/${consent.id}`}
-                              className={classNames(
+                              className={cn(
                                 (consent.consent_artefacts?.[0]?.status ??
                                   consent.status) === "GRANTED" &&
                                   new Date(
                                     consent.consent_artefacts?.[0]?.expiry ??
-                                      consent.expiry,
+                                      consent.expiry
                                   ) > new Date()
                                   ? "cursor-pointer text-primary-600 hover:text-primary-900"
-                                  : "pointer-events-none cursor-not-allowed text-secondary-600 opacity-70",
+                                  : "pointer-events-none cursor-not-allowed text-secondary-600 opacity-70"
                               )}
                             >
                               {t("view")}
