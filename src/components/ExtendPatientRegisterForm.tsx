@@ -13,7 +13,6 @@ import {
 } from "@/components/ui/tooltip";
 import { Button } from "@/components/ui/button";
 import { useTranslation } from "react-i18next";
-import { usePubSub } from "@/Utils/pubsubContext";
 import { SquareUserIcon } from "lucide-react";
 import { parsePhoneNumber } from "@/lib/utils";
 import { useMutation, useQuery } from "@tanstack/react-query";
@@ -33,7 +32,7 @@ const ExtendPatientRegisterForm: ExtendPatientRegisterFormComponentType = ({
 }) => {
   const { t } = useTranslation();
   const [showLinkAbhaNumberModal, setShowLinkAbhaNumberModal] = useState(false);
-  const { setSubscribers } = usePubSub();
+  const [{ setSubscribers }] = useState<any>(); // FIXME: CONTEXT
 
   const { data } = useQuery({
     queryKey: ["abhaNumber", patientId],
@@ -91,9 +90,11 @@ const ExtendPatientRegisterForm: ExtendPatientRegisterFormComponentType = ({
     const topic = "patient:upsert";
 
     // manually setting the subscribers (old instance of linkAbhaNumberAndPatient is replaced with new instance) as subscribe and unsubscribe cannot be used here because this component is not rendered while PatientForm is in loading state
-    setSubscribers((prev) => {
+    setSubscribers((prev: any) => {
+      // FIXME: CONTEXT
       const handlers = Array.from(prev[topic] ?? []).filter(
-        (handler) => handler.toString() !== linkAbhaNumberAndPatient.toString()
+        (handler: any) =>
+          handler.toString() !== linkAbhaNumberAndPatient.toString()
       );
 
       handlers.push(linkAbhaNumberAndPatient);

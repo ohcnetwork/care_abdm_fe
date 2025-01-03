@@ -1,24 +1,21 @@
 import * as Notification from "@/lib/notify";
+
+import ABHAProfileModal from "./ABHAProfileModal";
+import { ExtendPatientInfoCardComponentType } from "@/types/plugable-props";
+import FetchRecordsModal from "./FetchRecordsModal";
+import LinkAbhaNumber from "./LinkAbhaNumber";
+import apis from "../api";
+import { useMutation } from "@tanstack/react-query";
 import { useQueryParams } from "raviger";
 import { useTranslation } from "react-i18next";
-import { useConsultation } from "@/components/Facility/ConsultationDetails/ConsultationContext";
-import { AbhaNumberModel } from "../types";
-import LinkAbhaNumber from "./LinkAbhaNumber";
-import ABHAProfileModal from "./ABHAProfileModal";
-import FetchRecordsModal from "./FetchRecordsModal";
-import { useMutation } from "@tanstack/react-query";
-import apis from "../api";
-import { ExtendPatientInfoCardComponentType } from "@/types/plugable-props";
 
 const ExtendPatientInfoCard: ExtendPatientInfoCardComponentType = ({
+  consultationContext: { abhaNumber },
   patient,
   fetchPatientData,
 }) => {
   const { t } = useTranslation();
   const [qParams, setQParams] = useQueryParams();
-  const { abhaNumber } = useConsultation<{
-    abhaNumber?: AbhaNumberModel;
-  }>();
 
   const linkAbhaNumberAndPatientMutation = useMutation({
     mutationFn: apis.healthId.linkAbhaNumberAndPatient,
@@ -52,7 +49,7 @@ const ExtendPatientInfoCard: ExtendPatientInfoCardComponentType = ({
         }}
         onSuccess={async (abhaProfile) => {
           linkAbhaNumberAndPatientMutation.mutate({
-            patient: patient.id,
+            patient: patient.id!,
             abha_number: abhaProfile.external_id,
           });
         }}

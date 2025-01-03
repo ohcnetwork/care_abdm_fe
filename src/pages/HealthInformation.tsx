@@ -2,7 +2,7 @@ import { HIProfile } from "hi-profiles";
 import { useTranslation } from "react-i18next";
 
 import Loading from "@/components/ui/loading";
-import Page from "@/components/Common/Page";
+import Page from "@/components/ui/page";
 import { useQuery } from "@tanstack/react-query";
 import apis from "@/api";
 
@@ -13,11 +13,17 @@ interface IProps {
 export default function HealthInformation({ artefactId }: IProps) {
   const { t } = useTranslation();
 
-  const { data, isLoading, error } = useQuery({
+  const {
+    data,
+    isLoading,
+    error: errorT,
+  } = useQuery({
     queryKey: ["healthInformation", artefactId],
     queryFn: () => apis.healthInformation.get(artefactId),
     enabled: !!artefactId,
   });
+
+  const error: any = errorT; // FIXME: TYPE and ERROR fetching
 
   if (isLoading) {
     return <Loading />;

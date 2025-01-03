@@ -3,7 +3,7 @@ import { useTranslation } from "react-i18next";
 
 import { Button } from "@/components/ui/button";
 import Loading from "@/components/ui/loading";
-import Page from "@/components/Common/Page";
+import Page from "@/components/ui/page";
 
 import { cn, formatDateTime } from "@/lib/utils";
 import { RefreshCcwIcon } from "lucide-react";

@@ -11,29 +11,23 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 
-import { useConsultation } from "@/components/Facility/ConsultationDetails/ConsultationContext";
-
-import useAuthUser from "@/hooks/useAuthUser";
-
 import { AbhaNumberModel, HealthFacilityModel } from "../types";
 import { FileInputIcon, LinkIcon, SquareUserIcon } from "lucide-react";
 import { triggerGoal } from "@/lib/plausible";
 import { ManagePatientOptionsComponentType } from "@/types/plugable-props";
+import { useState } from "react";
 
 const ManagePatientOptions: ManagePatientOptionsComponentType = ({
   consultation,
+  patient,
 }) => {
   const { t } = useTranslation();
   const [qParams, setQParams] = useQueryParams();
-  const authUser = useAuthUser();
-  const { abhaNumber, healthFacility } = useConsultation<{
-    abhaNumber?: AbhaNumberModel;
-    healthFacility?: HealthFacilityModel;
-  }>();
-
-  if (!consultation) {
-    return null;
-  }
+  const [authUser] = useState<any>(); // FIXME: CONTEXT
+  const [{ abhaNumber, healthFacility }] = useState<any>({
+    abhaNumber: null as AbhaNumberModel | null,
+    healthFacility: null as HealthFacilityModel | null,
+  }); // FIXME: CONTEXT;
 
   return (
     <div>

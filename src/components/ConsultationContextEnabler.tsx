@@ -1,14 +1,10 @@
-import { useConsultation } from "@/components/Facility/ConsultationDetails/ConsultationContext";
 import { AbhaNumberModel, HealthFacilityModel } from "../types";
 import { useQuery } from "@tanstack/react-query";
 import apis from "../api";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 
 const ConsultationContextEnabler = () => {
-  const { patient, setValue } = useConsultation<{
-    abhaNumber?: AbhaNumberModel;
-    healthFacility?: HealthFacilityModel;
-  }>();
+  const [{ patient, setValue }] = useState<any>(); // FIXME: CONTEXT
 
   const { data: abhaNumber } = useQuery({
     queryKey: ["abha_number", patient?.id],

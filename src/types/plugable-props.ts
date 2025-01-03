@@ -1,10 +1,12 @@
-import { FormContextValue } from "@/components/Form/FormContext";
 import {
   ConsultationModel,
   FacilityModel,
   PatientMeta,
   PatientModel,
 } from "./external";
+
+import { AbhaNumberModel } from ".";
+import { FormContextValue } from "@/components/Form/FormContext";
 import { LazyExoticComponent } from "react";
 
 type LazyComponent<T extends React.FC<any>> = LazyExoticComponent<T>;
@@ -79,6 +81,9 @@ export type ExtendPatientInfoCardComponentType = React.FC<{
   fetchPatientData?: (state: { aborted: boolean }) => void;
   activeShiftingData: any;
   consultationId: string;
+  consultationContext: {
+    abhaNumber?: AbhaNumberModel;
+  }; // TODO: use ConsultationContext type
 }>;
 
 export type PatientForm = PatientModel &
