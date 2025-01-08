@@ -18,7 +18,7 @@ export async function request<Response>(
   path: string,
   options?: RequestInit
 ): Promise<Response> {
-  const url = `${CARE_BASE_URL}/${path}`;
+  const url = `${CARE_BASE_URL}${path}`;
 
   const defaultHeaders = {
     Authorization: `Bearer ${localStorage.getItem(

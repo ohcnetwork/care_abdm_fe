@@ -1,10 +1,15 @@
+import { lazy } from "react";
 import routes from "./routes";
 
 const manifest = {
   plugin: "care_abdm",
   routes,
   extends: [],
-  components: {},
+  components: {
+    PatientHomeActions: lazy(
+      () => import("./components/pluggables/PatientHomeActions")
+    ),
+  },
   navItems: [],
 };
 
