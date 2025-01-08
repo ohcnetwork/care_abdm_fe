@@ -1,265 +1,292 @@
-import { useMemo, useState } from "react";
-import { useTranslation } from "react-i18next";
-
-import DropdownMenu, { DropdownItem } from "@/components/Common/Menu";
-import CheckBoxFormField from "@/components/Form/FormFields/CheckBoxFormField";
-import OtpFormField from "@/components/Form/FormFields/OtpFormField";
-import TextFormField from "@/components/Form/FormFields/TextFormField";
-
-import * as Notify from "@/lib/notify";
-
-import { AbhaNumberModel } from "../../types";
-import useMultiStepForm, { InjectedStepProps } from "./useMultiStepForm";
-import { cn } from "@/lib/utils";
-import { Button, ButtonWithTimer } from "@/components/ui/button";
+import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation } from "@tanstack/react-query";
-import apis from "@/api";
+import { FC, useState } from "react";
+import { useForm } from "react-hook-form";
+import { useTranslation } from "react-i18next";
+import { toast } from "sonner";
+import { z } from "zod";
 
-const MAX_OTP_RESEND_ALLOWED = 2;
+import { Button, ButtonWithTimer } from "@/components/ui/button";
+import { Checkbox } from "@/components/ui/checkbox";
+import {
+  Form,
+  FormControl,
+  FormDescription,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
+import { Input } from "@/components/ui/input";
+import {
+  InputOTP,
+  InputOTPGroup,
+  InputOTPSlot,
+} from "@/components/ui/input-otp";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
 
-type ILoginWithOtpProps = {
-  onSuccess: (abhaNumber: AbhaNumberModel) => void;
+import { apis } from "@/apis";
+import { AbhaNumber } from "@/types/abhaNumber";
+import useMultiStepForm, { InjectedStepProps } from "./useMultiStepForm";
+import { MAX_OTP_RESEND_COUNT, SUPPORTED_AUTH_METHODS } from "@/lib/constants";
+
+type LinkWithOtpProps = {
+  onSuccess: (abhaNumber: AbhaNumber) => void;
 };
 
-type Memory = {
+type FormMemory = {
   id: string;
-
-  isLoading: boolean;
-  validationError: string;
+  idType: "aadhaar" | "mobile" | "abha-number" | "abha-address";
+  otpSystem: "aadhaar" | "abdm";
 
   transactionId: string;
-  type: "aadhaar" | "mobile" | "abha-number" | "abha-address";
-  otp_system: "abdm" | "aadhaar";
-  abhaNumber: AbhaNumberModel | null;
-
-  resendOtpCount: number;
+  abhaNumber?: AbhaNumber;
 };
 
-export default function LinkWithOtp({ onSuccess }: ILoginWithOtpProps) {
-  const { currentStep } = useMultiStepForm<Memory>(
+export const LinkWithOtp: FC<LinkWithOtpProps> = ({ onSuccess }) => {
+  const { currentStep } = useMultiStepForm<FormMemory>(
     [
-      <EnterId {...({} as IEnterIdProps)} />,
-      <VerifyId {...({ onSuccess } as IVerifyIdProps)} />,
+      <EnterId {...({} as EnterIdProps)} />,
+      <VerifyId {...({ onSuccess } as VerifyIdProps)} />,
     ],
     {
       id: "",
-      isLoading: false,
-      validationError: "",
+      idType: "aadhaar",
+      otpSystem: "aadhaar",
       transactionId: "",
-      type: "aadhaar",
-      otp_system: "aadhaar",
-      abhaNumber: null,
-      resendOtpCount: 0,
     }
   );
 
   return <div>{currentStep}</div>;
-}
+};
 
-type IEnterIdProps = InjectedStepProps<Memory>;
+const getIdType = (id: string) => {
+  const isNumeric = !isNaN(Number(id?.trim()));
 
-const supportedAuthMethods = ["AADHAAR_OTP", "MOBILE_OTP"];
+  if (isNumeric && (id?.length === 12 || id?.length === 16)) {
+    return "aadhaar";
+  } else if (isNumeric && id?.length === 10) {
+    return "mobile";
+  } else if (isNumeric && id?.length === 14) {
+    return "abha-number";
+  } else {
+    return "abha-address";
+  }
+};
 
-function EnterId({ memory, setMemory, next }: IEnterIdProps) {
+type EnterIdProps = InjectedStepProps<FormMemory>;
+
+const enterIdFormSchema = z.object({
+  id: z.string().min(4, {
+    message: "Enter a valid ID",
+  }),
+  disclaimer_1: z.boolean().refine((value) => value === true, {
+    message: "Please read and accept this policy",
+  }),
+  disclaimer_2: z.boolean().refine((value) => value === true, {
+    message: "Please read and accept this policy",
+  }),
+  disclaimer_3: z.boolean().refine((value) => value === true, {
+    message: "Please read and accept this policy",
+  }),
+});
+
+type EnterIdFormValues = z.infer<typeof enterIdFormSchema>;
+
+const EnterId: FC<EnterIdProps> = ({ setMemory, next }) => {
   const { t } = useTranslation();
-  const [disclaimerAccepted, setDisclaimerAccepted] = useState([
-    false,
-    false,
-    false,
-  ]);
-  const [authMethods, setAuthMethods] = useState<string[]>([]);
+  const [showAuthMethods, setShowAuthMethods] = useState(false);
+  const [authMethods, setAuthMethods] = useState<
+    (typeof SUPPORTED_AUTH_METHODS)[number][]
+  >([]);
 
-  const valueType = useMemo(() => {
-    const id = memory?.id;
-    const isNumeric = !isNaN(Number(id?.trim()));
-
-    if (isNumeric && (id?.length === 12 || id?.length === 16)) {
-      return "aadhaar";
-    } else if (isNumeric && id?.length === 10) {
-      return "mobile";
-    } else if (isNumeric && id?.length === 14) {
-      return "abha-number";
-    } else {
-      return "abha-address";
-    }
-  }, [memory?.id]);
+  const form = useForm<EnterIdFormValues>({
+    resolver: zodResolver(enterIdFormSchema),
+    defaultValues: {
+      id: "",
+      disclaimer_1: false,
+      disclaimer_2: false,
+      disclaimer_3: false,
+    },
+  });
 
   const checkAuthMethodsMutation = useMutation({
     mutationFn: apis.healthId.abhaLoginCheckAuthMethods,
     onSuccess: (data) => {
       if (data) {
         const methods = data.auth_methods.filter((method: string) =>
-          supportedAuthMethods.find((supported) => supported === method)
+          SUPPORTED_AUTH_METHODS.find((supported) => supported === method)
         );
 
         if (methods.length === 0) {
-          Notify.Warn({ msg: t("get_auth_mode_error") });
+          toast.warning(t("get_auth_mode_error"));
         }
       }
-
-      setMemory((prev) => ({ ...prev, isLoading: false }));
-    },
-    onError: (error) => {
-      Notify.Error({ msg: error?.message ?? t("get_auth_mode_error") });
     },
   });
+
+  async function onSubmit(values: EnterIdFormValues) {
+    const id = values.id.trim().replace(/-/g, "").replace(/ /g, "");
+    const idType = getIdType(id);
+
+    if (idType === "aadhaar") {
+      setAuthMethods(["AADHAAR_OTP"]);
+    } else if (idType === "mobile") {
+      setAuthMethods(["MOBILE_OTP"]);
+    } else {
+      await checkAuthMethodsMutation.mutateAsync({
+        abha_address: id,
+      });
+    }
+
+    setShowAuthMethods(true);
+  }
 
   const sendOtpMutation = useMutation({
     mutationFn: apis.healthId.abhaLoginSendOtp,
     onSuccess: (data) => {
       if (data) {
+        toast.success(data.detail);
         setMemory((prev) => ({
           ...prev,
           transactionId: data.transaction_id,
         }));
-        Notify.Success({ msg: data.detail ?? t("send_otp_success") });
         next();
       }
-
-      setMemory((prev) => ({ ...prev, isLoading: false }));
     },
   });
 
-  const handleGetAuthMethods = async () => {
-    if (!memory?.id) {
-      return;
-    }
-
-    setMemory((prev) => ({ ...prev, isLoading: true }));
-
-    if (valueType === "aadhaar") {
-      setAuthMethods(["AADHAAR_OTP"]);
-    } else if (valueType === "mobile") {
-      setAuthMethods(["MOBILE_OTP"]);
-    } else {
-      checkAuthMethodsMutation.mutate({
-        abha_address: memory.id.replace(/-/g, "").replace(/ /g, ""),
-      });
-    }
-
-    setMemory((prev) => ({ ...prev, isLoading: false }));
-  };
-
-  const handleSendOtp = async (authMethod: string) => {
-    if (!supportedAuthMethods.includes(authMethod)) {
-      Notify.Warn({ msg: t("auth_method_unsupported") });
-      return;
-    }
-
-    if (!memory?.id) {
-      return;
-    }
-
-    const otp_system: "aadhaar" | "abdm" =
-      authMethod === "AADHAAR_OTP" ? "aadhaar" : "abdm";
-
-    setMemory((prev) => ({
-      ...prev,
-      isLoading: true,
-      type: valueType,
-      otp_system,
-    }));
-
-    sendOtpMutation.mutate({
-      value: memory.id,
-      type: valueType,
-      otp_system,
-    });
-  };
-
   return (
-    <div>
-      <div className="flex flex-col justify-center">
-        <TextFormField
-          type="password"
+    <Form {...form}>
+      <form onSubmit={form.handleSubmit(onSubmit)} className="mt-6 space-y-4">
+        <FormField
+          control={form.control}
           name="id"
-          label={t("any_id")}
-          inputClassName="text-black tracking-[0.3em] font-bold placeholder:font-normal placeholder:tracking-normal"
-          placeholder={t("enter_any_id")}
-          disabled={memory?.isLoading}
-          value={memory?.id}
-          onChange={({ value }) => {
-            setMemory((prev) => ({ ...prev, id: value }));
-            setAuthMethods([]);
-          }}
-          error={memory?.validationError}
-        />
-        <span
-          className={cn(
-            "ml-2 text-sm font-medium text-gray-600",
-            !memory?.validationError && "-mt-4"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>{t("any_id")}</FormLabel>
+              <FormControl>
+                <Input placeholder={t("enter_any_id")} {...field} />
+              </FormControl>
+              <FormDescription>{t("any_id_description")}</FormDescription>
+              <FormMessage />
+            </FormItem>
           )}
-        >
-          {t("any_id_description")}
-        </span>
-      </div>
+        />
 
-      <div className="mt-4 flex flex-col gap-2">
-        {disclaimerAccepted.map((isAccepted, i) => (
-          <CheckBoxFormField
-            key={`abha_disclaimer_${i + 2}`}
-            name={`abha_disclaimer_${i + 2}`}
-            label={t(`abha__disclaimer_${i + 2}`)}
-            value={isAccepted}
-            onChange={(e) => {
-              setDisclaimerAccepted(
-                disclaimerAccepted.map((v, j) => (j === i ? e.value : v))
-              );
-            }}
-            className="mr-2 rounded border-gray-700"
-            labelClassName="text-xs text-gray-800"
-            errorClassName="hidden"
+        {Array.from({ length: 3 }).map((_, index) => (
+          <FormField
+            key={`disclaimer_${index + 1}`}
+            control={form.control}
+            name={`disclaimer_${index + 1}` as keyof EnterIdFormValues}
+            render={({ field }) => (
+              <FormItem className="flex flex-row items-start space-x-3 space-y-0">
+                <FormControl>
+                  <Checkbox
+                    checked={field.value as boolean}
+                    onCheckedChange={field.onChange}
+                  />
+                </FormControl>
+                <div className="space-y-1 leading-none">
+                  <FormLabel className="text-sm font-normal">
+                    {t(`abha__disclaimer_${index + 2}`)}
+                  </FormLabel>
+                  <FormMessage />
+                </div>
+              </FormItem>
+            )}
           />
         ))}
-      </div>
 
-      <div className="mt-4 flex items-center">
-        {authMethods.length === 0 ? (
-          <Button
-            className="w-full"
-            loading={memory?.isLoading}
-            disabled={
-              disclaimerAccepted.some((v) => !v) || memory?.id.length === 0
-            }
-            onClick={handleGetAuthMethods}
-          >
-            {t("get_auth_methods")}
-          </Button>
-        ) : (
-          <DropdownMenu
-            itemClassName="!w-full md:!w-full"
-            containerClassName="w-full"
-            title={t("verify_using")}
-          >
+        <Popover
+          open={showAuthMethods}
+          onOpenChange={(open) => !open && setShowAuthMethods(false)}
+        >
+          <PopoverTrigger>
+            <Button type="submit" variant="secondary">
+              {t("get_auth_methods")}
+            </Button>
+          </PopoverTrigger>
+          <PopoverContent align="start" className="p-2 gap-2">
             {authMethods.map((method) => (
-              <DropdownItem key={method} onClick={() => handleSendOtp(method)}>
-                {t(`abha__auth_method__${method}`)}
-              </DropdownItem>
-            ))}
-          </DropdownMenu>
-        )}
-      </div>
-    </div>
-  );
-}
+              <Button
+                key={method}
+                type="button"
+                variant="default"
+                className="w-full justify-start"
+                onClick={() => {
+                  const id = form
+                    .getValues("id")
+                    .trim()
+                    .replace(/-/g, "")
+                    .replace(/ /g, "");
+                  const idType = getIdType(id);
+                  const otpSystem =
+                    method === "AADHAAR_OTP" ? "aadhaar" : "abdm";
 
-type IVerifyIdProps = InjectedStepProps<Memory> & {
-  onSuccess: (abhaNumber: AbhaNumberModel) => void;
+                  setMemory((prev) => ({
+                    ...prev,
+                    id,
+                    idType,
+                    otpSystem,
+                  }));
+
+                  sendOtpMutation.mutate({
+                    value: id,
+                    type: idType,
+                    otp_system: otpSystem,
+                  });
+                }}
+              >
+                {t(`abha__auth_method__${method}`)}
+              </Button>
+            ))}
+          </PopoverContent>
+        </Popover>
+      </form>
+    </Form>
+  );
 };
 
-function VerifyId({ memory, setMemory, onSuccess }: IVerifyIdProps) {
+type VerifyIdProps = InjectedStepProps<FormMemory> & {
+  onSuccess: (abhaNumber: AbhaNumber) => void;
+};
+
+const verifyIdFormSchema = z.object({
+  _id: z.string(),
+  otp: z.string().length(6, {
+    message: "OTP must be 6 digits",
+  }),
+  _resendOtpCount: z.number().max(MAX_OTP_RESEND_COUNT, {
+    message: "You can only resend OTP 3 times",
+  }),
+});
+
+type VerifyIdFormValues = z.infer<typeof verifyIdFormSchema>;
+
+const VerifyId: FC<VerifyIdProps> = ({ memory, setMemory, onSuccess }) => {
   const { t } = useTranslation();
-  const [otp, setOtp] = useState("");
+
+  const form = useForm<VerifyIdFormValues>({
+    resolver: zodResolver(verifyIdFormSchema),
+    defaultValues: {
+      _id: memory?.id ?? "",
+      otp: "",
+      _resendOtpCount: 0,
+    },
+  });
 
   const verifyOtpMutation = useMutation({
     mutationFn: apis.healthId.abhaLoginVerifyOtp,
     onSuccess: (data) => {
       if (data) {
-        Notify.Success({ msg: t("verify_otp_success") });
+        toast.success(t("verify_otp_success"));
         onSuccess(data.abha_number);
       }
-
-      setMemory((prev) => ({ ...prev, isLoading: false }));
     },
   });
 
@@ -267,110 +294,95 @@ function VerifyId({ memory, setMemory, onSuccess }: IVerifyIdProps) {
     mutationFn: apis.healthId.abhaLoginSendOtp,
     onSuccess: (data) => {
       if (data) {
+        toast.success(data.detail);
+        form.setValue("otp", "");
         setMemory((prev) => ({
           ...prev,
           transactionId: data.transaction_id,
-          resendOtpCount: (prev.resendOtpCount ?? 0) + 1,
         }));
-        Notify.Success({ msg: data.detail ?? t("send_otp_success") });
       }
-
-      setMemory((prev) => ({ ...prev, isLoading: false }));
-    },
-    onError: () => {
-      setMemory((prev) => ({
-        ...prev,
-        resendOtpCount: Infinity,
-      }));
-      Notify.Error({ msg: t("send_otp_error") });
-
-      setMemory((prev) => ({ ...prev, isLoading: false }));
     },
   });
 
-  const handleSubmit = async () => {
-    if (!memory?.type || !memory?.transactionId || !memory?.otp_system) {
-      return;
-    }
-
-    setMemory((prev) => ({ ...prev, isLoading: true }));
+  function onSubmit(values: VerifyIdFormValues) {
+    if (!memory?.transactionId) return;
 
     verifyOtpMutation.mutate({
-      type: memory.type,
+      otp: values.otp,
       transaction_id: memory.transactionId,
-      otp,
-      otp_system: memory.otp_system,
+      type: memory.idType,
+      otp_system: memory.otpSystem,
     });
-  };
-
-  const handleResendOtp = async () => {
-    if (!memory?.type || !memory?.transactionId || !memory?.otp_system) {
-      return;
-    }
-
-    setMemory((prev) => ({ ...prev, isLoading: true }));
-
-    resendOtpMutation.mutate({
-      value: memory.id,
-      type: memory.type,
-      otp_system: memory.otp_system,
-    });
-  };
+  }
 
   return (
-    <div>
-      <div className="flex flex-col justify-center">
-        <TextFormField
-          type="password"
-          name="id"
-          label={t("any_id")}
-          inputClassName="text-black tracking-[0.3em] font-bold placeholder:font-normal placeholder:tracking-normal"
-          placeholder={t("enter_any_id")}
-          disabled={true}
-          value={memory?.id}
-          onChange={() => null}
-        />
-        <span
-          className={cn(
-            "ml-2 text-sm font-medium text-gray-600",
-            !memory?.validationError && "-mt-4"
+    <Form {...form}>
+      <form onSubmit={form.handleSubmit(onSubmit)} className="mt-6 space-y-4">
+        <FormField
+          control={form.control}
+          name="_id"
+          disabled
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>{t("any_id")}</FormLabel>
+              <FormControl>
+                <Input placeholder={t("enter_any_id")} {...field} />
+              </FormControl>
+              <FormDescription>{t("any_id_description")}</FormDescription>
+              <FormMessage />
+            </FormItem>
           )}
-        >
-          {t("any_id_description")}
-        </span>
-      </div>
-
-      <div className="mt-4">
-        <OtpFormField
-          name="otp"
-          onChange={(value) => setOtp(value as string)}
-          value={otp}
-          label={t("enter_otp")}
-          disabled={memory?.isLoading}
         />
-      </div>
 
-      <div className="mt-4 flex flex-col items-center gap-2">
-        <Button
-          className="w-full"
-          loading={memory?.isLoading}
-          disabled={otp.length !== 6}
-          onClick={handleSubmit}
-        >
-          {t("verify_and_link")}
-        </Button>
-
-        {(memory?.resendOtpCount ?? 0) < MAX_OTP_RESEND_ALLOWED && (
+        <div className="flex flex-col gap-2 w-fit">
+          <FormField
+            control={form.control}
+            name="otp"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>One-Time Password</FormLabel>
+                <FormControl>
+                  <InputOTP maxLength={6} {...field}>
+                    <InputOTPGroup>
+                      <InputOTPSlot index={0} />
+                      <InputOTPSlot index={1} />
+                      <InputOTPSlot index={2} />
+                      <InputOTPSlot index={3} />
+                      <InputOTPSlot index={4} />
+                      <InputOTPSlot index={5} />
+                    </InputOTPGroup>
+                  </InputOTP>
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
           <ButtonWithTimer
-            variant="ghost"
-            className="w-full"
-            initialInterval={60}
-            onClick={handleResendOtp}
+            type="button"
+            variant="secondary"
+            disabled={form.getValues("_resendOtpCount") >= MAX_OTP_RESEND_COUNT}
+            onClick={() => {
+              if (!memory?.id || !memory.idType || !memory.otpSystem) return;
+
+              form.setValue(
+                "_resendOtpCount",
+                form.getValues("_resendOtpCount") + 1
+              );
+              resendOtpMutation.mutate({
+                value: memory.id,
+                type: memory.idType,
+                otp_system: memory.otpSystem,
+              });
+            }}
           >
             {t("resend_otp")}
           </ButtonWithTimer>
-        )}
-      </div>
-    </div>
+        </div>
+
+        <Button type="submit" variant="default">
+          {t("verify_and_link")}
+        </Button>
+      </form>
+    </Form>
   );
-}
+};

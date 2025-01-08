@@ -38,9 +38,6 @@ module.exports = {
         danger: colors.red,
         warning: colors.amber,
         alert: colors.violet,
-        green: colors.emerald,
-        yellow: colors.amber,
-        purple: colors.violet,
       },
       scale: {
         25: "0.25",

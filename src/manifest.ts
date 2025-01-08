@@ -1,35 +1,11 @@
-import { lazy } from "react";
 import routes from "./routes";
-import { PluginManifest } from "./types/plugable-props";
 
-const manifest: PluginManifest = {
+const manifest = {
   plugin: "care_abdm",
   routes,
   extends: [],
-  components: {
-    ConsultationContextEnabler: lazy(
-      () => import("./components/ConsultationContextEnabler"),
-    ),
-    ExtendPatientInfoCard: lazy(
-      () => import("./components/ExtendPatientInfoCard"),
-    ),
-    ManagePatientOptions: lazy(
-      () => import("./components/ManagePatientOptions"),
-    ),
-    ManageFacilityOptions: lazy(
-      () => import("./components/ManageFacilityOptions"),
-    ),
-    ExtendFacilityConfigure: lazy(
-      () => import("./components/ExtendFacilityConfigure"),
-    ),
-    ExtendPatientRegisterForm: lazy(
-      () => import("./components/ExtendPatientRegisterForm"),
-    ),
-  },
+  components: {},
   navItems: [],
-  consultationTabs: {
-    ABDM: lazy(() => import("./components/ABDMRecordsTab")),
-  },
 };
 
 export default manifest;

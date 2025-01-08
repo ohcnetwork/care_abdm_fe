@@ -108,9 +108,9 @@ const ButtonWithTimer = ({
         }}
       >
         {!!(seconds && isButtonDisabled) && (
-          <div className="mr-2 flex items-center">
+          <div className="mr-2 flex items-center gap-1">
             <Loader2Icon className="animate-spin" />
-            {seconds}
+            <span>{seconds}</span>
           </div>
         )}
 
@@ -120,6 +120,4 @@ const ButtonWithTimer = ({
   );
 };
 
-// FIXME: Add tooltip
-
-export { Button, ButtonWithTimer, buttonVariants };
+export { Button, buttonVariants, ButtonWithTimer };

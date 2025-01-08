@@ -1,142 +1,77 @@
-import { useState } from "react";
-import { useTranslation } from "react-i18next";
-import DialogModal from "@/components/Common/Dialog";
+import { IdCardIcon } from "lucide-react";
+import { FC } from "react";
 
-import { AbhaNumberModel } from "../../types";
-import CreateWithAadhaar from "./CreateWithAadhaar";
-import LinkWithOtp from "./LinkWithOtp";
-import LinkWithQr from "./LinkWithQr";
-import { cn } from "@/lib/utils";
-import { Button } from "@/components/ui/button";
+import { Button, ButtonProps } from "@/components/ui/button";
+import {
+  Drawer,
+  DrawerContent,
+  DrawerDescription,
+  DrawerHeader,
+  DrawerTitle,
+  DrawerTrigger,
+} from "@/components/ui/drawer";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
-interface ILinkAbhaNumberProps {
-  show: boolean;
-  onClose: () => void;
-  onSuccess: (abhaNumber: AbhaNumberModel) => void;
-}
+import { AbhaNumber } from "@/types/abhaNumber";
+import { CreateWithAadhaar } from "./CreateWithAadhaar";
+import { LinkWithOtp } from "./LinkWithOtp";
 
-const ABHA_LINK_OPTIONS = {
-  create_with_aadhaar: {
-    title: "abha_link_options__create_with_aadhaar__title",
-    description: "abha_link_options__create_with_aadhaar__description",
-    disabled: false,
-    value: "create_with_aadhaar",
-    create: true,
-  },
-  link_with_otp: {
-    title: "abha_link_options__link_with_otp__title",
-    description: "abha_link_options__link_with_otp__description",
-    disabled: false,
-    value: "link_with_otp",
-    create: false,
-  },
-  create_with_driving_license: {
-    title: "abha_link_options__create_with_driving_license__title",
-    description: "abha_link_options__create_with_driving_license__description",
-    disabled: true,
-    value: "create_with_driving_license",
-    create: true,
-  },
-  link_with_demographics: {
-    title: "abha_link_options__link_with_demographics__title",
-    description: "abha_link_options__link_with_demographics__description",
-    disabled: true,
-    value: "link_with_demographics",
-    create: false,
-  },
-  link_with_qr: {
-    title: "abha_link_options__link_with_qr__title",
-    description: "abha_link_options__link_with_qr__description",
-    disabled: false,
-    value: "link_with_qr",
-    create: false,
-  },
+type LinkAbhaNumberProps = ButtonProps & {
+  onSuccess: (abhaNumber: AbhaNumber) => void;
+  defaultMode?: "new" | "existing";
 };
 
-export default function LinkAbhaNumber({
-  show,
-  onClose,
+export const LinkAbhaNumber: FC<LinkAbhaNumberProps> = ({
   onSuccess,
-}: ILinkAbhaNumberProps) {
-  const { t } = useTranslation();
-  const [currentAbhaLinkOption, setCurrentAbhaLinkOption] = useState<
-    keyof typeof ABHA_LINK_OPTIONS
-  >("create_with_aadhaar");
-
+  defaultMode = "new",
+  ...props
+}) => {
   return (
-    <DialogModal
-      title={t(ABHA_LINK_OPTIONS[currentAbhaLinkOption].title)}
-      show={show}
-      onClose={onClose}
-    >
-      {currentAbhaLinkOption === "create_with_aadhaar" && (
-        <CreateWithAadhaar onSuccess={onSuccess} />
-      )}
-
-      {currentAbhaLinkOption === "link_with_otp" && (
-        <LinkWithOtp onSuccess={onSuccess} />
-      )}
-
-      {currentAbhaLinkOption === "link_with_qr" && (
-        <LinkWithQr onSuccess={onSuccess} />
-      )}
-
-      <div className="mt-6">
-        <p
-          onClick={() =>
-            setCurrentAbhaLinkOption(
-              ABHA_LINK_OPTIONS[currentAbhaLinkOption].create
-                ? "link_with_otp"
-                : "create_with_aadhaar"
-            )
-          }
-          className="cursor-pointer text-center text-sm text-blue-800"
-        >
-          {ABHA_LINK_OPTIONS[currentAbhaLinkOption].create
-            ? t("link_existing_abha_profile")
-            : t("create_new_abha_profile")}
-        </p>
-      </div>
-
-      <div>
-        <p className="mt-6 text-sm text-secondary-800">
-          {t("try_different_abha_linking_option")}
-        </p>
-        <div className="mt-2 flex flex-wrap items-center justify-start gap-2">
-          {Object.values(ABHA_LINK_OPTIONS)
-            .filter(
-              (option) =>
-                option.value !== currentAbhaLinkOption &&
-                ABHA_LINK_OPTIONS[currentAbhaLinkOption]?.create ===
-                  option.create
-            )
-            .sort((a) => (a.disabled ? 1 : -1))
-            .map((option) => (
-              <Button
-                onClick={() =>
-                  setCurrentAbhaLinkOption(
-                    option.value as keyof typeof ABHA_LINK_OPTIONS
-                  )
-                }
-                variant="ghost"
-                // FIXME: Add tooltip
-                // tooltip={
-                //   option.disabled
-                //     ? t("abha_link_options__disabled_tooltip")
-                //     : t(option.description)
-                // }
-                disabled={option.disabled}
-                // tooltipClassName="top-full mt-1"
-                className={cn(
-                  "w-full border border-gray-400 text-secondary-800",
-                  !option.disabled && "hover:border-primary-100"
-                )}
+    <Drawer>
+      <DrawerTrigger>
+        <Button {...props}>
+          <span>
+            <IdCardIcon />
+          </span>
+          Generate/Link ABHA Number
+        </Button>
+      </DrawerTrigger>
+      <DrawerContent>
+        <div className="md:mx-auto max-w-screen md:max-w-md max-md:p-4 max-h-svh">
+          <DrawerHeader>
+            <DrawerTitle>Generate/Link ABHA Number</DrawerTitle>
+            <DrawerDescription>
+              Generate/link patient's ABHA details for easy access to healthcare
+              services.
+            </DrawerDescription>
+          </DrawerHeader>
+          <Tabs defaultValue={defaultMode} orientation="vertical">
+            <TabsList className="w-full">
+              <TabsTrigger
+                className="flex-1 w-1/2 truncate justify-start"
+                value="new"
               >
-                {t(option.title)}
-              </Button>
-            ))}
+                Generate new ABHA number
+              </TabsTrigger>
+              <TabsTrigger
+                className="flex-1 w-1/2 truncate justify-start"
+                value="existing"
+              >
+                Link existing ABHA number
+              </TabsTrigger>
+            </TabsList>
+            <ScrollArea className="h-96 pb-6 pr-3">
+              <TabsContent value="new">
+                <CreateWithAadhaar onSuccess={onSuccess} />
+              </TabsContent>
+              <TabsContent value="existing">
+                <LinkWithOtp onSuccess={onSuccess} />
+              </TabsContent>
+            </ScrollArea>
+          </Tabs>
         </div>
-      </div>
-    </DialogModal>
+      </DrawerContent>
+    </Drawer>
   );
-}
+};
