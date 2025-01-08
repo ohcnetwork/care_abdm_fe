@@ -1,4 +1,4 @@
-const CARE_BASE_URL = import.meta.env.REACT_CARE_API_URL || "";
+const CARE_BASE_URL = __CORE_ENV__.REACT_CARE_API_URL || "";
 const CARE_ACCESS_TOKEN_LOCAL_STORAGE_KEY = "care_access_token";
 
 export class APIError extends Error {
