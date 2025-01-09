@@ -162,7 +162,7 @@ const EnterId: FC<EnterIdProps> = ({ setMemory, next }) => {
 
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="mt-6 space-y-4">
+      <form className="mt-6 space-y-4">
         <FormField
           control={form.control}
           name="id"
@@ -207,7 +207,11 @@ const EnterId: FC<EnterIdProps> = ({ setMemory, next }) => {
           onOpenChange={(open) => !open && setShowAuthMethods(false)}
         >
           <PopoverTrigger>
-            <Button type="submit" variant="secondary">
+            <Button
+              type="button"
+              onClick={form.handleSubmit(onSubmit)}
+              variant="secondary"
+            >
               {t("get_auth_methods")}
             </Button>
           </PopoverTrigger>

@@ -365,13 +365,20 @@ const HandleExistingAbha: FC<HandleExistingAbhaProps> = ({
         {t("abha_number_exists_description")}
       </p>
       <div className="mt-4 flex flex-col items-center justify-center gap-2">
-        <Button variant="default" className="w-full" onClick={next}>
+        <Button
+          type="button"
+          variant="default"
+          className="w-full"
+          onClick={next}
+        >
           {t("create_new_abha_address")}
         </Button>
         <Button
+          type="button"
           variant="secondary"
           className="w-full"
           onClick={() => {
+            console.log(memory?.abhaNumber);
             if (!memory?.abhaNumber) {
               toast.error("No ABHA number found");
               return;

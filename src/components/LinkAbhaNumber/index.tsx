@@ -1,5 +1,5 @@
 import { IdCardIcon } from "lucide-react";
-import { FC } from "react";
+import { FC, useState } from "react";
 
 import { Button, ButtonProps } from "@/components/ui/button";
 import {
@@ -27,8 +27,15 @@ export const LinkAbhaNumber: FC<LinkAbhaNumberProps> = ({
   defaultMode = "new",
   ...props
 }) => {
+  const [isDrawerOpen, setIsDrawerOpen] = useState(false);
+
+  const handleOnSuccess = (abhaNumber: AbhaNumber) => {
+    setIsDrawerOpen(false);
+    onSuccess(abhaNumber);
+  };
+
   return (
-    <Drawer>
+    <Drawer open={isDrawerOpen} onOpenChange={setIsDrawerOpen}>
       <DrawerTrigger>
         <Button {...props}>
           <span>
@@ -63,10 +70,10 @@ export const LinkAbhaNumber: FC<LinkAbhaNumberProps> = ({
             </TabsList>
             <ScrollArea className="h-96 pb-6 pr-3">
               <TabsContent value="new">
-                <CreateWithAadhaar onSuccess={onSuccess} />
+                <CreateWithAadhaar onSuccess={handleOnSuccess} />
               </TabsContent>
               <TabsContent value="existing">
-                <LinkWithOtp onSuccess={onSuccess} />
+                <LinkWithOtp onSuccess={handleOnSuccess} />
               </TabsContent>
             </ScrollArea>
           </Tabs>
