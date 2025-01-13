@@ -1,32 +1,56 @@
 import { AbhaNumber } from "./abhaNumber";
 
-export type ConsentPurpose =
-  | "CAREMGT"
-  | "BTG"
-  | "PUBHLTH"
-  | "HPAYMT"
-  | "DSRCH"
-  | "PATRQT";
+export const CONSENT_PURPOSES = [
+  "CAREMGT",
+  "BTG",
+  "PUBHLTH",
+  "HPAYMT",
+  "DSRCH",
+  "PATRQT",
+] as const;
 
-export type ConsentStatus =
-  | "REQUESTED"
-  | "GRANTED"
-  | "DENIED"
-  | "EXPIRED"
-  | "REVOKED";
+export type ConsentPurpose = (typeof CONSENT_PURPOSES)[number];
 
-export type ConsentHIType =
-  | "Prescription"
-  | "DiagnosticReport"
-  | "OPConsultation"
-  | "DischargeSummary"
-  | "ImmunizationRecord"
-  | "HealthDocumentRecord"
-  | "WellnessRecord";
+export const CONSENT_STATUSES = [
+  "REQUESTED",
+  "GRANTED",
+  "DENIED",
+  "EXPIRED",
+  "REVOKED",
+] as const;
 
-export type ConsentAccessMode = "VIEW" | "STORE" | "QUERY" | "STREAM";
+export type ConsentStatus = (typeof CONSENT_STATUSES)[number];
 
-export type ConsentFrequencyUnit = "HOUR" | "DAY" | "WEEK" | "MONTH" | "YEAR";
+export const CONSENT_HI_TYPES = [
+  "Prescription",
+  "DiagnosticReport",
+  "OPConsultation",
+  "DischargeSummary",
+  "ImmunizationRecord",
+  "HealthDocumentRecord",
+  "WellnessRecord",
+] as const;
+
+export type ConsentHIType = (typeof CONSENT_HI_TYPES)[number];
+
+export const CONSENT_ACCESS_MODES = [
+  "VIEW",
+  "STORE",
+  "QUERY",
+  "STREAM",
+] as const;
+
+export type ConsentAccessMode = (typeof CONSENT_ACCESS_MODES)[number];
+
+export const CONSENT_FREQUENCY_UNITS = [
+  "HOUR",
+  "DAY",
+  "WEEK",
+  "MONTH",
+  "YEAR",
+] as const;
+
+export type ConsentFrequencyUnit = (typeof CONSENT_FREQUENCY_UNITS)[number];
 
 export type ConsentCareContext = {
   patientReference: string;
