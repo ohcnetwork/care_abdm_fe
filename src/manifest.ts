@@ -17,6 +17,9 @@ const manifest = {
     ),
   },
   navItems: [],
+  encounterTabs: {
+    abdm: lazy(() => import("./components/encounter-tabs/Abdm")),
+  },
 };
 
 export default manifest;

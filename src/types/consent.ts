@@ -1,4 +1,5 @@
 import { AbhaNumber } from "./abhaNumber";
+import { User } from "./user";
 
 export const CONSENT_PURPOSES = [
   "CAREMGT",
@@ -91,7 +92,7 @@ export type ConsentArtefact = {
 } & Consent;
 
 export type ConsentRequest = {
-  requester: unknown; // FIXME: UserBareMinimum
+  requester: User;
   patient_abha_object: AbhaNumber;
   consent_artefacts: ConsentArtefact[];
 } & Consent;

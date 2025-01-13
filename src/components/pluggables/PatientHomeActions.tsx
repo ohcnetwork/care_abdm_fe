@@ -3,13 +3,10 @@ import { useMutation, useQuery } from "@tanstack/react-query";
 import { FC } from "react";
 import { LinkAbhaNumber } from "@/components/LinkAbhaNumber";
 import { toast } from "sonner";
+import { Patient } from "@/types/patient";
 
 type PatientHomeActionsProps = {
-  patient: {
-    id: string;
-
-    [key: string]: unknown;
-  };
+  patient: Patient;
   className?: string;
 };
 
