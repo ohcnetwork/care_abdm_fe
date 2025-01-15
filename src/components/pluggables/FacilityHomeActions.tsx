@@ -1,5 +1,3 @@
-import { apis } from "@/apis";
-import { useQuery } from "@tanstack/react-query";
 import { FC } from "react";
 import {
   Dialog,
@@ -9,32 +7,29 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import CreateConsentRequestForm from "../CreateConsentRequestForm";
 import { useTranslation } from "react-i18next";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
-import { Encounter } from "@/types/encounter";
+import { Facility } from "@/types/facility";
+import { SettingsIcon } from "lucide-react";
+import { ConfigureHealthFacilityForm } from "../ConfigureHealthFacilityForm";
 
-type PatientInfoCardActionsProps = {
-  encounter: Encounter;
+type FacilityHomeActionsProps = {
+  facility: Facility;
   className?: string;
 };
 
-const PatientInfoCardActions: FC<PatientInfoCardActionsProps> = ({
-  encounter,
+const FacilityHomeActions: FC<FacilityHomeActionsProps> = ({
+  facility,
   className,
 }) => {
   const { t } = useTranslation();
 
-  const { data: abhaNumber } = useQuery({
-    queryKey: ["abhaNumber", encounter.patient.id],
-    queryFn: () => apis.abhaNumber.get(encounter.patient.id),
-    enabled: !!encounter.patient.id,
-  });
-
-  if (!abhaNumber) {
+  if (!facility) {
     return null;
   }
+
+  console.log(facility);
 
   return (
     <>
@@ -47,23 +42,30 @@ const PatientInfoCardActions: FC<PatientInfoCardActionsProps> = ({
               className
             )}
           >
-            {t("hi__fetch_records")}
+            <SettingsIcon className="mr-2 h-4 w-4" />
+            {t("configure_health_facility")}
           </Button>
         </DialogTrigger>
         <DialogContent className="sm:max-w-[425px]">
           <DialogHeader>
-            <DialogTitle>{t("hi__fetch_records")}</DialogTitle>
+            <DialogTitle>{t("configure_health_facility")}</DialogTitle>
             <DialogDescription>
-              {t("hi__fetch_records_description")}
+              {t("configure_health_facility_description")}
             </DialogDescription>
+
+            <div className="mt-6">
+              <ConfigureHealthFacilityForm
+                facilityId={facility.id}
+                onSuccess={(data) => {
+                  console.log(data);
+                }}
+              />
+            </div>
           </DialogHeader>
-          <div className="mt-6">
-            <CreateConsentRequestForm abhaNumber={abhaNumber} />
-          </div>
         </DialogContent>
       </Dialog>
     </>
   );
 };
 
-export default PatientInfoCardActions;
+export default FacilityHomeActions;
