@@ -7,6 +7,6 @@ interface ImportMetaEnv {}
 
 declare global {
   var __CORE_ENV__: {
-    readonly REACT_CARE_API_URL: string;
+    readonly apiUrl: string;
   };
 }

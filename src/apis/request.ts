@@ -1,4 +1,3 @@
-const CARE_BASE_URL = __CORE_ENV__.REACT_CARE_API_URL || "";
 const CARE_ACCESS_TOKEN_LOCAL_STORAGE_KEY = "care_access_token";
 
 export class APIError extends Error {
@@ -18,7 +17,7 @@ export async function request<Response>(
   path: string,
   options?: RequestInit
 ): Promise<Response> {
-  const url = `${CARE_BASE_URL}${path}`;
+  const url = `${window.__CORE_ENV__?.apiUrl || ""}${path}`;
 
   const defaultHeaders = {
     Authorization: `Bearer ${localStorage.getItem(
