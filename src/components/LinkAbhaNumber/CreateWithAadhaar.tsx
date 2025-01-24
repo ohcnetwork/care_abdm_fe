@@ -378,7 +378,6 @@ const HandleExistingAbha: FC<HandleExistingAbhaProps> = ({
           variant="secondary"
           className="w-full"
           onClick={() => {
-            console.log(memory?.abhaNumber);
             if (!memory?.abhaNumber) {
               toast.error("No ABHA number found");
               return;

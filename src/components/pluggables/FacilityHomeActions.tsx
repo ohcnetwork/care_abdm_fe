@@ -29,8 +29,6 @@ const FacilityHomeActions: FC<FacilityHomeActionsProps> = ({
     return null;
   }
 
-  console.log(facility);
-
   return (
     <>
       <Dialog>
