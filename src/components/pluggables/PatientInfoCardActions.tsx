@@ -1,6 +1,6 @@
 import { apis } from "@/apis";
-import { useQuery } from "@tanstack/react-query";
-import { FC } from "react";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { FC, useState } from "react";
 import {
   Dialog,
   DialogContent,
@@ -25,6 +25,9 @@ const PatientInfoCardActions: FC<PatientInfoCardActionsProps> = ({
   className,
 }) => {
   const { t } = useTranslation();
+  const queryClient = useQueryClient();
+
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
 
   const { data: abhaNumber } = useQuery({
     queryKey: ["abhaNumber", encounter.patient.id],
@@ -38,7 +41,7 @@ const PatientInfoCardActions: FC<PatientInfoCardActionsProps> = ({
 
   return (
     <>
-      <Dialog>
+      <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
         <DialogTrigger asChild>
           <Button
             variant="ghost"
@@ -58,7 +61,15 @@ const PatientInfoCardActions: FC<PatientInfoCardActionsProps> = ({
             </DialogDescription>
           </DialogHeader>
           <div className="mt-6">
-            <CreateConsentRequestForm abhaNumber={abhaNumber} />
+            <CreateConsentRequestForm
+              abhaNumber={abhaNumber}
+              onSuccess={() => {
+                queryClient.invalidateQueries({
+                  queryKey: ["consents", encounter.patient.id],
+                });
+                setIsDialogOpen(false);
+              }}
+            />
           </div>
         </DialogContent>
       </Dialog>

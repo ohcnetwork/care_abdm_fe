@@ -67,38 +67,41 @@ export const ConfigureHealthFacilityForm: FC<
     },
   });
 
+  const handleError = (error: Error) => {
+    toast.error(error?.message || t("health_facility__config_update_error"));
+  };
+
   const handleUpdate = (data: HealthFacility) => {
     if (data?.registered) {
       toast.success(t("health_facility__config_update_success"));
       refetch();
       onSuccess?.(data);
     } else {
-      if (data?.registered === false) {
-        toast.warning(
-          data?.detail || t("health_facility__config_registration_error")
-        );
-        refetch();
-        onSuccess?.(data);
-      } else {
-        toast.error(data?.detail || t("health_facility__config_update_error"));
-      }
+      toast.warning(
+        data?.detail || t("health_facility__config_registration_error")
+      );
+      refetch();
+      onSuccess?.(data);
     }
   };
 
   const registerHealthFacilityAsServiceMutation = useMutation({
     mutationFn: () => apis.healthFacility.registerAsService(facilityId),
     onSuccess: handleUpdate,
+    onError: handleError,
   });
 
   const updateHealthFacilityMutation = useMutation({
     mutationFn: (body: Partial<HealthFacility>) =>
       apis.healthFacility.partialUpdate(facilityId, body),
     onSuccess: handleUpdate,
+    onError: handleError,
   });
 
   const createHealthFacilityMutation = useMutation({
     mutationFn: apis.healthFacility.create,
     onSuccess: handleUpdate,
+    onError: handleError,
   });
 
   function onSubmit(values: z.infer<typeof formSchema>) {

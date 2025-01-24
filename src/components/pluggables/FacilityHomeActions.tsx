@@ -1,4 +1,4 @@
-import { FC } from "react";
+import { FC, useState } from "react";
 import {
   Dialog,
   DialogContent,
@@ -13,6 +13,7 @@ import { cn } from "@/lib/utils";
 import { Facility } from "@/types/facility";
 import { SettingsIcon } from "lucide-react";
 import { ConfigureHealthFacilityForm } from "../ConfigureHealthFacilityForm";
+import { useQueryClient } from "@tanstack/react-query";
 
 type FacilityHomeActionsProps = {
   facility: Facility;
@@ -24,6 +25,9 @@ const FacilityHomeActions: FC<FacilityHomeActionsProps> = ({
   className,
 }) => {
   const { t } = useTranslation();
+  const queryClient = useQueryClient();
+
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
 
   if (!facility) {
     return null;
@@ -31,12 +35,12 @@ const FacilityHomeActions: FC<FacilityHomeActionsProps> = ({
 
   return (
     <>
-      <Dialog>
+      <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
         <DialogTrigger asChild>
           <Button
             variant="ghost"
             className={cn(
-              "relative flex cursor-default select-none items-center gap-2 rounded-sm px-2 py-1.5 text-sm outline-none transition-colors focus:bg-gray-100 focus:text-gray-900 data-[disabled]:pointer-events-none data-[disabled]:opacity-50 [&>svg]:size-4 [&>svg]:shrink-0 dark:focus:bg-gray-800 dark:focus:text-gray-50",
+              "w-full justify-start relative flex cursor-pointer select-none items-center gap-2 rounded-sm px-2 py-1.5 text-sm outline-none transition-colors focus:bg-gray-100 focus:text-gray-900 data-[disabled]:pointer-events-none data-[disabled]:opacity-50 [&>svg]:size-4 [&>svg]:shrink-0 dark:focus:bg-gray-800 dark:focus:text-gray-50",
               className
             )}
           >
@@ -44,7 +48,7 @@ const FacilityHomeActions: FC<FacilityHomeActionsProps> = ({
             {t("configure_health_facility")}
           </Button>
         </DialogTrigger>
-        <DialogContent className="sm:max-w-[425px]">
+        <DialogContent className="sm:max-w-[425px] z-50" autoFocus>
           <DialogHeader>
             <DialogTitle>{t("configure_health_facility")}</DialogTitle>
             <DialogDescription>
@@ -54,8 +58,11 @@ const FacilityHomeActions: FC<FacilityHomeActionsProps> = ({
             <div className="mt-6">
               <ConfigureHealthFacilityForm
                 facilityId={facility.id}
-                onSuccess={(data) => {
-                  console.log(data);
+                onSuccess={() => {
+                  queryClient.invalidateQueries({
+                    queryKey: ["healthFacility", facility.id],
+                  });
+                  setIsDialogOpen(false);
                 }}
               />
             </div>

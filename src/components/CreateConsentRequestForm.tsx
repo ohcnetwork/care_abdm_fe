@@ -19,7 +19,11 @@ import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { apis } from "@/apis";
 import { AbhaNumber } from "@/types/abhaNumber";
-import { CONSENT_HI_TYPES, CONSENT_PURPOSES } from "@/types/consent";
+import {
+  CONSENT_HI_TYPES,
+  CONSENT_PURPOSES,
+  ConsentRequest,
+} from "@/types/consent";
 import {
   Select,
   SelectContent,
@@ -33,6 +37,7 @@ import { MultiSelect } from "./ui/multi-select";
 
 type CreateConsentRequestFormProps = {
   abhaNumber?: AbhaNumber;
+  onSuccess?: (consentRequest: ConsentRequest) => void;
 };
 
 const createConsentRequestFormSchema = z.object({
@@ -52,6 +57,7 @@ type CreateConsentRequestFormValues = z.infer<
 
 const CreateConsentRequestForm: FC<CreateConsentRequestFormProps> = ({
   abhaNumber,
+  onSuccess,
 }) => {
   const { t } = useTranslation();
 
@@ -71,8 +77,9 @@ const CreateConsentRequestForm: FC<CreateConsentRequestFormProps> = ({
 
   const createConsentRequestOtpMutation = useMutation({
     mutationFn: apis.consent.create,
-    onSuccess: () => {
+    onSuccess: (data) => {
       toast.success(t("consent_requested_successfully"));
+      onSuccess?.(data);
     },
   });
 
