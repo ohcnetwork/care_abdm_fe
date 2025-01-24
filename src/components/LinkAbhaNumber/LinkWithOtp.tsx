@@ -245,6 +245,7 @@ const EnterId: FC<EnterIdProps> = ({ setMemory, next }) => {
                     otp_system: otpSystem,
                   });
                 }}
+                loading={sendOtpMutation.isPending}
               >
                 {t(`abha__auth_method__${method}`)}
               </Button>
@@ -378,12 +379,17 @@ const VerifyId: FC<VerifyIdProps> = ({ memory, setMemory, onSuccess }) => {
                 otp_system: memory.otpSystem,
               });
             }}
+            loading={resendOtpMutation.isPending}
           >
             {t("resend_otp")}
           </ButtonWithTimer>
         </div>
 
-        <Button type="submit" variant="default">
+        <Button
+          type="submit"
+          variant="default"
+          loading={verifyOtpMutation.isPending}
+        >
           {t("verify_and_link")}
         </Button>
       </form>

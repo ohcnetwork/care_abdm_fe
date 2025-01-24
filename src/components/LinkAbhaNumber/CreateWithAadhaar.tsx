@@ -170,7 +170,11 @@ const EnterAadhaar: FC<EnterAadhaarProps> = ({ setMemory, next }) => {
             )}
           />
         ))}
-        <Button type="submit" variant="default">
+        <Button
+          type="submit"
+          variant="default"
+          loading={sendAadhaarOtpMutation.isPending}
+        >
           {t("send_otp")}
         </Button>
       </form>
@@ -308,6 +312,7 @@ const VerifyAadhaar: FC<VerifyAadhaarProps> = ({ memory, setMemory, next }) => {
                 aadhaar: form.getValues("_aadhaar"),
               });
             }}
+            loading={resendAadhaarOtpMutation.isPending}
           >
             {t("resend_otp")}
           </ButtonWithTimer>
@@ -331,7 +336,11 @@ const VerifyAadhaar: FC<VerifyAadhaarProps> = ({ memory, setMemory, next }) => {
           )}
         />
 
-        <Button type="submit" variant="default">
+        <Button
+          type="submit"
+          variant="default"
+          loading={verifyAadhaarOtpMutation.isPending}
+        >
           {t("verify_otp")}
         </Button>
       </form>
@@ -466,7 +475,11 @@ const LinkMobile: FC<LinkMobileProps> = ({ memory, setMemory, goTo, next }) => {
           )}
         />
 
-        <Button type="submit" variant="default">
+        <Button
+          type="submit"
+          variant="default"
+          loading={linkMobileMutation.isPending}
+        >
           {t("send_otp")}
         </Button>
       </form>
@@ -597,12 +610,17 @@ const VerifyMobile: FC<VerifyMobileProps> = ({ memory, setMemory, next }) => {
                 transaction_id: memory.transactionId,
               });
             }}
+            loading={resendMobileOtpMutation.isPending}
           >
             {t("resend_otp")}
           </ButtonWithTimer>
         </div>
 
-        <Button type="submit" variant="default">
+        <Button
+          type="submit"
+          variant="default"
+          loading={verifyMobileOtpMutation.isPending}
+        >
           {t("verify_otp")}
         </Button>
       </form>
@@ -776,7 +794,11 @@ export const ChooseAbhaAddress: FC<ChooseAbhaAddressProps> = ({
           </div>
         )}
 
-        <Button type="submit" variant="default">
+        <Button
+          type="submit"
+          variant="default"
+          loading={enrollAbhaAddressMutation.isPending}
+        >
           {t("create_abha_address")}
         </Button>
       </form>

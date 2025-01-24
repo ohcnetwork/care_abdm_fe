@@ -195,6 +195,11 @@ export const ConfigureHealthFacilityForm: FC<
             form.watch("hf_id") === healthFacility?.hf_id &&
             healthFacility?.registered
           }
+          loading={
+            registerHealthFacilityAsServiceMutation.isPending ||
+            updateHealthFacilityMutation.isPending ||
+            createHealthFacilityMutation.isPending
+          }
         >
           {t("health_facility__link")}
         </Button>

@@ -147,6 +147,7 @@ function ConsentRequestCard({ consent }: IConsentRequestCardProps) {
         <div className="flex flex-col items-center">
           <Button
             onClick={() => checkStatusMutation.mutate(consent.id)}
+            loading={checkStatusMutation.isPending}
             variant="ghost"
             className="max-w-2xl text-sm text-secondary-700 hover:text-secondary-900"
           >

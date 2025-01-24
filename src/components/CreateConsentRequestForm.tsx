@@ -182,7 +182,11 @@ const CreateConsentRequestForm: FC<CreateConsentRequestFormProps> = ({
           )}
         />
 
-        <Button type="submit" variant="default">
+        <Button
+          type="submit"
+          variant="default"
+          loading={createConsentRequestOtpMutation.isPending}
+        >
           {t("request_consent")}
         </Button>
       </form>
