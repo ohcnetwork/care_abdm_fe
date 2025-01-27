@@ -14,6 +14,7 @@ import { Facility } from "@/types/facility";
 import { SettingsIcon } from "lucide-react";
 import { ConfigureHealthFacilityForm } from "../ConfigureHealthFacilityForm";
 import { useQueryClient } from "@tanstack/react-query";
+import { I18NNAMESPACE } from "@/lib/constants";
 
 type FacilityHomeActionsProps = {
   facility: Facility;
@@ -24,7 +25,7 @@ const FacilityHomeActions: FC<FacilityHomeActionsProps> = ({
   facility,
   className,
 }) => {
-  const { t } = useTranslation();
+  const { t } = useTranslation(I18NNAMESPACE);
   const queryClient = useQueryClient();
 
   const [isDialogOpen, setIsDialogOpen] = useState(false);

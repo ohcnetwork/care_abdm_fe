@@ -30,7 +30,7 @@ import {
 import { apis } from "@/apis";
 import { AbhaNumber } from "@/types/abhaNumber";
 import useMultiStepForm, { InjectedStepProps } from "./useMultiStepForm";
-import { MAX_OTP_RESEND_COUNT } from "@/lib/constants";
+import { I18NNAMESPACE, MAX_OTP_RESEND_COUNT } from "@/lib/constants";
 
 type CreateWithAadhaarProps = {
   onSuccess: (abhaNumber: AbhaNumber) => void;
@@ -44,7 +44,9 @@ type FormMemory = {
   abhaNumber?: AbhaNumber;
 };
 
-export const CreateWithAadhaar: FC<CreateWithAadhaarProps> = ({ onSuccess }) => {
+export const CreateWithAadhaar: FC<CreateWithAadhaarProps> = ({
+  onSuccess,
+}) => {
   const { currentStep } = useMultiStepForm<FormMemory>(
     [
       <EnterAadhaar {...({} as EnterAadhaarProps)} />,
@@ -90,7 +92,7 @@ const enterAadhaarFormSchema = z.object({
 type EnterAadhaarFormValues = z.infer<typeof enterAadhaarFormSchema>;
 
 const EnterAadhaar: FC<EnterAadhaarProps> = ({ setMemory, next }) => {
-  const { t } = useTranslation();
+  const { t } = useTranslation(I18NNAMESPACE);
 
   const form = useForm<EnterAadhaarFormValues>({
     resolver: zodResolver(enterAadhaarFormSchema),
@@ -200,7 +202,7 @@ const verifyAadhaarFormSchema = z.object({
 type VerifyAadhaarFormValues = z.infer<typeof verifyAadhaarFormSchema>;
 
 const VerifyAadhaar: FC<VerifyAadhaarProps> = ({ memory, setMemory, next }) => {
-  const { t } = useTranslation();
+  const { t } = useTranslation(I18NNAMESPACE);
 
   const form = useForm<VerifyAadhaarFormValues>({
     resolver: zodResolver(verifyAadhaarFormSchema),
@@ -357,7 +359,7 @@ const HandleExistingAbha: FC<HandleExistingAbhaProps> = ({
   next,
   onSuccess,
 }) => {
-  const { t } = useTranslation();
+  const { t } = useTranslation(I18NNAMESPACE);
 
   useEffect(() => {
     if (memory?.abhaNumber?.new) {
@@ -413,7 +415,7 @@ const linkMobileFormSchema = z.object({
 type LinkMobileFormValues = z.infer<typeof linkMobileFormSchema>;
 
 const LinkMobile: FC<LinkMobileProps> = ({ memory, setMemory, goTo, next }) => {
-  const { t } = useTranslation();
+  const { t } = useTranslation(I18NNAMESPACE);
 
   const form = useForm<LinkMobileFormValues>({
     resolver: zodResolver(linkMobileFormSchema),
@@ -502,7 +504,7 @@ const verifyMobileFormSchema = z.object({
 type VerifyMobileFormValues = z.infer<typeof verifyMobileFormSchema>;
 
 const VerifyMobile: FC<VerifyMobileProps> = ({ memory, setMemory, next }) => {
-  const { t } = useTranslation();
+  const { t } = useTranslation(I18NNAMESPACE);
 
   const form = useForm<VerifyMobileFormValues>({
     resolver: zodResolver(verifyMobileFormSchema),
@@ -676,7 +678,7 @@ export const ChooseAbhaAddress: FC<ChooseAbhaAddressProps> = ({
   setMemory,
   onSuccess,
 }) => {
-  const { t } = useTranslation();
+  const { t } = useTranslation(I18NNAMESPACE);
 
   const [suggestions, setSuggestions] = useState<string[]>([]);
 

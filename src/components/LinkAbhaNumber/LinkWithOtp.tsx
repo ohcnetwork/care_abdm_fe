@@ -32,7 +32,11 @@ import {
 import { apis } from "@/apis";
 import { AbhaNumber } from "@/types/abhaNumber";
 import useMultiStepForm, { InjectedStepProps } from "./useMultiStepForm";
-import { MAX_OTP_RESEND_COUNT, SUPPORTED_AUTH_METHODS } from "@/lib/constants";
+import {
+  I18NNAMESPACE,
+  MAX_OTP_RESEND_COUNT,
+  SUPPORTED_AUTH_METHODS,
+} from "@/lib/constants";
 
 type LinkWithOtpProps = {
   onSuccess: (abhaNumber: AbhaNumber) => void;
@@ -98,7 +102,7 @@ const enterIdFormSchema = z.object({
 type EnterIdFormValues = z.infer<typeof enterIdFormSchema>;
 
 const EnterId: FC<EnterIdProps> = ({ setMemory, next }) => {
-  const { t } = useTranslation();
+  const { t } = useTranslation(I18NNAMESPACE);
   const [showAuthMethods, setShowAuthMethods] = useState(false);
   const [authMethods, setAuthMethods] = useState<
     (typeof SUPPORTED_AUTH_METHODS)[number][]
@@ -274,7 +278,7 @@ const verifyIdFormSchema = z.object({
 type VerifyIdFormValues = z.infer<typeof verifyIdFormSchema>;
 
 const VerifyId: FC<VerifyIdProps> = ({ memory, setMemory, onSuccess }) => {
-  const { t } = useTranslation();
+  const { t } = useTranslation(I18NNAMESPACE);
 
   const form = useForm<VerifyIdFormValues>({
     resolver: zodResolver(verifyIdFormSchema),

@@ -10,9 +10,10 @@ import { Button } from "../ui/button";
 import { Loader2Icon, RefreshCcwIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Link } from "raviger";
+import { I18NNAMESPACE } from "@/lib/constants";
 
 export const AbdmEncounterTab: FC<EncounterTabProps> = ({ patient }) => {
-  const { t } = useTranslation();
+  const { t } = useTranslation(I18NNAMESPACE);
 
   const { data, isLoading } = useQuery({
     queryKey: ["consents", patient.id],
@@ -62,7 +63,7 @@ interface IConsentArtefactCardProps {
 }
 
 function ConsentArtefactCard({ artefact }: IConsentArtefactCardProps) {
-  const { t } = useTranslation();
+  const { t } = useTranslation(I18NNAMESPACE);
 
   return (
     <Link
@@ -112,7 +113,7 @@ interface IConsentRequestCardProps {
 }
 
 function ConsentRequestCard({ consent }: IConsentRequestCardProps) {
-  const { t } = useTranslation();
+  const { t } = useTranslation(I18NNAMESPACE);
 
   const checkStatusMutation = useMutation({
     mutationFn: apis.consent.checkStatus,

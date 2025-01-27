@@ -6,13 +6,14 @@ import { useQuery } from "@tanstack/react-query";
 import { Loader2Icon } from "lucide-react";
 import { apis } from "@/apis";
 import { FC } from "react";
+import { I18NNAMESPACE } from "@/lib/constants";
 
 interface HealthInformationProps {
   artefactId: string;
 }
 
 const HealthInformation: FC<HealthInformationProps> = ({ artefactId }) => {
-  const { t } = useTranslation();
+  const { t } = useTranslation(I18NNAMESPACE);
 
   const {
     data,

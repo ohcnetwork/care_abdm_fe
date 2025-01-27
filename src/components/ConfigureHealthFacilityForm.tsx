@@ -27,6 +27,7 @@ import { apis } from "@/apis";
 import { toast } from "sonner";
 import { HealthFacility } from "@/types/healthFacility";
 import { CircleAlertIcon, CircleCheckIcon } from "lucide-react";
+import { I18NNAMESPACE } from "@/lib/constants";
 
 type ConfigureHealthFacilityFormProps = {
   facilityId: string;
@@ -36,7 +37,7 @@ type ConfigureHealthFacilityFormProps = {
 export const ConfigureHealthFacilityForm: FC<
   ConfigureHealthFacilityFormProps
 > = ({ facilityId, onSuccess }) => {
-  const { t } = useTranslation();
+  const { t } = useTranslation(I18NNAMESPACE);
 
   const formSchema = useMemo(
     () =>

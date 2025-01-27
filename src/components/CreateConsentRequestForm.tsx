@@ -34,6 +34,7 @@ import {
 import { DatePickerWithRange } from "./ui/date-range-picker";
 import { DatePicker } from "./ui/date-picker";
 import { MultiSelect } from "./ui/multi-select";
+import { I18NNAMESPACE } from "@/lib/constants";
 
 type CreateConsentRequestFormProps = {
   abhaNumber?: AbhaNumber;
@@ -59,7 +60,7 @@ const CreateConsentRequestForm: FC<CreateConsentRequestFormProps> = ({
   abhaNumber,
   onSuccess,
 }) => {
-  const { t } = useTranslation();
+  const { t } = useTranslation(I18NNAMESPACE);
 
   const form = useForm<CreateConsentRequestFormValues>({
     resolver: zodResolver(createConsentRequestFormSchema),
