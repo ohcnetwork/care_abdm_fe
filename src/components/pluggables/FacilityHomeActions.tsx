@@ -49,25 +49,24 @@ const FacilityHomeActions: FC<FacilityHomeActionsProps> = ({
             {t("configure_health_facility")}
           </Button>
         </DialogTrigger>
-        <DialogContent className="sm:max-w-[425px] z-50" autoFocus>
+        <DialogContent className="sm:max-w-[425px]">
           <DialogHeader>
             <DialogTitle>{t("configure_health_facility")}</DialogTitle>
             <DialogDescription>
               {t("configure_health_facility_description")}
             </DialogDescription>
-
-            <div className="mt-6">
-              <ConfigureHealthFacilityForm
-                facilityId={facility.id}
-                onSuccess={() => {
-                  queryClient.invalidateQueries({
-                    queryKey: ["healthFacility", facility.id],
-                  });
-                  setIsDialogOpen(false);
-                }}
-              />
-            </div>
           </DialogHeader>
+          <div className="mt-6">
+            <ConfigureHealthFacilityForm
+              facilityId={facility.id}
+              onSuccess={() => {
+                queryClient.invalidateQueries({
+                  queryKey: ["healthFacility", facility.id],
+                });
+                setIsDialogOpen(false);
+              }}
+            />
+          </div>
         </DialogContent>
       </Dialog>
     </>

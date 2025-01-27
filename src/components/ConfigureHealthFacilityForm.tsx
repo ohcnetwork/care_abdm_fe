@@ -22,7 +22,7 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-import { FC, useEffect, useMemo } from "react";
+import { FC, useEffect } from "react";
 import { apis } from "@/apis";
 import { toast } from "sonner";
 import { HealthFacility } from "@/types/healthFacility";
@@ -34,20 +34,18 @@ type ConfigureHealthFacilityFormProps = {
   onSuccess?: (data: HealthFacility) => void;
 };
 
+const configureHealthFacilityFormSchema = z.object({
+  hf_id: z.string().min(1),
+});
+
+type ConfigureHealthFacilityFormValues = z.infer<
+  typeof configureHealthFacilityFormSchema
+>;
+
 export const ConfigureHealthFacilityForm: FC<
   ConfigureHealthFacilityFormProps
 > = ({ facilityId, onSuccess }) => {
   const { t } = useTranslation(I18NNAMESPACE);
-
-  const formSchema = useMemo(
-    () =>
-      z.object({
-        hf_id: z.string().min(1, {
-          message: t("health_facility__validation__hf_id_required"),
-        }),
-      }),
-    []
-  );
 
   const { data: healthFacility, refetch } = useQuery({
     queryKey: ["healthFacility", facilityId],
@@ -61,8 +59,8 @@ export const ConfigureHealthFacilityForm: FC<
     }
   }, [healthFacility]);
 
-  const form = useForm<z.infer<typeof formSchema>>({
-    resolver: zodResolver(formSchema),
+  const form = useForm<ConfigureHealthFacilityFormValues>({
+    resolver: zodResolver(configureHealthFacilityFormSchema),
     defaultValues: {
       hf_id: "",
     },
@@ -105,7 +103,7 @@ export const ConfigureHealthFacilityForm: FC<
     onError: handleError,
   });
 
-  function onSubmit(values: z.infer<typeof formSchema>) {
+  function onSubmit(values: ConfigureHealthFacilityFormValues) {
     if (values.hf_id === healthFacility?.hf_id) {
       registerHealthFacilityAsServiceMutation.mutate();
     } else if (healthFacility) {
@@ -122,7 +120,7 @@ export const ConfigureHealthFacilityForm: FC<
 
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="mt-6 space-y-4">
+      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
         <FormField
           control={form.control}
           name="hf_id"
