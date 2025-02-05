@@ -128,7 +128,13 @@ const EnterAadhaar: FC<EnterAadhaarProps> = ({ setMemory, next }) => {
 
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="mt-6 space-y-4">
+      <form
+        onSubmit={(e) => {
+          e.stopPropagation();
+          form.handleSubmit(onSubmit)(e);
+        }}
+        className="mt-6 space-y-4"
+      >
         <FormField
           control={form.control}
           name="aadhaar"
@@ -256,7 +262,13 @@ const VerifyAadhaar: FC<VerifyAadhaarProps> = ({ memory, setMemory, next }) => {
 
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="mt-6 space-y-4">
+      <form
+        onSubmit={(e) => {
+          e.stopPropagation();
+          form.handleSubmit(onSubmit)(e);
+        }}
+        className="mt-6 space-y-4"
+      >
         <FormField
           control={form.control}
           disabled
@@ -458,7 +470,13 @@ const LinkMobile: FC<LinkMobileProps> = ({ memory, setMemory, goTo, next }) => {
 
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="mt-6 space-y-4">
+      <form
+        onSubmit={(e) => {
+          e.stopPropagation();
+          form.handleSubmit(onSubmit)(e);
+        }}
+        className="mt-6 space-y-4"
+      >
         <FormField
           control={form.control}
           name="_mobile"
@@ -554,7 +572,13 @@ const VerifyMobile: FC<VerifyMobileProps> = ({ memory, setMemory, next }) => {
 
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="mt-6 space-y-4">
+      <form
+        onSubmit={(e) => {
+          e.stopPropagation();
+          form.handleSubmit(onSubmit)(e);
+        }}
+        className="mt-6 space-y-4"
+      >
         <FormField
           control={form.control}
           name="_mobile"
@@ -735,7 +759,13 @@ export const ChooseAbhaAddress: FC<ChooseAbhaAddressProps> = ({
 
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="mt-6 space-y-4">
+      <form
+        onSubmit={(e) => {
+          e.stopPropagation();
+          form.handleSubmit(onSubmit)(e);
+        }}
+        className="mt-6 space-y-4"
+      >
         <FormField
           control={form.control}
           name="abhaAddress"
