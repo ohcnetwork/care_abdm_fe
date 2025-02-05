@@ -70,7 +70,7 @@ const PatientRegistrationForm: FC<PatientRegistrationFormProps> = ({
     };
   }, [queryClient]);
 
-  if (!abhaNumber) {
+  if (!form.watch("abha_id")) {
     return (
       <div className="flex justify-end w-full">
         <LinkAbhaNumber
@@ -91,15 +91,20 @@ const PatientRegistrationForm: FC<PatientRegistrationFormProps> = ({
             }
 
             form.setValue("name", abhaNumber.name);
-            form.setValue("phone_number", abhaNumber.mobile);
+            form.setValue(
+              "phone_number",
+              "+91" + abhaNumber.mobile?.replace("+91", "")
+            );
             form.setValue("yob_or_dob", "dob");
             form.setValue("date_of_birth", abhaNumber.date_of_birth);
+            form.setValue("blood_group", "unknown");
             form.setValue(
               "gender",
               { M: "male", F: "female", O: "transgender" }[abhaNumber.gender] ??
                 "transgender"
             );
             form.setValue("address", abhaNumber.address);
+            form.setValue("permanent_address", abhaNumber.address);
             form.setValue("pincode", abhaNumber.pincode);
           }}
         />
