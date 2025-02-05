@@ -298,7 +298,7 @@ const VerifyAadhaar: FC<VerifyAadhaarProps> = ({ memory, setMemory, next }) => {
               <FormItem>
                 <FormLabel>One-Time Password</FormLabel>
                 <FormControl>
-                  <InputOTP maxLength={6} {...field}>
+                  <InputOTP autoFocus maxLength={6} {...field}>
                     <InputOTPGroup>
                       <InputOTPSlot index={0} />
                       <InputOTPSlot index={1} />
@@ -605,7 +605,7 @@ const VerifyMobile: FC<VerifyMobileProps> = ({ memory, setMemory, next }) => {
               <FormItem>
                 <FormLabel>One-Time Password</FormLabel>
                 <FormControl>
-                  <InputOTP maxLength={6} {...field}>
+                  <InputOTP autoFocus maxLength={6} {...field}>
                     <InputOTPGroup>
                       <InputOTPSlot index={0} />
                       <InputOTPSlot index={1} />
