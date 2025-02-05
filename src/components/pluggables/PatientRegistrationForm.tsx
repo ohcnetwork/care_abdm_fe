@@ -5,7 +5,7 @@ import { apis } from "@/apis";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { LinkAbhaNumber } from "../LinkAbhaNumber";
-import { toast } from "sonner";
+import { toast } from "@/lib/utils";
 
 type PatientRegistrationFormProps = {
   form: UseFormReturn;

@@ -4,7 +4,7 @@ import { apis } from "@/apis";
 import { useTranslation } from "react-i18next";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { ConsentArtefact, ConsentRequest } from "@/types/consent";
-import { toast } from "sonner";
+import { toast } from "@/lib/utils";
 import dayjs from "@/lib/dayjs";
 import { Button } from "../ui/button";
 import { Loader2Icon, RefreshCcwIcon } from "lucide-react";

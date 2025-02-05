@@ -2,7 +2,7 @@ import { apis } from "@/apis";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { FC } from "react";
 import { LinkAbhaNumber } from "@/components/LinkAbhaNumber";
-import { toast } from "sonner";
+import { toast } from "@/lib/utils";
 import { Patient } from "@/types/patient";
 
 type PatientHomeActionsProps = {

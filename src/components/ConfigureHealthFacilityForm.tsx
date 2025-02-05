@@ -24,7 +24,7 @@ import {
 } from "@/components/ui/tooltip";
 import { FC, useEffect } from "react";
 import { apis } from "@/apis";
-import { toast } from "sonner";
+import { toast } from "@/lib/utils";
 import { HealthFacility } from "@/types/healthFacility";
 import { CircleAlertIcon, CircleCheckIcon } from "lucide-react";
 import { I18NNAMESPACE } from "@/lib/constants";

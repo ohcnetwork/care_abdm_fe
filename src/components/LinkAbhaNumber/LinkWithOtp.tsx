@@ -3,7 +3,7 @@ import { useMutation } from "@tanstack/react-query";
 import { FC, useState } from "react";
 import { useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
-import { toast } from "sonner";
+import { toast } from "@/lib/utils";
 import { z } from "zod";
 
 import { Button, ButtonWithTimer } from "@/components/ui/button";
