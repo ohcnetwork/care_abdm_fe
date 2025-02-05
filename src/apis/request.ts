@@ -46,7 +46,7 @@ export async function request<Response>(
     }
 
     throw new APIError(
-      data.detail ?? "Something went wrong",
+      (data.detail ?? JSON.stringify(data)) || "Something went wrong",
       data,
       response.status
     );
