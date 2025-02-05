@@ -48,26 +48,21 @@ const PatientRegistrationForm: FC<PatientRegistrationFormProps> = ({
   useEffect(() => {
     let isFirstSuccess = true;
 
-    const unsubscribe = queryClient
-      .getMutationCache()
-      .subscribe(({ mutation }) => {
-        if (
-          isFirstSuccess &&
-          mutation?.state.status === "success" &&
-          mutation?.options.mutationKey?.includes("create_patient")
-        ) {
-          isFirstSuccess = false;
+    queryClient.getMutationCache().subscribe(({ mutation }) => {
+      if (
+        isFirstSuccess &&
+        mutation?.state.status === "success" &&
+        mutation?.options.mutationKey?.includes("create_patient") &&
+        mutation?.state.data?.id
+      ) {
+        isFirstSuccess = false;
 
-          linkAbhaNumberAndPatientMutation.mutate({
-            patient: mutation.state.data.id,
-            abha_number: form.getValues("abha_number"),
-          });
-        }
-      });
-
-    return () => {
-      unsubscribe();
-    };
+        linkAbhaNumberAndPatientMutation.mutate({
+          patient: mutation.state.data.id,
+          abha_number: form.watch("abha_id"),
+        });
+      }
+    });
   }, [queryClient]);
 
   if (!form.watch("abha_id")) {
@@ -105,7 +100,10 @@ const PatientRegistrationForm: FC<PatientRegistrationFormProps> = ({
             );
             form.setValue("address", abhaNumber.address);
             form.setValue("permanent_address", abhaNumber.address);
-            form.setValue("pincode", abhaNumber.pincode);
+            form.setValue(
+              "pincode",
+              abhaNumber.pincode && Number(abhaNumber.pincode)
+            );
           }}
         />
       </div>
