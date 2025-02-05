@@ -9,6 +9,10 @@ const manifest = {
     PatientHomeActions: lazy(
       () => import("./components/pluggables/PatientHomeActions")
     ),
+    PatientDetailsTabDemographyGeneralInfo: lazy(
+      () =>
+        import("./components/pluggables/PatientDetailsTabDemographyGeneralInfo")
+    ),
     PatientInfoCardActions: lazy(
       () => import("./components/pluggables/PatientInfoCardActions")
     ),

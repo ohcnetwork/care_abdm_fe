@@ -213,7 +213,10 @@ const EnterId: FC<EnterIdProps> = ({ setMemory, next }) => {
           <PopoverTrigger>
             <Button
               type="button"
-              onClick={form.handleSubmit(onSubmit)}
+              onClick={(e) => {
+                e.stopPropagation();
+                form.handleSubmit(onSubmit)(e);
+              }}
               variant="secondary"
             >
               {t("get_auth_methods")}
@@ -326,7 +329,13 @@ const VerifyId: FC<VerifyIdProps> = ({ memory, setMemory, onSuccess }) => {
 
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="mt-6 space-y-4">
+      <form
+        onSubmit={(e) => {
+          e.stopPropagation();
+          form.handleSubmit(onSubmit)(e);
+        }}
+        className="mt-6 space-y-4"
+      >
         <FormField
           control={form.control}
           name="_id"
@@ -351,7 +360,7 @@ const VerifyId: FC<VerifyIdProps> = ({ memory, setMemory, onSuccess }) => {
               <FormItem>
                 <FormLabel>One-Time Password</FormLabel>
                 <FormControl>
-                  <InputOTP maxLength={6} {...field}>
+                  <InputOTP autoFocus maxLength={6} {...field}>
                     <InputOTPGroup>
                       <InputOTPSlot index={0} />
                       <InputOTPSlot index={1} />

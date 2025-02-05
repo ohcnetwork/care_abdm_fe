@@ -7,6 +7,7 @@ export class APIError extends Error {
 
   constructor(message: string, data: unknown, status: number) {
     super(message);
+    this.name = "AbortError"; // this is required to skip error toasts by the core app, all the necessary errors are handled by the plug
     this.message = message;
     this.data = data;
     this.status = status;
@@ -45,7 +46,7 @@ export async function request<Response>(
     }
 
     throw new APIError(
-      data.detail ?? "Something went wrong",
+      (data.detail ?? JSON.stringify(data)) || "Something went wrong",
       data,
       response.status
     );

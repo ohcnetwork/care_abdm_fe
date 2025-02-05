@@ -48,29 +48,24 @@ const PatientRegistrationForm: FC<PatientRegistrationFormProps> = ({
   useEffect(() => {
     let isFirstSuccess = true;
 
-    const unsubscribe = queryClient
-      .getMutationCache()
-      .subscribe(({ mutation }) => {
-        if (
-          isFirstSuccess &&
-          mutation?.state.status === "success" &&
-          mutation?.options.mutationKey?.includes("create_patient")
-        ) {
-          isFirstSuccess = false;
+    queryClient.getMutationCache().subscribe(({ mutation }) => {
+      if (
+        isFirstSuccess &&
+        mutation?.state.status === "success" &&
+        mutation?.options.mutationKey?.includes("create_patient") &&
+        mutation?.state.data?.id
+      ) {
+        isFirstSuccess = false;
 
-          linkAbhaNumberAndPatientMutation.mutate({
-            patient: mutation.state.data.id,
-            abha_number: form.getValues("abha_number"),
-          });
-        }
-      });
-
-    return () => {
-      unsubscribe();
-    };
+        linkAbhaNumberAndPatientMutation.mutate({
+          patient: mutation.state.data.id,
+          abha_number: form.watch("abha_id"),
+        });
+      }
+    });
   }, [queryClient]);
 
-  if (!abhaNumber) {
+  if (!form.watch("abha_id")) {
     return (
       <div className="flex justify-end w-full">
         <LinkAbhaNumber
@@ -91,16 +86,24 @@ const PatientRegistrationForm: FC<PatientRegistrationFormProps> = ({
             }
 
             form.setValue("name", abhaNumber.name);
-            form.setValue("phone_number", abhaNumber.mobile);
+            form.setValue(
+              "phone_number",
+              "+91" + abhaNumber.mobile?.replace("+91", "")
+            );
             form.setValue("yob_or_dob", "dob");
             form.setValue("date_of_birth", abhaNumber.date_of_birth);
+            form.setValue("blood_group", "unknown");
             form.setValue(
               "gender",
               { M: "male", F: "female", O: "transgender" }[abhaNumber.gender] ??
                 "transgender"
             );
             form.setValue("address", abhaNumber.address);
-            form.setValue("pincode", abhaNumber.pincode);
+            form.setValue("permanent_address", abhaNumber.address);
+            form.setValue(
+              "pincode",
+              abhaNumber.pincode && Number(abhaNumber.pincode)
+            );
           }}
         />
       </div>
