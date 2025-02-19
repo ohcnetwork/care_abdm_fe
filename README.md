@@ -13,8 +13,7 @@ The plugin integrates with the main CARE frontend application to provide ABDM (A
 
 ### Prerequisites
 
-- Node.js and npm installed
-- Git installed
+- Node.js and npm _(refer care_fe repo for exact version required.)_
 
 ### Setup Instructions
 
