@@ -56,22 +56,25 @@ npm run dev
 ### Pluggable Components
 
 1. **FacilityHomeActions**
-   - Location: Facility Settings page dropdown menu
+   - Location: Facility Settings page, dropdown menu
    - Function: Provides a dialog for editing Health Facility ID
    
 2. **PatientDetailsTabDemographyGeneralInfo**
-   - Location: Patient details demography tab
+   - Location: Patient details page, demography tab
    - Function: Displays ABHA details card
-   - Note: Returns null if no ABHA number is linked
+   - Condition: Visible only when the Patient's ABHA number is linked
 
 3. **PatientHomeActions**
    - Location: Patient details page
    - Function: Provides ABHA linking functionality
-   - Note: Returns null if ABHA number already linked
+   - Condition: Visible only when the Patient doesn't have thier ABHA Number linked
+   - Requirements: Health Facility ID should be linked before linking ABHA Number to the Patient
 
 4. **PatientInfoCardActions**
-   - Location: Encounter page dropdown menu
+   - Location: Encounter page, dropdown menu
    - Function: Dialog for creating consent requests for data from 3rd party hospitals
+   - Condition: Visible only when the Patient's ABHA number is linked
+   - Requirements: Health Facility ID should be linked before making a consent request
 
 5. **PatientRegistrationForm**
    - Location: Patient registration page
@@ -79,12 +82,14 @@ npm run dev
    - Features:
      - Auto-fills patient registration form with ABDM data upon successful linking
      - Shows disabled form with ABHA details if already linked
+   - Requirements: Health Facility ID should be linked before linking ABHA Number to the Patient
 
 ### Encounter Tab
 
 **ABDM Records**
 - Displays consent requests and artifacts
 - Links to HealthInformation page when consent artifact is clicked
+- Condition: Visible only when the Patient's ABHA number is linked
 
 ### Custom Pages
 
