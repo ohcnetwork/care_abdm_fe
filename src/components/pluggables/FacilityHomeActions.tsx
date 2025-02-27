@@ -38,13 +38,7 @@ const FacilityHomeActions: FC<FacilityHomeActionsProps> = ({
     <>
       <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
         <DialogTrigger asChild>
-          <Button
-            variant="outline"
-            className={cn(
-              "cursor-pointer mt-2 [@media(max-width:25rem)]:mt-12 [@media(max-width:25rem)]:w-full",
-              className
-            )}
-          >
+          <Button variant="outline" className={cn("cursor-pointer", className)}>
             <SettingsIcon className="mr-2 h-4 w-4" />
             {t("configure_health_facility")}
           </Button>
