@@ -9,7 +9,6 @@ import {
 } from "@/components/ui/dialog";
 import { useTranslation } from "react-i18next";
 import { Button } from "@/components/ui/button";
-import { cn } from "@/lib/utils";
 import { Facility } from "@/types/facility";
 import { SettingsIcon } from "lucide-react";
 import { ConfigureHealthFacilityForm } from "../ConfigureHealthFacilityForm";
@@ -21,10 +20,7 @@ type FacilityHomeActionsProps = {
   className?: string;
 };
 
-const FacilityHomeActions: FC<FacilityHomeActionsProps> = ({
-  facility,
-  className,
-}) => {
+const FacilityHomeActions: FC<FacilityHomeActionsProps> = ({ facility }) => {
   const { t } = useTranslation(I18NNAMESPACE);
   const queryClient = useQueryClient();
 
@@ -38,29 +34,32 @@ const FacilityHomeActions: FC<FacilityHomeActionsProps> = ({
     <>
       <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
         <DialogTrigger asChild>
-          <Button variant="outline" className={cn("cursor-pointer", className)}>
-            <SettingsIcon className="mr-2 h-4 w-4" />
+          <Button
+            variant="outline"
+            size="sm"
+            className="cursor-pointer font-semibold"
+          >
+            <SettingsIcon />
             {t("configure_health_facility")}
           </Button>
         </DialogTrigger>
-        <DialogContent className="sm:max-w-[425px]">
+        <DialogContent className="max-w-md w-[95%] rounded-md">
           <DialogHeader>
             <DialogTitle>{t("configure_health_facility")}</DialogTitle>
-            <DialogDescription>
+            <DialogDescription className="text-start">
               {t("configure_health_facility_description")}
             </DialogDescription>
           </DialogHeader>
-          <div className="mt-6">
-            <ConfigureHealthFacilityForm
-              facilityId={facility.id}
-              onSuccess={() => {
-                queryClient.invalidateQueries({
-                  queryKey: ["healthFacility", facility.id],
-                });
-                setIsDialogOpen(false);
-              }}
-            />
-          </div>
+
+          <ConfigureHealthFacilityForm
+            facilityId={facility.id}
+            onSuccess={() => {
+              queryClient.invalidateQueries({
+                queryKey: ["healthFacility", facility.id],
+              });
+              setIsDialogOpen(false);
+            }}
+          />
         </DialogContent>
       </Dialog>
     </>
