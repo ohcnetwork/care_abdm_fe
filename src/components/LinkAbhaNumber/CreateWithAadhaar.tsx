@@ -143,7 +143,7 @@ const EnterAadhaar: FC<EnterAadhaarProps> = ({ setMemory, next }) => {
               <FormLabel>Aadhaar Number / Virtual ID</FormLabel>
               <FormControl>
                 <Input
-                  placeholder="Enter 12 digital Aadhaar  number OR 16 digit virtual ID"
+                  placeholder="Enter Aadhaar number OR Virtual ID"
                   {...field}
                 />
               </FormControl>

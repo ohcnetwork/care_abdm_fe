@@ -16,6 +16,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { AbhaNumber } from "@/types/abhaNumber";
 import { CreateWithAadhaar } from "./CreateWithAadhaar";
 import { LinkWithOtp } from "./LinkWithOtp";
+import { TooltipComponent } from "../ui/tooltip";
 
 type LinkAbhaNumberProps = ButtonProps & {
   onSuccess: (abhaNumber: AbhaNumber) => void;
@@ -56,16 +57,20 @@ export const LinkAbhaNumber: FC<LinkAbhaNumberProps> = ({
           <Tabs defaultValue={defaultMode} orientation="vertical">
             <TabsList className="w-full">
               <TabsTrigger
-                className="flex-1 w-1/2 truncate justify-start"
+                className="flex-1 w-1/2 justify-start"
                 value="new"
               >
-                Generate new ABHA number
+              <TooltipComponent content="Generate new ABHA number" side="top">
+                <span className="truncate">Generate new ABHA number</span>
+                </TooltipComponent>
               </TabsTrigger>
               <TabsTrigger
-                className="flex-1 w-1/2 truncate justify-start"
+                className="flex-1 w-1/2 justify-start"
                 value="existing"
               >
-                Link existing ABHA number
+              <TooltipComponent content="Link existing ABHA number" side="top">
+                <span className="truncate">Link existing ABHA number</span>
+              </TooltipComponent>
               </TabsTrigger>
             </TabsList>
             <ScrollArea className="h-96 pb-6 pr-3">
