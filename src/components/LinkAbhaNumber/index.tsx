@@ -2,14 +2,6 @@ import { IdCardIcon } from "lucide-react";
 import { FC, useState } from "react";
 
 import { Button, ButtonProps } from "@/components/ui/button";
-import {
-  Drawer,
-  DrawerContent,
-  DrawerDescription,
-  DrawerHeader,
-  DrawerTitle,
-  DrawerTrigger,
-} from "@/components/ui/drawer";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
@@ -17,6 +9,7 @@ import { AbhaNumber } from "@/types/abhaNumber";
 import { CreateWithAadhaar } from "./CreateWithAadhaar";
 import { LinkWithOtp } from "./LinkWithOtp";
 import { TooltipComponent } from "../ui/tooltip";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "../ui/dialog";
 
 type LinkAbhaNumberProps = ButtonProps & {
   onSuccess: (abhaNumber: AbhaNumber) => void;
@@ -36,25 +29,25 @@ export const LinkAbhaNumber: FC<LinkAbhaNumberProps> = ({
   };
 
   return (
-    <Drawer open={isDrawerOpen} onOpenChange={setIsDrawerOpen}>
-      <DrawerTrigger>
+    <Dialog open={isDrawerOpen} onOpenChange={setIsDrawerOpen}>
+      <DialogTrigger>
         <Button {...props}>
           <span>
             <IdCardIcon />
           </span>
           Generate/Link ABHA Number
         </Button>
-      </DrawerTrigger>
-      <DrawerContent>
-        <div className="md:mx-auto max-w-screen md:max-w-md max-md:p-4 max-h-svh">
-          <DrawerHeader>
-            <DrawerTitle>Generate/Link ABHA Number</DrawerTitle>
-            <DrawerDescription>
+      </DialogTrigger>
+      <DialogContent>
+        <div className="h-full w-full flex flex-wrap items-center justify-center overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>Generate/Link ABHA Number</DialogTitle>
+            <DialogDescription>
               Generate/link patient's ABHA details for easy access to healthcare
               services.
-            </DrawerDescription>
-          </DrawerHeader>
-          <Tabs defaultValue={defaultMode} orientation="vertical">
+            </DialogDescription>
+          </DialogHeader>
+          <Tabs defaultValue={defaultMode} orientation="vertical" className="flex flex-wrap">
             <TabsList className="w-full">
               <TabsTrigger
                 className="flex-1 w-1/2 justify-start"
@@ -82,8 +75,8 @@ export const LinkAbhaNumber: FC<LinkAbhaNumberProps> = ({
               </TabsContent>
             </ScrollArea>
           </Tabs>
-        </div>
-      </DrawerContent>
-    </Drawer>
+          </div>
+      </DialogContent>
+    </Dialog>
   );
 };
