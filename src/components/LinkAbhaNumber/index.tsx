@@ -39,7 +39,7 @@ export const LinkAbhaNumber: FC<LinkAbhaNumberProps> = ({
         </Button>
       </DialogTrigger>
       <DialogContent>
-        <div className="h-full w-full flex flex-wrap items-center justify-center overflow-y-auto">
+        <div className="h-full w-full overflow-y-auto">
           <DialogHeader>
             <DialogTitle>Generate/Link ABHA Number</DialogTitle>
             <DialogDescription>
