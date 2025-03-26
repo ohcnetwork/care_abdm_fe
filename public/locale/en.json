@@ -112,5 +112,11 @@
   "async_operation_warning": "This operation may take some time. Please check back later.",
   "loading_health_information": "Loading Health Information",
   "configure_health_facility": "Configure Health Facility",
-  "configure_health_facility_description": "Configure the health facility, link your ABDM health facility with care and register it as a service in bridge"
+  "configure_health_facility_description": "Configure the health facility, link your ABDM health facility with care and register it as a service in bridge",
+  "generate_scan_and_share_qr": "Generate Scan and Share QR",
+  "generate_scan_and_share_qr_description": "Generate a QR code that can be scanned by the patients to expidite thier registration process",
+  "counter_name": "Counter Name",
+  "counter_name_placeholder": "Enter the name of the counter",
+  "counter_name_description": "Counter name can be any alpha numeric string without spaces",
+  "download_qr_code": "Download QR Code"
 }
