@@ -1,4 +1,5 @@
 import { FC } from "react";
+import { HIProfile } from "hi-profiles";
 import { I18NNAMESPACE } from "@/lib/constants";
 import { Loader2Icon } from "lucide-react";
 import Page from "@/components/ui/page";
@@ -77,6 +78,12 @@ const HealthInformation: FC<HealthInformationProps> = ({ artefactId }) => {
             </h4>
           </>
         )}
+        {data?.data.map((item) => (
+          <HIProfile
+            key={item.care_context_reference}
+            bundle={parseData(item.content)}
+          />
+        ))}
       </div>
     </Page>
   );
