@@ -68,7 +68,7 @@ function ConsentArtefactCard({ artefact }: IConsentArtefactCardProps) {
   return (
     <Link
       href={`/abdm/health-information/${artefact.id}`}
-      className="w-full cursor-pointer overflow-hidden bg-white shadow sm:rounded-lg"
+      className="w-full cursor-pointer overflow-hidden bg-white shadow-sm sm:rounded-lg"
     >
       <div className="flex flex-col items-center justify-between gap-4 px-4 py-5 sm:flex-row sm:gap-0 sm:px-6">
         <div className="flex flex-col items-center">
@@ -124,7 +124,7 @@ function ConsentRequestCard({ consent }: IConsentRequestCardProps) {
   });
 
   return (
-    <div className="overflow-hidden bg-white shadow sm:rounded-lg">
+    <div className="overflow-hidden bg-white shadow-sm sm:rounded-lg">
       <div className="flex flex-col items-center justify-between gap-4 px-4 py-5 sm:flex-row sm:gap-0 sm:px-6">
         <div className="flex flex-col items-center">
           <h5 className="font-semibold leading-6 text-secondary-900">
