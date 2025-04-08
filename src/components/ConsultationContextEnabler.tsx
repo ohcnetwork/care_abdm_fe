@@ -1,7 +1,10 @@
 import { useConsultation } from "@/components/Facility/ConsultationDetails/ConsultationContext";
+
 import useQuery from "@/Utils/request/useQuery";
+
 import routes from "../api";
 import { AbhaNumberModel, HealthFacilityModel } from "../types";
+import EnforceAbhaLinking from "./EnforceAbhaLinking";
 
 const ConsultationContextEnabler = () => {
   const { patient, setValue } = useConsultation<{
@@ -9,7 +12,7 @@ const ConsultationContextEnabler = () => {
     healthFacility?: HealthFacilityModel;
   }>();
 
-  useQuery(routes.abhaNumber.get, {
+  const { loading } = useQuery(routes.abhaNumber.get, {
     pathParams: { abhaNumberId: patient?.id ?? "" },
     silent: true,
     onResponse(res) {
@@ -25,7 +28,11 @@ const ConsultationContextEnabler = () => {
     },
   });
 
-  return <></>;
+  if (loading) {
+    return null;
+  }
+
+  return <EnforceAbhaLinking />;
 };
 
 export default ConsultationContextEnabler;
