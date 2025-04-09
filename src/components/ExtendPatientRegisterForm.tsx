@@ -1,27 +1,32 @@
-import * as Notification from "@/Utils/Notifications";
-
-import { ExtendPatientRegisterFormComponentType } from "@/pluginTypes";
-import LinkAbhaNumber from "./LinkAbhaNumber";
-import { AbhaNumberModel } from "../types";
-import { FormContextValue } from "@/components/Form/FormContext";
-import { parsePhoneNumber } from "@/Utils/utils";
+import { useNavigate } from "raviger";
 import { useCallback, useEffect, useState } from "react";
-import TextFormField from "@/components/Form/FormFields/TextFormField";
-import { PatientForm } from "@/components/Patient/PatientRegister";
+import { useTranslation } from "react-i18next";
+
+import CareIcon from "@/CAREUI/icons/CareIcon";
+
+import { Button } from "@/components/ui/button";
 import {
   Tooltip,
   TooltipContent,
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-import { Button } from "@/components/ui/button";
-import CareIcon from "@/CAREUI/icons/CareIcon";
-import routes from "../api";
-import useQuery from "@/Utils/request/useQuery";
-import { useTranslation } from "react-i18next";
+
+import { FormContextValue } from "@/components/Form/FormContext";
+import TextFormField from "@/components/Form/FormFields/TextFormField";
+import { PatientForm } from "@/components/Patient/PatientRegister";
+import { PatientModel } from "@/components/Patient/models";
+
+import * as Notification from "@/Utils/Notifications";
 import { usePubSub } from "@/Utils/pubsubContext";
 import request from "@/Utils/request/request";
-import { PatientModel } from "@/components/Patient/models";
+import useQuery from "@/Utils/request/useQuery";
+import { parsePhoneNumber } from "@/Utils/utils";
+import { ExtendPatientRegisterFormComponentType } from "@/pluginTypes";
+
+import routes from "../api";
+import { AbhaNumberModel } from "../types";
+import LinkAbhaNumber from "./LinkAbhaNumber";
 
 const ExtendPatientRegisterForm: ExtendPatientRegisterFormComponentType = ({
   facilityId,
@@ -31,7 +36,7 @@ const ExtendPatientRegisterForm: ExtendPatientRegisterFormComponentType = ({
   field,
 }) => {
   const { t } = useTranslation();
-  const [showLinkAbhaNumberModal, setShowLinkAbhaNumberModal] = useState(false);
+  const navigate = useNavigate();
   const { setSubscribers } = usePubSub();
 
   useQuery(routes.abhaNumber.get, {
@@ -51,6 +56,8 @@ const ExtendPatientRegisterForm: ExtendPatientRegisterFormComponentType = ({
       }
     },
   });
+
+  const showLinkAbhaNumberModal = !state.form.abha_number;
 
   const linkAbhaNumberAndPatient = useCallback(
     async (message: unknown) => {
@@ -157,7 +164,6 @@ const ExtendPatientRegisterForm: ExtendPatientRegisterFormComponentType = ({
     }
 
     dispatch({ type: "set_form", form: { ...state.form, ...values } });
-    setShowLinkAbhaNumberModal(false);
   };
 
   return (
@@ -172,7 +178,6 @@ const ExtendPatientRegisterForm: ExtendPatientRegisterFormComponentType = ({
                   disabled={!healthFacility}
                   onClick={(e) => {
                     e.preventDefault();
-                    setShowLinkAbhaNumberModal(true);
                   }}
                 >
                   <CareIcon icon="l-user-square" className="mr-2" />
@@ -193,7 +198,7 @@ const ExtendPatientRegisterForm: ExtendPatientRegisterFormComponentType = ({
         {showLinkAbhaNumberModal && (
           <LinkAbhaNumber
             show={showLinkAbhaNumberModal}
-            onClose={() => setShowLinkAbhaNumberModal(false)}
+            onClose={() => {}}
             onSuccess={(data) => {
               if (patientId) {
                 Notification.Warn({
@@ -202,6 +207,9 @@ const ExtendPatientRegisterForm: ExtendPatientRegisterFormComponentType = ({
               }
 
               populateAbhaValues(data, field);
+            }}
+            onBack={() => {
+              navigate("/patients");
             }}
           />
         )}

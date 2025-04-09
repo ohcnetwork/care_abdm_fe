@@ -15,6 +15,7 @@ interface ILinkAbhaNumberProps {
   show: boolean;
   onClose: () => void;
   onSuccess: (abhaNumber: AbhaNumberModel) => void;
+  onBack?: () => void;
 }
 
 const ABHA_LINK_OPTIONS = {
@@ -59,6 +60,7 @@ export default function LinkAbhaNumber({
   show,
   onClose,
   onSuccess,
+  onBack,
 }: ILinkAbhaNumberProps) {
   const { t } = useTranslation();
   const [currentAbhaLinkOption, setCurrentAbhaLinkOption] = useState<
@@ -136,6 +138,15 @@ export default function LinkAbhaNumber({
                 {t(option.title)}
               </ButtonV2>
             ))}
+          {onBack && (
+            <ButtonV2
+              ghost
+              className="w-full border border-gray-400 text-secondary-800 hover:bg-secondary-300"
+              onClick={onBack}
+            >
+              Go Back
+            </ButtonV2>
+          )}
         </div>
       </div>
     </DialogModal>
