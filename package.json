@@ -6,9 +6,8 @@
   "author": "",
   "license": "ISC",
   "scripts": {
-    "start": "npm run build && vite",
-    "build": "npm run build:temp && vite build",
-    "build:temp": "vite build --outDir temp",
+    "start": "vite build --watch & vite preview --port 5173",
+    "build": "vite build",
     "preview": "vite preview"
   },
   "dependencies": {

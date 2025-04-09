@@ -1,8 +1,6 @@
-import { config } from "process";
 import { defineConfig } from "vite";
 import federation from "@originjs/vite-plugin-federation";
 import path from "path";
-import prefixClassnames from "./babel-plugin-prefix-classnames";
 import react from "@vitejs/plugin-react";
 import tailwindcss from "@tailwindcss/vite";
 
@@ -17,9 +15,9 @@ export default defineConfig({
       shared: ["react", "react-dom", "react-i18next", "@tanstack/react-query"],
     }),
     react({
-      babel: {
-        plugins: [[prefixClassnames, { prefix: "abdm:" }]],
-      },
+      // babel: {
+      //   plugins: [[prefixClassnames, { prefix: "abdm:" }]],
+      // },
     }),
     tailwindcss(),
   ],

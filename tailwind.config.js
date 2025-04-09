@@ -2,7 +2,6 @@ const colors = require("tailwindcss/colors");
 
 /** @type {import('tailwindcss').Config} */
 module.exports = {
-  prefix: "abdm",
   important: false,
   darkMode: ["class"],
   theme: {
