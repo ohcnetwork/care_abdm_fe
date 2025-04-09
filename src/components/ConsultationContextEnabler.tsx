@@ -7,7 +7,7 @@ import { AbhaNumberModel, HealthFacilityModel } from "../types";
 import EnforceAbhaLinking from "./EnforceAbhaLinking";
 
 const ConsultationContextEnabler = () => {
-  const { patient, setValue } = useConsultation<{
+  const { patient, setValue, consultation } = useConsultation<{
     abhaNumber?: AbhaNumberModel;
     healthFacility?: HealthFacilityModel;
   }>();
@@ -32,7 +32,7 @@ const ConsultationContextEnabler = () => {
     return null;
   }
 
-  return <EnforceAbhaLinking />;
+  return <EnforceAbhaLinking consultation={consultation} />;
 };
 
 export default ConsultationContextEnabler;

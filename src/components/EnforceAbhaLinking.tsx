@@ -13,18 +13,23 @@ import {
 
 import { useConsultation } from "@/components/Facility/ConsultationDetails/ConsultationContext";
 import DischargeModal from "@/components/Facility/DischargeModal";
+import { ConsultationModel } from "@/components/Facility/models";
 
 import { AbhaNumberModel } from "../types";
 
-export default function EnforceAbhaLinking() {
+type EnforceAbhaLinkingProps = {
+  consultation?: ConsultationModel;
+};
+
+export default function EnforceAbhaLinking({
+  consultation,
+}: EnforceAbhaLinkingProps) {
   const { t } = useTranslation();
   const [qParams, setQParams] = useQueryParams();
   const navigate = useNavigate();
   const { abhaNumber } = useConsultation<{
     abhaNumber?: AbhaNumberModel;
   }>();
-
-  const { consultation } = useConsultation();
 
   return (
     <>
