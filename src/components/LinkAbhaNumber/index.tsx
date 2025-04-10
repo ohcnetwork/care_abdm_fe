@@ -36,7 +36,7 @@ export const LinkAbhaNumber: FC<LinkAbhaNumberProps> = ({
 
   return (
     <Drawer open={isDrawerOpen} onOpenChange={setIsDrawerOpen}>
-      <DrawerTrigger>
+      <DrawerTrigger disabled={props.disabled}>
         <Button {...props}>
           <span>
             <IdCardIcon />
