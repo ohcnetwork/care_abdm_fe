@@ -8,6 +8,7 @@
   "scripts": {
     "start": "vite build --watch & vite preview --port 5173",
     "build": "vite build",
+    "prebuild": "rm package-lock.json && npm install",
     "preview": "vite preview"
   },
   "dependencies": {
