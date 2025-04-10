@@ -4,15 +4,14 @@ import useQuery from "@/Utils/request/useQuery";
 
 import routes from "../api";
 import { AbhaNumberModel, HealthFacilityModel } from "../types";
-import EnforceAbhaLinking from "./EnforceAbhaLinking";
 
 const ConsultationContextEnabler = () => {
-  const { patient, setValue, consultation } = useConsultation<{
+  const { patient, setValue } = useConsultation<{
     abhaNumber?: AbhaNumberModel;
     healthFacility?: HealthFacilityModel;
   }>();
 
-  const { loading } = useQuery(routes.abhaNumber.get, {
+  useQuery(routes.abhaNumber.get, {
     pathParams: { abhaNumberId: patient?.id ?? "" },
     silent: true,
     onResponse(res) {
@@ -28,11 +27,7 @@ const ConsultationContextEnabler = () => {
     },
   });
 
-  if (loading) {
-    return null;
-  }
-
-  return <EnforceAbhaLinking consultation={consultation} />;
+  return null;
 };
 
 export default ConsultationContextEnabler;
