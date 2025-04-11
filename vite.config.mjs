@@ -14,11 +14,7 @@ export default defineConfig({
       },
       shared: ["react", "react-dom", "react-i18next", "@tanstack/react-query"],
     }),
-    react({
-      // babel: {
-      //   plugins: [[prefixClassnames, { prefix: "abdm:" }]],
-      // },
-    }),
+    react(),
     tailwindcss(),
   ],
   build: {

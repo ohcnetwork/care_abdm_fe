@@ -1,6 +1,9 @@
-@import 'tailwindcss' prefix(abdm);
 
 @config '../tailwind.config.js';
+
+.abdm-container {
+  @import 'tailwindcss';
+}
 
 /*
   The default border color has changed to `currentcolor` in Tailwind CSS v4,
