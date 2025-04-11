@@ -32,7 +32,7 @@
     "input-otp": "^1.4.2",
     "lucide-react": "^0.468.0",
     "qrcode.react": "^4.2.0",
-    "raviger": "^4.1.2",
+    "raviger": "^5.0.0-2",
     "react": "^18.3.1",
     "react-day-picker": "^8.10.1",
     "react-dom": "^18.3.1",
