@@ -33,7 +33,7 @@ const FacilityHomeActions: FC<FacilityHomeActionsProps> = ({ facility }) => {
   return (
     <>
       <Sheet open={open} onOpenChange={setOpen}>
-        <SheetTrigger asChild>
+        <SheetTrigger asChild className="abdm-container">
           <Button
             variant="outline"
             size="sm"
@@ -43,7 +43,7 @@ const FacilityHomeActions: FC<FacilityHomeActionsProps> = ({ facility }) => {
             {t("configure_health_facility")}
           </Button>
         </SheetTrigger>
-        <SheetContent className="w-full sm:max-w-2xl overflow-y-auto">
+        <SheetContent className="abdm-container w-full sm:max-w-2xl overflow-y-auto">
           <SheetHeader>
             <SheetTitle>{t("configure_health_facility")}</SheetTitle>
             <SheetDescription>

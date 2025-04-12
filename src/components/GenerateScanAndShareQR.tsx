@@ -1,10 +1,4 @@
-import { I18NNAMESPACE } from "@/lib/constants";
 import { FC, useMemo, useRef } from "react";
-import { useTranslation } from "react-i18next";
-import { Input } from "@/components/ui/input";
-import { z } from "zod";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { useForm } from "react-hook-form";
 import {
   Form,
   FormControl,
@@ -14,9 +8,16 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
+
+import { Button } from "./ui/button";
+import { I18NNAMESPACE } from "@/lib/constants";
+import { Input } from "@/components/ui/input";
 import { QRCodeSVG } from "qrcode.react";
 import { scanAndShareUrl } from "@/config";
-import { Button } from "./ui/button";
+import { useForm } from "react-hook-form";
+import { useTranslation } from "react-i18next";
+import { z } from "zod";
+import { zodResolver } from "@hookform/resolvers/zod";
 
 type GenerateScanAndShareQRProps = {
   healthFacilityId: string;
@@ -42,8 +43,8 @@ export const GenerateScanAndShareQR: FC<GenerateScanAndShareQRProps> = ({
 
   const scanAndShareQrValue = useMemo(() => {
     return scanAndShareUrl
-      .replace("<HF_ID>", healthFacilityId)
-      .replace("<COUNTER_NAME>", scanAndShareQrForm.watch("counterName"));
+      ?.replace("<HF_ID>", healthFacilityId)
+      ?.replace("<COUNTER_NAME>", scanAndShareQrForm.watch("counterName"));
   }, [scanAndShareQrForm.watch("counterName"), healthFacilityId]);
 
   const downloadQR = () => {
@@ -85,6 +86,16 @@ export const GenerateScanAndShareQR: FC<GenerateScanAndShareQRProps> = ({
 
   function onSubmit(_values: z.infer<typeof scanAndShareQrFormSchema>) {
     downloadQR();
+  }
+
+  if (!scanAndShareUrl) {
+    return (
+      <div className="mt-10 flex flex-col items-center justify-center gap-2.5">
+        <p className="font-semibold text-secondary-600">
+          {t("scan_and_share_qr_not_available")}
+        </p>
+      </div>
+    );
   }
 
   return (

@@ -22,6 +22,7 @@
   "consent__hi_types": "HI Profiles",
   "consent__patient": "Patient",
   "consent__purpose": "Purpose",
+  "scan_and_share_qr_not_available": "Scan and share QR code is not available, Please contact the admin.",
   "consent__purpose__BTG": "Break The Glass",
   "consent__purpose__CAREMGT": "Care Management",
   "consent__purpose__DSRCH": "Disease Specific Healthcare Research",
