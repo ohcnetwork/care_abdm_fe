@@ -12,10 +12,16 @@ export default defineConfig({
       exposes: {
         "./manifest": "./src/manifest.ts",
       },
-      shared: ["react", "react-dom", "react-i18next", "@tanstack/react-query"],
+      shared: [
+        "react",
+        "react-dom",
+        "react-i18next",
+        "@tanstack/react-query",
+        "raviger",
+      ],
     }),
-    react(),
     tailwindcss(),
+    react(),
   ],
   build: {
     target: "esnext",
@@ -35,6 +41,11 @@ export default defineConfig({
         chunkFileNames: "assets/[name].js",
       },
     },
+  },
+  preview: {
+    port: 5173,
+    allowedHosts: true,
+    host: "0.0.0.0",
   },
   resolve: {
     alias: {
