@@ -1,7 +1,7 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation } from "@tanstack/react-query";
 import { CircleCheckIcon, CircleIcon, CircleXIcon } from "lucide-react";
-import { FC, useEffect, useState } from "react";
+import { FC, JSX, useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 import { toast } from "@/lib/utils";
