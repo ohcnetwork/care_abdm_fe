@@ -18,6 +18,7 @@ coverage
 # Production
 dist
 dist-ssr
+temp
 *.local
 
 # Editor directories and files

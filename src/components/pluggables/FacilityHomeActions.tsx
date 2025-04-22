@@ -1,18 +1,17 @@
 import { FC, useState } from "react";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog";
 import { useTranslation } from "react-i18next";
 import { Button } from "@/components/ui/button";
-import { cn } from "@/lib/utils";
 import { Facility } from "@/types/facility";
 import { SettingsIcon } from "lucide-react";
 import { ConfigureHealthFacilityForm } from "../ConfigureHealthFacilityForm";
+import {
+  Sheet,
+  SheetContent,
+  SheetDescription,
+  SheetHeader,
+  SheetTitle,
+  SheetTrigger,
+} from "@/components/ui/sheet";
 import { useQueryClient } from "@tanstack/react-query";
 import { I18NNAMESPACE } from "@/lib/constants";
 
@@ -21,14 +20,11 @@ type FacilityHomeActionsProps = {
   className?: string;
 };
 
-const FacilityHomeActions: FC<FacilityHomeActionsProps> = ({
-  facility,
-  className,
-}) => {
+const FacilityHomeActions: FC<FacilityHomeActionsProps> = ({ facility }) => {
   const { t } = useTranslation(I18NNAMESPACE);
   const queryClient = useQueryClient();
 
-  const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [open, setOpen] = useState(false);
 
   if (!facility) {
     return null;
@@ -36,20 +32,24 @@ const FacilityHomeActions: FC<FacilityHomeActionsProps> = ({
 
   return (
     <>
-      <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-        <DialogTrigger asChild>
-          <Button variant="outline" className={cn("cursor-pointer", className)}>
-            <SettingsIcon className="mr-2 h-4 w-4" />
+      <Sheet open={open} onOpenChange={setOpen}>
+        <SheetTrigger asChild className="abdm-container">
+          <Button
+            variant="outline"
+            size="sm"
+            className="cursor-pointer font-semibold"
+          >
+            <SettingsIcon />
             {t("configure_health_facility")}
           </Button>
-        </DialogTrigger>
-        <DialogContent className="sm:max-w-[425px]">
-          <DialogHeader>
-            <DialogTitle>{t("configure_health_facility")}</DialogTitle>
-            <DialogDescription>
+        </SheetTrigger>
+        <SheetContent className="abdm-container w-full sm:max-w-2xl overflow-y-auto">
+          <SheetHeader>
+            <SheetTitle>{t("configure_health_facility")}</SheetTitle>
+            <SheetDescription>
               {t("configure_health_facility_description")}
-            </DialogDescription>
-          </DialogHeader>
+            </SheetDescription>
+          </SheetHeader>
           <div className="mt-6">
             <ConfigureHealthFacilityForm
               facilityId={facility.id}
@@ -57,12 +57,12 @@ const FacilityHomeActions: FC<FacilityHomeActionsProps> = ({
                 queryClient.invalidateQueries({
                   queryKey: ["healthFacility", facility.id],
                 });
-                setIsDialogOpen(false);
+                setOpen(false);
               }}
             />
           </div>
-        </DialogContent>
-      </Dialog>
+        </SheetContent>
+      </Sheet>
     </>
   );
 };

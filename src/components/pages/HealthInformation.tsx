@@ -1,12 +1,11 @@
-import { HIProfile } from "hi-profiles";
-import { useTranslation } from "react-i18next";
-
-import Page from "@/components/ui/page";
-import { useQuery } from "@tanstack/react-query";
-import { Loader2Icon } from "lucide-react";
-import { apis } from "@/apis";
 import { FC } from "react";
+import { HIProfile } from "hi-profiles";
 import { I18NNAMESPACE } from "@/lib/constants";
+import { Loader2Icon } from "lucide-react";
+import Page from "@/components/ui/page";
+import { apis } from "@/apis";
+import { useQuery } from "@tanstack/react-query";
+import { useTranslation } from "react-i18next";
 
 interface HealthInformationProps {
   artefactId: string;

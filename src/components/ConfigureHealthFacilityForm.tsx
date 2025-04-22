@@ -3,7 +3,7 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import * as z from "zod";
-import { useTranslation } from "react-i18next";
+import { Trans, useTranslation } from "react-i18next";
 import { useMutation, useQuery } from "@tanstack/react-query";
 
 import { Button } from "@/components/ui/button";
@@ -28,6 +28,7 @@ import { toast } from "@/lib/utils";
 import { HealthFacility } from "@/types/healthFacility";
 import { CircleAlertIcon, CircleCheckIcon } from "lucide-react";
 import { I18NNAMESPACE } from "@/lib/constants";
+import { GenerateScanAndShareQR } from "./GenerateScanAndShareQR";
 
 type ConfigureHealthFacilityFormProps = {
   facilityId: string;
@@ -119,96 +120,108 @@ export const ConfigureHealthFacilityForm: FC<
   }
 
   return (
-    <Form {...form}>
-      <form
-        onSubmit={(e) => {
-          e.stopPropagation();
-          form.handleSubmit(onSubmit)(e);
-        }}
-        className="space-y-4"
-      >
-        <FormField
-          control={form.control}
-          name="hf_id"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>{t("health_facility__hf_id")}</FormLabel>
-              <FormControl>
-                <div className="flex items-center gap-2">
-                  <Input {...field} />
-                  <TooltipProvider>
-                    <Tooltip>
-                      <TooltipTrigger asChild>
-                        <Button
-                          type="button"
-                          variant="ghost"
-                          className={
-                            healthFacility?.registered
-                              ? "text-primary-500"
-                              : "text-warning-500"
-                          }
-                        >
-                          {healthFacility?.registered ? (
-                            <CircleCheckIcon className="size-6" />
-                          ) : (
-                            <CircleAlertIcon className="size-6" />
-                          )}
-                        </Button>
-                      </TooltipTrigger>
-                      <TooltipContent>
-                        {healthFacility?.registered ? (
-                          <div className="flex flex-col gap-2">
-                            <span>
-                              {t("health_facility__registered_1.1")}{" "}
-                              <strong>
-                                {t("health_facility__registered_1.2")}
-                              </strong>
-                            </span>
-                            <span className="text-green-500">
-                              {t("health_facility__registered_2")}
-                            </span>
-                            <span>{t("health_facility__registered_3")}</span>
-                          </div>
-                        ) : (
-                          <div className="flex flex-col gap-2">
-                            <span>
-                              {t("health_facility__not_registered_1.1")}{" "}
-                              <strong>
-                                {t("health_facility__not_registered_1.2")}
-                              </strong>
-                            </span>
-                            <span className="text-warning">
-                              {t("health_facility__not_registered_2")}
-                            </span>
-                            <span>
-                              {t("health_facility__not_registered_3")}
-                            </span>
-                          </div>
-                        )}
-                      </TooltipContent>
-                    </Tooltip>
-                  </TooltipProvider>
-                </div>
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-        <Button
-          type="submit"
-          disabled={
-            form.watch("hf_id") === healthFacility?.hf_id &&
-            healthFacility?.registered
-          }
-          loading={
-            registerHealthFacilityAsServiceMutation.isPending ||
-            updateHealthFacilityMutation.isPending ||
-            createHealthFacilityMutation.isPending
-          }
+    <div className="grid gap-4">
+      <Form {...form}>
+        <form
+          onSubmit={(e) => {
+            e.stopPropagation();
+            form.handleSubmit(onSubmit)(e);
+          }}
+          className="space-y-4"
         >
-          {t("health_facility__link")}
-        </Button>
-      </form>
-    </Form>
+          <FormField
+            control={form.control}
+            name="hf_id"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>{t("health_facility__hf_id")}</FormLabel>
+                <FormControl>
+                  <div className="flex items-center gap-4">
+                    <Input {...field} />
+                    <TooltipProvider>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <div
+                            className={
+                              healthFacility?.registered
+                                ? "text-primary-500 cursor-pointer"
+                                : "text-warning-500 cursor-pointer"
+                            }
+                          >
+                            {healthFacility?.registered ? (
+                              <CircleCheckIcon className="size-6" />
+                            ) : (
+                              <CircleAlertIcon className="size-6" />
+                            )}
+                          </div>
+                        </TooltipTrigger>
+                        <TooltipContent>
+                          {healthFacility?.registered ? (
+                            <div className="flex flex-col text-gray-300">
+                              <span className="font-semibold text-base text-white mb-2">
+                                {t("registered")}
+                              </span>
+                              <span>{t("health_facility__registered")}</span>
+                              <span className="mt-2 font-bold text-green-500">
+                                {t("no_action_required")}
+                              </span>
+                            </div>
+                          ) : (
+                            <div className="flex flex-col whitespace-nowrap text-gray-300">
+                              <span className="font-semibold text-base text-white mb-2">
+                                {t("not_registered")}
+                              </span>
+                              <Trans
+                                i18nKey="health_facility__not_registered_1"
+                                ns={I18NNAMESPACE}
+                                components={{
+                                  strong: (
+                                    <strong className="text-warning-500" />
+                                  ),
+                                }}
+                              />
+                              <span className="mt-2">
+                                <Trans
+                                  i18nKey="health_facility__not_registered_1.1"
+                                  ns={I18NNAMESPACE}
+                                  components={{
+                                    strong: (
+                                      <strong className="text-warning-500" />
+                                    ),
+                                  }}
+                                />
+                              </span>
+                            </div>
+                          )}
+                        </TooltipContent>
+                      </Tooltip>
+                    </TooltipProvider>
+                  </div>
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          <Button
+            type="submit"
+            disabled={
+              form.watch("hf_id") === healthFacility?.hf_id &&
+              healthFacility?.registered
+            }
+            loading={
+              registerHealthFacilityAsServiceMutation.isPending ||
+              updateHealthFacilityMutation.isPending ||
+              createHealthFacilityMutation.isPending
+            }
+          >
+            {t("health_facility__link")}
+          </Button>
+        </form>
+      </Form>
+
+      {healthFacility && (
+        <GenerateScanAndShareQR healthFacilityId={healthFacility.hf_id} />
+      )}
+    </div>
   );
 };

@@ -29,8 +29,8 @@ export const LinkAbhaNumber: FC<LinkAbhaNumberProps> = ({
   };
 
   return (
-    <Dialog open={isDrawerOpen} onOpenChange={setIsDrawerOpen}>
-      <DialogTrigger>
+    <Drawer open={isDrawerOpen} onOpenChange={setIsDrawerOpen}>
+      <DrawerTrigger disabled={props.disabled}>
         <Button {...props}>
           <span>
             <IdCardIcon />
