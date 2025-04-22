@@ -174,7 +174,7 @@ const EnterId: FC<EnterIdProps> = ({ setMemory, next }) => {
             <FormItem>
               <FormLabel>{t("any_id")}</FormLabel>
               <FormControl>
-                <Input placeholder={t("enter_any_id")} {...field} />
+                <Input placeholder={t("enter_any_id")} {...field} className="truncate" />
               </FormControl>
               <FormDescription>{t("any_id_description")}</FormDescription>
               <FormMessage />

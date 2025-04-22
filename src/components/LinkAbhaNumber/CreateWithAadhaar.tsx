@@ -1,7 +1,7 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation } from "@tanstack/react-query";
 import { CircleCheckIcon, CircleIcon, CircleXIcon } from "lucide-react";
-import { FC, useEffect, useState } from "react";
+import { FC, JSX, useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 import { toast } from "@/lib/utils";
@@ -143,7 +143,7 @@ const EnterAadhaar: FC<EnterAadhaarProps> = ({ setMemory, next }) => {
               <FormLabel>Aadhaar Number / Virtual ID</FormLabel>
               <FormControl>
                 <Input
-                  placeholder="Enter 12 digital Aadhaar  number OR 16 digit virtual ID"
+                  placeholder="Enter Aadhaar number OR Virtual ID"
                   {...field}
                 />
               </FormControl>
