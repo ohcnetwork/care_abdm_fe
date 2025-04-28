@@ -1,16 +1,17 @@
 import { FC, useEffect } from "react";
-import { UseFormReturn } from "react-hook-form";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { apis } from "@/apis";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import {
   Tooltip,
   TooltipContent,
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { LinkAbhaNumber } from "../LinkAbhaNumber";
+import { UseFormReturn } from "react-hook-form";
+import { apis } from "@/apis";
 import { toast } from "@/lib/utils";
 
 type PatientRegistrationFormProps = {
@@ -81,7 +82,7 @@ const PatientRegistrationForm: FC<PatientRegistrationFormProps> = ({
 
   if (!form.watch("abha_id")) {
     return (
-      <div className="flex justify-end w-full">
+      <div className="abdm-container flex justify-end w-full">
         <TooltipProvider>
           <Tooltip>
             <TooltipTrigger>
@@ -141,7 +142,7 @@ const PatientRegistrationForm: FC<PatientRegistrationFormProps> = ({
   }
 
   return (
-    <div id="abha-info" className="space-y-6">
+    <div id="abha-info" className="abdm-container space-y-6">
       <div>
         <h2 className="text-lg font-semibold">ABHA Info</h2>
         <div className="text-sm">

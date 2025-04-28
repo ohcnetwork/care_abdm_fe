@@ -1,9 +1,9 @@
+import { FC } from "react";
+import { I18NNAMESPACE } from "@/lib/constants";
+import { Patient } from "@/types/patient";
 import { apis } from "@/apis";
 import { useQuery } from "@tanstack/react-query";
-import { FC } from "react";
-import { Patient } from "@/types/patient";
 import { useTranslation } from "react-i18next";
-import { I18NNAMESPACE } from "@/lib/constants";
 
 type PatientDetailsTabDemographyGeneralInfoProps = {
   patientData: Patient;
@@ -27,8 +27,8 @@ const PatientDetailsTabDemographyGeneralInfo: FC<
   }
 
   return (
-    <div className="sm:col-span-2">
-      <div className="mr-6 flex flex-col items-start justify-between rounded-md border border-blue-300 bg-blue-50 p-4 sm:flex-row">
+    <div className="abdm-container sm:col-span-2">
+      <div className="mr-6 flex flex-col items-start justify-between rounded-md border border-blue-400 bg-blue-50 p-4 sm:flex-row">
         <div className="flex-1">
           <div className="text-sm font-normal leading-5 text-gray-600">
             {t("abha_number")}
