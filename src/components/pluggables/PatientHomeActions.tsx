@@ -1,15 +1,16 @@
-import { apis } from "@/apis";
-import { useMutation, useQuery } from "@tanstack/react-query";
-import { FC } from "react";
-import { LinkAbhaNumber } from "@/components/LinkAbhaNumber";
-import { toast } from "@/lib/utils";
 import {
   Tooltip,
   TooltipContent,
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import { useMutation, useQuery } from "@tanstack/react-query";
+
+import { FC } from "react";
+import { LinkAbhaNumber } from "@/components/LinkAbhaNumber";
 import { Patient } from "@/types/patient";
+import { apis } from "@/apis";
+import { toast } from "@/lib/utils";
 
 type PatientHomeActionsProps = {
   patient: Patient;
@@ -52,7 +53,7 @@ const PatientHomeActions: FC<PatientHomeActionsProps> = ({
       {!abhaNumber && (
         <TooltipProvider>
           <Tooltip>
-            <TooltipTrigger>
+            <TooltipTrigger className="abdm-container">
               <LinkAbhaNumber
                 disabled={!healthFacility}
                 onSuccess={(abhaNumber) => {
@@ -65,7 +66,7 @@ const PatientHomeActions: FC<PatientHomeActionsProps> = ({
               />
             </TooltipTrigger>
             {!healthFacility && (
-              <TooltipContent>
+              <TooltipContent className="abdm-container">
                 <p>
                   Abha linking is disabled for this facility as it doesn't have
                   health facility id configured.

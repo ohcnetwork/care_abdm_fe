@@ -1,6 +1,3 @@
-import { IdCardIcon } from "lucide-react";
-import { FC, useState } from "react";
-
 import { Button, ButtonProps } from "@/components/ui/button";
 import {
   Drawer,
@@ -10,12 +7,14 @@ import {
   DrawerTitle,
   DrawerTrigger,
 } from "@/components/ui/drawer";
-import { ScrollArea } from "@/components/ui/scroll-area";
+import { FC, useState } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 import { AbhaNumber } from "@/types/abhaNumber";
 import { CreateWithAadhaar } from "./CreateWithAadhaar";
+import { IdCardIcon } from "lucide-react";
 import { LinkWithOtp } from "./LinkWithOtp";
+import { ScrollArea } from "@/components/ui/scroll-area";
 
 type LinkAbhaNumberProps = ButtonProps & {
   onSuccess: (abhaNumber: AbhaNumber) => void;
@@ -36,7 +35,7 @@ export const LinkAbhaNumber: FC<LinkAbhaNumberProps> = ({
 
   return (
     <Drawer open={isDrawerOpen} onOpenChange={setIsDrawerOpen}>
-      <DrawerTrigger disabled={props.disabled}>
+      <DrawerTrigger disabled={props.disabled} className="abdm-container">
         <Button {...props}>
           <span>
             <IdCardIcon />
@@ -44,7 +43,7 @@ export const LinkAbhaNumber: FC<LinkAbhaNumberProps> = ({
           Generate/Link ABHA Number
         </Button>
       </DrawerTrigger>
-      <DrawerContent>
+      <DrawerContent className="abdm-container">
         <div className="md:mx-auto max-w-screen md:max-w-md max-md:p-4 max-h-svh">
           <DrawerHeader>
             <DrawerTitle>Generate/Link ABHA Number</DrawerTitle>
