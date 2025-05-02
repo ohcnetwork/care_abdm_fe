@@ -1,13 +1,5 @@
-import { zodResolver } from "@hookform/resolvers/zod";
-import { useMutation } from "@tanstack/react-query";
-import { FC, useState } from "react";
-import { useForm } from "react-hook-form";
-import { useTranslation } from "react-i18next";
-import { toast } from "@/lib/utils";
-import { z } from "zod";
-
 import { Button, ButtonWithTimer } from "@/components/ui/button";
-import { Checkbox } from "@/components/ui/checkbox";
+import { FC, useState } from "react";
 import {
   Form,
   FormControl,
@@ -17,7 +9,11 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
+import {
+  I18NNAMESPACE,
+  MAX_OTP_RESEND_COUNT,
+  SUPPORTED_AUTH_METHODS,
+} from "@/lib/constants";
 import {
   InputOTP,
   InputOTPGroup,
@@ -28,15 +24,18 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
-
-import { apis } from "@/apis";
-import { AbhaNumber } from "@/types/abhaNumber";
 import useMultiStepForm, { InjectedStepProps } from "./useMultiStepForm";
-import {
-  I18NNAMESPACE,
-  MAX_OTP_RESEND_COUNT,
-  SUPPORTED_AUTH_METHODS,
-} from "@/lib/constants";
+
+import { AbhaNumber } from "@/types/abhaNumber";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Input } from "@/components/ui/input";
+import { apis } from "@/apis";
+import { toast } from "@/lib/utils";
+import { useForm } from "react-hook-form";
+import { useMutation } from "@tanstack/react-query";
+import { useTranslation } from "react-i18next";
+import { z } from "zod";
+import { zodResolver } from "@hookform/resolvers/zod";
 
 type LinkWithOtpProps = {
   onSuccess: (abhaNumber: AbhaNumber) => void;
@@ -54,8 +53,14 @@ type FormMemory = {
 export const LinkWithOtp: FC<LinkWithOtpProps> = ({ onSuccess }) => {
   const { currentStep } = useMultiStepForm<FormMemory>(
     [
-      <EnterId {...({} as EnterIdProps)} />,
-      <VerifyId {...({ onSuccess } as VerifyIdProps)} />,
+      {
+        id: "enter-id",
+        element: <EnterId {...({} as EnterIdProps)} />,
+      },
+      {
+        id: "verify-id",
+        element: <VerifyId {...({ onSuccess } as VerifyIdProps)} />,
+      },
     ],
     {
       id: "",
@@ -101,7 +106,7 @@ const enterIdFormSchema = z.object({
 
 type EnterIdFormValues = z.infer<typeof enterIdFormSchema>;
 
-const EnterId: FC<EnterIdProps> = ({ setMemory, next }) => {
+const EnterId: FC<EnterIdProps> = ({ setMemory, goTo }) => {
   const { t } = useTranslation(I18NNAMESPACE);
   const [showAuthMethods, setShowAuthMethods] = useState(false);
   const [authMethods, setAuthMethods] = useState<
@@ -159,7 +164,7 @@ const EnterId: FC<EnterIdProps> = ({ setMemory, next }) => {
           ...prev,
           transactionId: data.transaction_id,
         }));
-        next();
+        goTo("verify-id");
       }
     },
   });

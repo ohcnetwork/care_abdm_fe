@@ -119,5 +119,8 @@
   "counter_name": "Counter Name",
   "counter_name_placeholder": "Enter the name of the counter",
   "counter_name_description": "Counter name can be any alpha numeric string without spaces",
-  "download_qr_code": "Download QR Code"
+  "download_qr_code": "Download QR Code",
+  "verify_with_otp": "Verify with OTP",
+  "verify_demographics": "Verify Demographics",
+  "verify_with_demographics": "Verify with Demographics"
 }

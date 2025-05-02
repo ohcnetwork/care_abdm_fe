@@ -1,16 +1,6 @@
-import { zodResolver } from "@hookform/resolvers/zod";
-import { useMutation } from "@tanstack/react-query";
-import { CircleCheckIcon, CircleIcon, CircleXIcon } from "lucide-react";
-import { FC, useEffect, useState } from "react";
-import { useForm } from "react-hook-form";
-import { useTranslation } from "react-i18next";
-import { toast } from "@/lib/utils";
-import { z } from "zod";
-
-import { cn } from "@/lib/utils";
-
 import { Button, ButtonWithTimer } from "@/components/ui/button";
-import { Checkbox } from "@/components/ui/checkbox";
+import { CircleCheckIcon, CircleIcon, CircleXIcon } from "lucide-react";
+import { FC, JSX, useEffect, useState } from "react";
 import {
   Form,
   FormControl,
@@ -20,17 +10,33 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
+import { I18NNAMESPACE, MAX_OTP_RESEND_COUNT } from "@/lib/constants";
 import {
   InputOTP,
   InputOTPGroup,
   InputOTPSlot,
 } from "@/components/ui/input-otp";
-
-import { apis } from "@/apis";
-import { AbhaNumber } from "@/types/abhaNumber";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import useMultiStepForm, { InjectedStepProps } from "./useMultiStepForm";
-import { I18NNAMESPACE, MAX_OTP_RESEND_COUNT } from "@/lib/constants";
+
+import { AbhaNumber } from "@/types/abhaNumber";
+import { Checkbox } from "@/components/ui/checkbox";
+import { DatePicker } from "@/components/ui/date-picker";
+import { Input } from "@/components/ui/input";
+import { apis } from "@/apis";
+import { cn } from "@/lib/utils";
+import { toast } from "@/lib/utils";
+import { useForm } from "react-hook-form";
+import { useMutation } from "@tanstack/react-query";
+import { useTranslation } from "react-i18next";
+import { z } from "zod";
+import { zodResolver } from "@hookform/resolvers/zod";
 
 type CreateWithAadhaarProps = {
   onSuccess: (abhaNumber: AbhaNumber) => void;
@@ -49,12 +55,44 @@ export const CreateWithAadhaar: FC<CreateWithAadhaarProps> = ({
 }) => {
   const { currentStep } = useMultiStepForm<FormMemory>(
     [
-      <EnterAadhaar {...({} as EnterAadhaarProps)} />,
-      <VerifyAadhaar {...({} as VerifyAadhaarProps)} />,
-      <HandleExistingAbha {...({ onSuccess } as HandleExistingAbhaProps)} />,
-      <LinkMobile {...({} as LinkMobileProps)} />,
-      <VerifyMobile {...({} as VerifyMobileProps)} />,
-      <ChooseAbhaAddress {...({ onSuccess } as ChooseAbhaAddressProps)} />,
+      {
+        id: "enter-aadhaar",
+        element: <EnterAadhaar {...({} as EnterAadhaarProps)} />,
+      },
+      {
+        id: "verify-aadhaar-with-otp",
+        element: (
+          <VerifyAadhaarWithOtp {...({} as VerifyAadhaarWithOtpProps)} />
+        ),
+      },
+      {
+        id: "verify-aadhaar-with-demographics",
+        element: (
+          <VerifyAadhaarWithDemographics
+            {...({ onSuccess } as VerifyAadhaarWithDemographicsProps)}
+          />
+        ),
+      },
+      {
+        id: "handle-existing-abha",
+        element: (
+          <HandleExistingAbha {...({ onSuccess } as HandleExistingAbhaProps)} />
+        ),
+      },
+      {
+        id: "link-mobile",
+        element: <LinkMobile {...({} as LinkMobileProps)} />,
+      },
+      {
+        id: "verify-mobile",
+        element: <VerifyMobile {...({} as VerifyMobileProps)} />,
+      },
+      {
+        id: "choose-abha-address",
+        element: (
+          <ChooseAbhaAddress {...({ onSuccess } as ChooseAbhaAddressProps)} />
+        ),
+      },
     ],
     {
       aadhaarNumber: "",
@@ -91,7 +129,7 @@ const enterAadhaarFormSchema = z.object({
 
 type EnterAadhaarFormValues = z.infer<typeof enterAadhaarFormSchema>;
 
-const EnterAadhaar: FC<EnterAadhaarProps> = ({ setMemory, next }) => {
+const EnterAadhaar: FC<EnterAadhaarProps> = ({ setMemory, goTo }) => {
   const { t } = useTranslation(I18NNAMESPACE);
 
   const form = useForm<EnterAadhaarFormValues>({
@@ -115,7 +153,7 @@ const EnterAadhaar: FC<EnterAadhaarProps> = ({ setMemory, next }) => {
           transactionId: data.transaction_id,
           aadhaarNumber: form.getValues("aadhaar"),
         }));
-        next();
+        goTo("verify-aadhaar-with-otp");
       }
     },
   });
@@ -178,21 +216,39 @@ const EnterAadhaar: FC<EnterAadhaarProps> = ({ setMemory, next }) => {
             )}
           />
         ))}
-        <Button
-          type="submit"
-          variant="default"
-          loading={sendAadhaarOtpMutation.isPending}
-        >
-          {t("send_otp")}
-        </Button>
+        <div className="flex items-center justify-center gap-2">
+          <Button
+            type="submit"
+            variant="default"
+            loading={sendAadhaarOtpMutation.isPending}
+            className="w-full"
+          >
+            {t("verify_with_otp")}
+          </Button>
+          <Button
+            type="button"
+            variant="default"
+            onClick={() => {
+              setMemory((prev) => ({
+                ...prev,
+                transactionId: "",
+                aadhaarNumber: form.getValues("aadhaar"),
+              }));
+              goTo("verify-aadhaar-with-demographics");
+            }}
+            className="w-full"
+          >
+            {t("verify_with_demographics")}
+          </Button>
+        </div>
       </form>
     </Form>
   );
 };
 
-type VerifyAadhaarProps = InjectedStepProps<FormMemory>;
+type VerifyAadhaarWithOtpProps = InjectedStepProps<FormMemory>;
 
-const verifyAadhaarFormSchema = z.object({
+const verifyAadhaarWithOtpFormSchema = z.object({
   _aadhaar: z.string(),
   otp: z.string().length(6, {
     message: "OTP must be 6 digits",
@@ -205,13 +261,19 @@ const verifyAadhaarFormSchema = z.object({
   }),
 });
 
-type VerifyAadhaarFormValues = z.infer<typeof verifyAadhaarFormSchema>;
+type VerifyAadhaarWithOtpFormValues = z.infer<
+  typeof verifyAadhaarWithOtpFormSchema
+>;
 
-const VerifyAadhaar: FC<VerifyAadhaarProps> = ({ memory, setMemory, next }) => {
+const VerifyAadhaarWithOtp: FC<VerifyAadhaarWithOtpProps> = ({
+  memory,
+  setMemory,
+  goTo,
+}) => {
   const { t } = useTranslation(I18NNAMESPACE);
 
-  const form = useForm<VerifyAadhaarFormValues>({
-    resolver: zodResolver(verifyAadhaarFormSchema),
+  const form = useForm<VerifyAadhaarWithOtpFormValues>({
+    resolver: zodResolver(verifyAadhaarWithOtpFormSchema),
     defaultValues: {
       _aadhaar: memory?.aadhaarNumber ?? "",
       otp: "",
@@ -231,7 +293,7 @@ const VerifyAadhaar: FC<VerifyAadhaarProps> = ({ memory, setMemory, next }) => {
           mobileNumber: form.getValues("mobile"),
           abhaNumber: data.abha_number,
         }));
-        next();
+        goTo("handle-existing-abha");
       }
     },
   });
@@ -250,7 +312,7 @@ const VerifyAadhaar: FC<VerifyAadhaarProps> = ({ memory, setMemory, next }) => {
     },
   });
 
-  function onSubmit(values: VerifyAadhaarFormValues) {
+  function onSubmit(values: VerifyAadhaarWithOtpFormValues) {
     if (!memory?.transactionId) return;
 
     verifyAadhaarOtpMutation.mutate({
@@ -362,20 +424,194 @@ const VerifyAadhaar: FC<VerifyAadhaarProps> = ({ memory, setMemory, next }) => {
   );
 };
 
+type VerifyAadhaarWithDemographicsProps = InjectedStepProps<FormMemory> & {
+  onSuccess: (abhaNumber: AbhaNumber) => void;
+};
+
+const verifyAadhaarWithDemographicsFormSchema = z.object({
+  _aadhaar: z.string(),
+  name: z.string().min(1),
+  gender: z.enum(["M", "F", "O"]),
+  date_of_birth: z.string().date(),
+});
+
+type VerifyAadhaarWithDemographicsFormValues = z.infer<
+  typeof verifyAadhaarWithDemographicsFormSchema
+>;
+
+const VerifyAadhaarWithDemographics: FC<VerifyAadhaarWithDemographicsProps> = ({
+  memory,
+  setMemory,
+  goTo,
+  onSuccess,
+}) => {
+  const { t } = useTranslation(I18NNAMESPACE);
+
+  const form = useForm<VerifyAadhaarWithDemographicsFormValues>({
+    resolver: zodResolver(verifyAadhaarWithDemographicsFormSchema),
+    defaultValues: {
+      _aadhaar: memory?.aadhaarNumber ?? "",
+    },
+  });
+
+  const verifyAadhaarDemographicsMutation = useMutation({
+    mutationFn: apis.healthId.abhaCreateVerifyAadhaarDemographics,
+    onSuccess: (data) => {
+      if (data) {
+        setMemory((prev) => ({
+          ...prev,
+          transactionId: data.transaction_id,
+          abhaNumber: data.abha_number,
+        }));
+
+        if (!data.transaction_id) {
+          onSuccess(data.abha_number);
+          return;
+        }
+
+        goTo("handle-existing-abha");
+      }
+    },
+  });
+
+  function onSubmit(values: VerifyAadhaarWithDemographicsFormValues) {
+    if (!memory) return;
+
+    console.log(values, memory);
+
+    verifyAadhaarDemographicsMutation.mutate({
+      transaction_id: memory.transactionId || undefined,
+      aadhaar: memory.aadhaarNumber,
+      name: values.name,
+      gender: values.gender,
+      date_of_birth: new Date(values.date_of_birth).toISOString().slice(0, 10),
+    });
+  }
+
+  return (
+    <Form {...form}>
+      <form
+        onSubmit={(e) => {
+          e.stopPropagation();
+          form.handleSubmit(onSubmit)(e);
+        }}
+        className="mt-6 space-y-4"
+      >
+        <FormField
+          control={form.control}
+          disabled
+          name="_aadhaar"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Aadhaar Number / Virtual ID</FormLabel>
+              <FormControl>
+                <Input
+                  placeholder="Enter 12 digital Aadhaar  number OR 16 digit virtual ID"
+                  {...field}
+                />
+              </FormControl>
+              <FormDescription>
+                Aadhaar number will not be stored by CARE.
+              </FormDescription>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        <div className="flex flex-col gap-2">
+          <FormField
+            control={form.control}
+            name="name"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Name</FormLabel>
+                <FormControl>
+                  <Input
+                    placeholder="Enter your name as per Aadhaar"
+                    {...field}
+                  />
+                </FormControl>
+                <FormDescription>
+                  Name must exactly match with the name in Aadhaar.
+                </FormDescription>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          <FormField
+            control={form.control}
+            name="gender"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Gender</FormLabel>
+                <Select
+                  onValueChange={field.onChange}
+                  defaultValue={field.value}
+                >
+                  <FormControl>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Gender" />
+                    </SelectTrigger>
+                  </FormControl>
+                  <SelectContent>
+                    {[
+                      { id: "M", label: "Male" },
+                      { id: "F", label: "Female" },
+                      { id: "O", label: "Other" },
+                    ].map((gender) => (
+                      <SelectItem key={gender.id} value={gender.id}>
+                        {gender.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          <FormField
+            control={form.control}
+            name="date_of_birth"
+            render={({ field }) => (
+              <FormItem className="flex flex-col">
+                <FormLabel>Date of Birth</FormLabel>
+                <FormControl>
+                  <Input type="date" {...field} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+        </div>
+
+        <Button
+          type="submit"
+          variant="default"
+          loading={verifyAadhaarDemographicsMutation.isPending}
+        >
+          {t("verify_demographics")}
+        </Button>
+      </form>
+    </Form>
+  );
+};
+
 type HandleExistingAbhaProps = InjectedStepProps<FormMemory> & {
   onSuccess: (abhaNumber: AbhaNumber) => void;
 };
 
 const HandleExistingAbha: FC<HandleExistingAbhaProps> = ({
   memory,
-  next,
+  goTo,
   onSuccess,
 }) => {
   const { t } = useTranslation(I18NNAMESPACE);
 
   useEffect(() => {
     if (memory?.abhaNumber?.new) {
-      next();
+      goTo("link-mobile");
     }
   }, [memory?.abhaNumber]); // eslint-disable-line react-hooks/exhaustive-deps
 
@@ -392,7 +628,9 @@ const HandleExistingAbha: FC<HandleExistingAbhaProps> = ({
           type="button"
           variant="default"
           className="w-full"
-          onClick={next}
+          onClick={() => {
+            goTo("link-mobile");
+          }}
         >
           {t("create_new_abha_address")}
         </Button>
@@ -426,7 +664,7 @@ const linkMobileFormSchema = z.object({
 
 type LinkMobileFormValues = z.infer<typeof linkMobileFormSchema>;
 
-const LinkMobile: FC<LinkMobileProps> = ({ memory, setMemory, goTo, next }) => {
+const LinkMobile: FC<LinkMobileProps> = ({ memory, setMemory, goTo }) => {
   const { t } = useTranslation(I18NNAMESPACE);
 
   const form = useForm<LinkMobileFormValues>({
@@ -441,7 +679,7 @@ const LinkMobile: FC<LinkMobileProps> = ({ memory, setMemory, goTo, next }) => {
       memory?.abhaNumber?.mobile?.replace("+91", "").replace(/ /g, "") ===
       memory?.mobileNumber.replace("+91", "").replace(/ /g, "")
     ) {
-      goTo(5); // skip linking mobile number
+      goTo("choose-abha-address");
     }
   }, [memory?.abhaNumber, memory?.mobileNumber]); // eslint-disable-line
 
@@ -454,7 +692,7 @@ const LinkMobile: FC<LinkMobileProps> = ({ memory, setMemory, goTo, next }) => {
           ...prev,
           transactionId: data.transaction_id,
         }));
-        next();
+        goTo("verify-mobile");
       }
     },
   });
@@ -521,7 +759,7 @@ const verifyMobileFormSchema = z.object({
 
 type VerifyMobileFormValues = z.infer<typeof verifyMobileFormSchema>;
 
-const VerifyMobile: FC<VerifyMobileProps> = ({ memory, setMemory, next }) => {
+const VerifyMobile: FC<VerifyMobileProps> = ({ memory, setMemory, goTo }) => {
   const { t } = useTranslation(I18NNAMESPACE);
 
   const form = useForm<VerifyMobileFormValues>({
@@ -542,7 +780,7 @@ const VerifyMobile: FC<VerifyMobileProps> = ({ memory, setMemory, next }) => {
           ...prev,
           transactionId: data.transaction_id,
         }));
-        next();
+        goTo("choose-abha-address");
       }
     },
   });
