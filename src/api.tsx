@@ -1,6 +1,3 @@
-import { Type } from "@/Utils/request/api";
-import { PaginatedResponse } from "@/Utils/request/types";
-
 import {
   AbhaNumberModel,
   ConsentRequestModel,
@@ -10,6 +7,9 @@ import {
   IcreateHealthFacilityTBody,
   IpartialUpdateHealthFacilityTBody,
 } from "./types";
+
+import { PaginatedResponse } from "@/Utils/request/types";
+import { Type } from "@/Utils/request/api";
 
 const routes = {
   consent: {
@@ -107,6 +107,23 @@ const routes = {
   },
 
   healthId: {
+    abhaCreateVerifyAadhaarDemographics: {
+      path: "/api/abdm/v3/health_id/create/verify_aadhaar_demographics/",
+      method: "POST",
+      TBody: Type<{
+        transaction_id?: string;
+        name: string;
+        date_of_birth: string;
+        gender: "M" | "F" | "O";
+        aadhaar: string;
+      }>(),
+      TRes: Type<{
+        transaction_id: string;
+        is_new: boolean;
+        abha_number: AbhaNumberModel;
+      }>(),
+    },
+
     abhaCreateSendAadhaarOtp: {
       path: "/api/abdm/v3/health_id/create/send_aadhaar_otp/",
       method: "POST",

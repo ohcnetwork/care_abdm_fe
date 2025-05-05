@@ -1,20 +1,22 @@
-import { useEffect, useState } from "react";
-import { useTranslation } from "react-i18next";
+import * as Notify from "@/Utils/Notifications";
 
 import ButtonV2, { ButtonWithTimer } from "@/components/Common/ButtonV2";
+import { useEffect, useState } from "react";
+import useMultiStepForm, { InjectedStepProps } from "./useMultiStepForm";
+
+import { AbhaNumberModel } from "../../types";
 import CheckBoxFormField from "@/components/Form/FormFields/CheckBoxFormField";
+import DateFormField from "@/components/Form/FormFields/DateFormField";
 import OtpFormField from "@/components/Form/FormFields/OtpFormField";
 import PhoneNumberFormField from "@/components/Form/FormFields/PhoneNumberFormField";
+import { SelectFormField } from "@/components/Form/FormFields/SelectFormField";
 import TextFormField from "@/components/Form/FormFields/TextFormField";
-import { validateRule } from "@/components/Users/UserAdd";
-
-import * as Notify from "@/Utils/Notifications";
-import request from "@/Utils/request/request";
 import { classNames } from "@/Utils/utils";
-
+import dayjs from "dayjs";
+import request from "@/Utils/request/request";
 import routes from "../../api";
-import { AbhaNumberModel } from "../../types";
-import useMultiStepForm, { InjectedStepProps } from "./useMultiStepForm";
+import { useTranslation } from "react-i18next";
+import { validateRule } from "@/components/Users/UserAdd";
 
 const MAX_OTP_RESEND_ALLOWED = 2;
 
@@ -40,18 +42,50 @@ export default function CreateWithAadhaar({
 }: ICreateWithAadhaarProps) {
   const { currentStep } = useMultiStepForm<Memory>(
     [
-      <EnterAadhaar {...({} as IEnterAadhaarProps)} />,
-      <VerifyAadhaar {...({} as IVerifyAadhaarProps)} />,
-      <HandleExistingAbhaNumber
-        {...({ onSuccess } as IHandleExistingAbhaNumberProps)}
-      />,
-      <LinkMobileNumber {...({} as ILinkMobileNumberProps)} />,
-      <VerifyMobileNumber {...({} as IVerifyMobileNumberProps)} />,
-      <ChooseAbhaAddress
-        {...({
-          onSuccess,
-        } as IChooseAbhaAddressProps)}
-      />,
+      {
+        id: "enter-aadhaar",
+        element: <EnterAadhaar {...({} as IEnterAadhaarProps)} />,
+      },
+      {
+        id: "verify-aadhaar-with-otp",
+        element: (
+          <VerifyAadhaarWithOtp {...({} as IVerifyAadhaarWithOtpProps)} />
+        ),
+      },
+      {
+        id: "verify-aadhaar-with-demographics",
+        element: (
+          <VerifyAadhaarWithDemographics
+            {...({ onSuccess } as IVerifyAadhaarWithDemographicsProps)}
+          />
+        ),
+      },
+      {
+        id: "handle-existing-abha",
+        element: (
+          <HandleExistingAbhaNumber
+            {...({ onSuccess } as IHandleExistingAbhaNumberProps)}
+          />
+        ),
+      },
+      {
+        id: "link-mobile",
+        element: <LinkMobileNumber {...({} as ILinkMobileNumberProps)} />,
+      },
+      {
+        id: "verify-mobile",
+        element: <VerifyMobileNumber {...({} as IVerifyMobileNumberProps)} />,
+      },
+      {
+        id: "choose-abha-address",
+        element: (
+          <ChooseAbhaAddress
+            {...({
+              onSuccess,
+            } as IChooseAbhaAddressProps)}
+          />
+        ),
+      },
     ],
     {
       aadhaarNumber: "",
@@ -61,7 +95,7 @@ export default function CreateWithAadhaar({
       transactionId: "",
       abhaNumber: null,
       resendOtpCount: 0,
-    }
+    },
   );
 
   return <div>{currentStep}</div>;
@@ -69,7 +103,7 @@ export default function CreateWithAadhaar({
 
 type IEnterAadhaarProps = InjectedStepProps<Memory>;
 
-function EnterAadhaar({ memory, setMemory, next }: IEnterAadhaarProps) {
+function EnterAadhaar({ memory, setMemory, goTo }: IEnterAadhaarProps) {
   const { t } = useTranslation();
   const [disclaimerAccepted, setDisclaimerAccepted] = useState([
     false,
@@ -109,7 +143,7 @@ function EnterAadhaar({ memory, setMemory, next }: IEnterAadhaarProps) {
         body: {
           aadhaar: memory!.aadhaarNumber,
         },
-      }
+      },
     );
 
     if (res?.status === 200 && data) {
@@ -117,7 +151,7 @@ function EnterAadhaar({ memory, setMemory, next }: IEnterAadhaarProps) {
       Notify.Success({
         msg: data.detail ?? t("aadhaar_otp_send_success"),
       });
-      next();
+      goTo("verify-aadhaar-with-otp");
     }
 
     setMemory((prev) => ({ ...prev, isLoading: false }));
@@ -147,7 +181,7 @@ function EnterAadhaar({ memory, setMemory, next }: IEnterAadhaarProps) {
         <span
           className={classNames(
             "ml-2 text-sm font-medium text-gray-600",
-            !memory?.validationError && "-mt-4"
+            !memory?.validationError && "-mt-4",
           )}
         >
           {t("aadhaar_number_will_not_be_stored")}
@@ -163,7 +197,7 @@ function EnterAadhaar({ memory, setMemory, next }: IEnterAadhaarProps) {
             value={isAccepted}
             onChange={(e) => {
               setDisclaimerAccepted(
-                disclaimerAccepted.map((v, j) => (j === i ? e.value : v))
+                disclaimerAccepted.map((v, j) => (j === i ? e.value : v)),
               );
             }}
             className="mr-2 rounded border-gray-700"
@@ -173,7 +207,7 @@ function EnterAadhaar({ memory, setMemory, next }: IEnterAadhaarProps) {
         ))}
       </div>
 
-      <div className="mt-4 flex items-center">
+      <div className="mt-4 flex items-center gap-2">
         <ButtonV2
           className="w-full"
           loading={memory?.isLoading}
@@ -183,16 +217,37 @@ function EnterAadhaar({ memory, setMemory, next }: IEnterAadhaarProps) {
           }
           onClick={handleSubmit}
         >
-          {t("send_otp")}
+          Verify with Otp
+        </ButtonV2>
+        <ButtonV2
+          className="w-full"
+          disabled={
+            disclaimerAccepted.some((v) => !v) ||
+            memory?.aadhaarNumber.length !== 12 ||
+            memory?.isLoading
+          }
+          onClick={() => {
+            setMemory((prev) => ({
+              ...prev,
+              transactionId: "",
+            }));
+            goTo("verify-aadhaar-with-demographics");
+          }}
+        >
+          Verify with Demographics
         </ButtonV2>
       </div>
     </div>
   );
 }
 
-type IVerifyAadhaarProps = InjectedStepProps<Memory>;
+type IVerifyAadhaarWithOtpProps = InjectedStepProps<Memory>;
 
-function VerifyAadhaar({ memory, setMemory, next }: IVerifyAadhaarProps) {
+function VerifyAadhaarWithOtp({
+  memory,
+  setMemory,
+  goTo,
+}: IVerifyAadhaarWithOtpProps) {
   const { t } = useTranslation();
   const [otp, setOtp] = useState("");
 
@@ -222,7 +277,7 @@ function VerifyAadhaar({ memory, setMemory, next }: IVerifyAadhaarProps) {
           transaction_id: memory?.transactionId,
           mobile: memory?.mobileNumber.replace("+91", "").replace(/ /g, ""),
         },
-      }
+      },
     );
 
     if (res?.status === 200 && data) {
@@ -235,7 +290,7 @@ function VerifyAadhaar({ memory, setMemory, next }: IVerifyAadhaarProps) {
       Notify.Success({
         msg: data.detail ?? t("otp_verification_success"),
       });
-      next();
+      goTo("handle-existing-abha");
     }
 
     setMemory((prev) => ({ ...prev, isLoading: false }));
@@ -252,7 +307,7 @@ function VerifyAadhaar({ memory, setMemory, next }: IVerifyAadhaarProps) {
           // transaction_id: memory?.transactionId,
         },
         silent: true,
-      }
+      },
     );
 
     if (res?.status === 200 && data) {
@@ -295,7 +350,7 @@ function VerifyAadhaar({ memory, setMemory, next }: IVerifyAadhaarProps) {
         <span
           className={classNames(
             "ml-2 text-sm font-medium text-gray-600",
-            !memory?.validationError && "-mt-4"
+            !memory?.validationError && "-mt-4",
           )}
         >
           {t("aadhaar_number_will_not_be_stored")}
@@ -360,6 +415,172 @@ function VerifyAadhaar({ memory, setMemory, next }: IVerifyAadhaarProps) {
   );
 }
 
+type IVerifyAadhaarWithDemographicsProps = InjectedStepProps<Memory> & {
+  onSuccess: (abhaNumber: AbhaNumberModel) => void;
+};
+
+function VerifyAadhaarWithDemographics({
+  memory,
+  setMemory,
+  onSuccess,
+  goTo,
+}: IVerifyAadhaarWithDemographicsProps) {
+  const { t } = useTranslation();
+
+  const [name, setName] = useState("");
+  const [gender, setGender] = useState<AbhaNumberModel["gender"]>();
+  const [date_of_birth, setDateOfBirth] = useState(
+    new Date().toISOString().slice(0, 10),
+  );
+
+  const validateInput = () => {
+    if (!name) {
+      setMemory((prev) => ({
+        ...prev,
+        validationError: "Name is required",
+      }));
+      return false;
+    }
+
+    if (!gender) {
+      setMemory((prev) => ({
+        ...prev,
+        validationError: "Gender is required",
+      }));
+      return false;
+    }
+
+    if (!date_of_birth) {
+      setMemory((prev) => ({
+        ...prev,
+        validationError: "Date of birth is required",
+      }));
+      return false;
+    }
+
+    return true;
+  };
+
+  const handleSubmit = async () => {
+    if (!validateInput()) return;
+
+    setMemory((prev) => ({ ...prev, isLoading: true }));
+
+    const { res, data } = await request(
+      routes.healthId.abhaCreateVerifyAadhaarDemographics,
+      {
+        body: {
+          transaction_id: memory?.transactionId || undefined,
+          aadhaar: memory!.aadhaarNumber,
+          name,
+          gender: gender!,
+          date_of_birth,
+        },
+      },
+    );
+
+    if (res?.status === 200 && data) {
+      setMemory((prev) => ({
+        ...prev,
+        transactionId: data.transaction_id,
+        abhaNumber: data.abha_number,
+      }));
+      Notify.Success({
+        msg: "Aadhaar demographics verified successfully",
+      });
+
+      if (!data.transaction_id) {
+        onSuccess(data.abha_number);
+        return;
+      }
+
+      goTo("handle-existing-abha");
+    }
+
+    setMemory((prev) => ({ ...prev, isLoading: false }));
+  };
+
+  return (
+    <div>
+      <div className="flex flex-col justify-center">
+        <TextFormField
+          type="password"
+          name="aadhaar-number"
+          label={t("aadhaar_number")}
+          minLength={12}
+          maxLength={12}
+          inputClassName="text-black tracking-[0.3em] font-bold placeholder:font-normal placeholder:tracking-normal"
+          placeholder={t("enter_aadhaar_number")}
+          disabled={true}
+          value={memory?.aadhaarNumber}
+          onChange={() => null}
+        />
+        <span
+          className={classNames(
+            "ml-2 text-sm font-medium text-gray-600",
+            !memory?.validationError && "-mt-4",
+          )}
+        >
+          {t("aadhaar_number_will_not_be_stored")}
+        </span>
+      </div>
+
+      <div className="mt-6 flex flex-col gap-2">
+        <TextFormField
+          name="name"
+          label="Name"
+          inputClassName="text-black tracking-[0.3em] font-bold placeholder:font-normal placeholder:tracking-normal"
+          placeholder="Enter your name as per Aadhaar"
+          errorClassName="hidden"
+          value={name}
+          onChange={(e) => {
+            setName(e.value);
+          }}
+        />
+
+        <SelectFormField
+          name="gender"
+          label="Gender"
+          errorClassName="hidden"
+          options={[
+            { label: "Male", value: "M" },
+            { label: "Female", value: "F" },
+            { label: "Other", value: "O" },
+          ]}
+          optionLabel={({ label }) => label}
+          optionValue={({ value }) => value}
+          value={gender}
+          onChange={({ value }) =>
+            setGender(value as AbhaNumberModel["gender"])
+          }
+        />
+
+        <DateFormField
+          label="Date of Birth"
+          name="date_of_birth"
+          errorClassName="hidden"
+          value={new Date(date_of_birth)}
+          max={new Date()}
+          onChange={(e) => {
+            setDateOfBirth(dayjs(e.value).format("YYYY-MM-DD"));
+          }}
+        />
+      </div>
+
+      <div className="mt-4 flex flex-col items-center gap-2">
+        <ButtonV2
+          className="w-full"
+          loading={memory?.isLoading}
+          disabled={!name || !gender || !date_of_birth}
+          onClick={handleSubmit}
+        >
+          Verify Demographics
+        </ButtonV2>
+      </div>
+    </div>
+  );
+}
+
 type IHandleExistingAbhaNumberProps = InjectedStepProps<Memory> & {
   onSuccess: (abhaNumber: AbhaNumberModel) => void;
 };
@@ -367,14 +588,14 @@ type IHandleExistingAbhaNumberProps = InjectedStepProps<Memory> & {
 function HandleExistingAbhaNumber({
   memory,
   onSuccess,
-  next,
+  goTo,
 }: IHandleExistingAbhaNumberProps) {
   const { t } = useTranslation();
 
   // skip this step for new abha number
   useEffect(() => {
     if (memory?.abhaNumber?.new) {
-      next();
+      goTo("link-mobile");
     }
   }, [memory?.abhaNumber, memory?.mobileNumber]); // eslint-disable-line
 
@@ -387,7 +608,12 @@ function HandleExistingAbhaNumber({
         {t("abha_number_exists_description")}
       </p>
       <div className="mt-4 flex flex-col items-center justify-center gap-2">
-        <ButtonV2 className="w-full" onClick={next}>
+        <ButtonV2
+          className="w-full"
+          onClick={() => {
+            goTo("link-mobile");
+          }}
+        >
           {t("create_new_abha_address")}
         </ButtonV2>
         <ButtonV2
@@ -407,12 +633,7 @@ function HandleExistingAbhaNumber({
 
 type ILinkMobileNumberProps = InjectedStepProps<Memory>;
 
-function LinkMobileNumber({
-  memory,
-  goTo,
-  setMemory,
-  next,
-}: ILinkMobileNumberProps) {
+function LinkMobileNumber({ memory, goTo, setMemory }: ILinkMobileNumberProps) {
   const { t } = useTranslation();
 
   useEffect(() => {
@@ -420,7 +641,7 @@ function LinkMobileNumber({
       memory?.abhaNumber?.mobile ===
       memory?.mobileNumber.replace("+91", "").replace(/ /g, "")
     ) {
-      goTo(5); // skip linking mobile number
+      goTo("choose-abha-address");
     }
   }, [memory?.abhaNumber, memory?.mobileNumber]); // eslint-disable-line
 
@@ -434,7 +655,7 @@ function LinkMobileNumber({
           mobile: memory?.mobileNumber.replace("+91", "").replace(/ /g, ""),
           transaction_id: memory?.transactionId,
         },
-      }
+      },
     );
 
     if (res?.status === 200 && data) {
@@ -445,7 +666,7 @@ function LinkMobileNumber({
       Notify.Success({
         msg: data.detail ?? t("mobile_otp_send_success"),
       });
-      next();
+      goTo("verify-mobile");
     }
 
     setMemory((prev) => ({ ...prev, isLoading: false }));
@@ -487,7 +708,7 @@ type IVerifyMobileNumberProps = InjectedStepProps<Memory>;
 function VerifyMobileNumber({
   memory,
   setMemory,
-  next,
+  goTo,
 }: IVerifyMobileNumberProps) {
   const { t } = useTranslation();
   const [otp, setOtp] = useState("");
@@ -502,7 +723,7 @@ function VerifyMobileNumber({
           transaction_id: memory?.transactionId,
           otp: otp,
         },
-      }
+      },
     );
 
     if (res?.status === 200 && data) {
@@ -514,7 +735,7 @@ function VerifyMobileNumber({
       Notify.Success({
         msg: data.detail ?? t("mobile_otp_verify_success"),
       });
-      next();
+      goTo("choose-abha-address");
     }
 
     setMemory((prev) => ({ ...prev, isLoading: false }));
@@ -530,7 +751,7 @@ function VerifyMobileNumber({
           mobile: memory?.mobileNumber.replace("+91", "").replace(/ /g, ""),
           transaction_id: memory?.transactionId,
         },
-      }
+      },
     );
 
     if (res?.status === 200 && data) {
@@ -624,7 +845,7 @@ function ChooseAbhaAddress({
           body: {
             transaction_id: memory?.transactionId,
           },
-        }
+        },
       );
 
       if (res?.status === 200 && data) {
@@ -646,7 +867,7 @@ function ChooseAbhaAddress({
           abha_address: healthId,
           transaction_id: memory?.transactionId,
         },
-      }
+      },
     );
 
     if (res?.status === 200 && data) {
@@ -680,19 +901,19 @@ function ChooseAbhaAddress({
       <div className="-mt-4 mb-2 pl-2 text-sm text-secondary-500">
         {validateRule(
           healthId.length >= 4,
-          t("abha_address_validation_length_error")
+          t("abha_address_validation_length_error"),
         )}
         {validateRule(
           isNaN(Number(healthId[0])) && healthId[0] !== ".",
-          t("abha_address_validation_start_error")
+          t("abha_address_validation_start_error"),
         )}
         {validateRule(
           healthId[healthId.length - 1] !== ".",
-          t("abha_address_validation_end_error")
+          t("abha_address_validation_end_error"),
         )}
         {validateRule(
           /^[0-9a-zA-Z._]+$/.test(healthId),
-          t("abha_address_validation_character_error")
+          t("abha_address_validation_character_error"),
         )}
       </div>
 

@@ -1,19 +1,18 @@
-import { useMemo, useState } from "react";
-import { useTranslation } from "react-i18next";
+import * as Notify from "@/Utils/Notifications";
 
 import ButtonV2, { ButtonWithTimer } from "@/components/Common/ButtonV2";
 import DropdownMenu, { DropdownItem } from "@/components/Common/Menu";
+import { useMemo, useState } from "react";
+import useMultiStepForm, { InjectedStepProps } from "./useMultiStepForm";
+
+import { AbhaNumberModel } from "../../types";
 import CheckBoxFormField from "@/components/Form/FormFields/CheckBoxFormField";
 import OtpFormField from "@/components/Form/FormFields/OtpFormField";
 import TextFormField from "@/components/Form/FormFields/TextFormField";
-
-import * as Notify from "@/Utils/Notifications";
-import request from "@/Utils/request/request";
 import { classNames } from "@/Utils/utils";
-
+import request from "@/Utils/request/request";
 import routes from "../../api";
-import { AbhaNumberModel } from "../../types";
-import useMultiStepForm, { InjectedStepProps } from "./useMultiStepForm";
+import { useTranslation } from "react-i18next";
 
 const MAX_OTP_RESEND_ALLOWED = 2;
 
@@ -38,8 +37,14 @@ type Memory = {
 export default function LinkWithOtp({ onSuccess }: ILoginWithOtpProps) {
   const { currentStep } = useMultiStepForm<Memory>(
     [
-      <EnterId {...({} as IEnterIdProps)} />,
-      <VerifyId {...({ onSuccess } as IVerifyIdProps)} />,
+      {
+        id: "enter-id",
+        element: <EnterId {...({} as IEnterIdProps)} />,
+      },
+      {
+        id: "verify-id",
+        element: <VerifyId {...({ onSuccess } as IVerifyIdProps)} />,
+      },
     ],
     {
       id: "",
@@ -60,7 +65,7 @@ type IEnterIdProps = InjectedStepProps<Memory>;
 
 const supportedAuthMethods = ["AADHAAR_OTP", "MOBILE_OTP"];
 
-function EnterId({ memory, setMemory, next }: IEnterIdProps) {
+function EnterId({ memory, setMemory, goTo }: IEnterIdProps) {
   const { t } = useTranslation();
   const [disclaimerAccepted, setDisclaimerAccepted] = useState([
     false,
@@ -148,7 +153,7 @@ function EnterId({ memory, setMemory, next }: IEnterIdProps) {
         transactionId: data.transaction_id,
       }));
       Notify.Success({ msg: data.detail ?? t("send_otp_success") });
-      next();
+      goTo("verify-id");
     }
 
     setMemory((prev) => ({ ...prev, isLoading: false }));
