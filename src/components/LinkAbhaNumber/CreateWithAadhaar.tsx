@@ -221,6 +221,7 @@ const EnterAadhaar: FC<EnterAadhaarProps> = ({ setMemory, goTo }) => {
             type="submit"
             variant="default"
             loading={sendAadhaarOtpMutation.isPending}
+            disabled={!form.formState.isValid}
             className="w-full"
           >
             {t("verify_with_otp")}
@@ -228,6 +229,7 @@ const EnterAadhaar: FC<EnterAadhaarProps> = ({ setMemory, goTo }) => {
           <Button
             type="button"
             variant="default"
+            disabled={!form.formState.isValid}
             onClick={() => {
               setMemory((prev) => ({
                 ...prev,
