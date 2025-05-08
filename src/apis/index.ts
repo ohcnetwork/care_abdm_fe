@@ -299,7 +299,7 @@ export const apis = {
 
     getAbhaCard: async (query: { abha_id?: string; type: "pdf" | "png" }) => {
       return await request<Blob>(
-        "/api/abdm/v3/health_id/login/get_abha_card/" + queryString(query)
+        "/api/abdm/v3/health_id/abha_card/" + queryString(query)
       );
     },
   },
