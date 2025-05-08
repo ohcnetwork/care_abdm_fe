@@ -474,12 +474,16 @@ const VerifyAadhaarWithDemographics: FC<VerifyAadhaarWithDemographicsProps> = ({
         goTo("handle-existing-abha");
       }
     },
+    onError: (error) => {
+      form.setError("_aadhaar", {
+        message: error.message,
+      });
+      toast.error(error.message);
+    },
   });
 
   function onSubmit(values: VerifyAadhaarWithDemographicsFormValues) {
     if (!memory) return;
-
-    console.log(values, memory);
 
     verifyAadhaarDemographicsMutation.mutate({
       transaction_id: memory.transactionId || undefined,
