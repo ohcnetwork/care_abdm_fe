@@ -93,6 +93,8 @@ const PatientRegistrationForm: FC<PatientRegistrationFormProps> = ({
                 className="text-primary border-primary-400"
                 disabled={!healthFacility}
                 onSuccess={(abhaNumber) => {
+                  form.setValue("abha", abhaNumber);
+
                   form.setValue("abha_id", abhaNumber.external_id);
                   form.setValue("abha_number", abhaNumber.abha_number);
                   form.setValue("abha_address", abhaNumber.health_id);
@@ -142,6 +144,8 @@ const PatientRegistrationForm: FC<PatientRegistrationFormProps> = ({
     );
   }
 
+  const abhaProfile = abhaNumber || form.getValues("abha");
+
   return (
     <div id="abha-info" className="abdm-container space-y-6">
       <div>
@@ -162,7 +166,7 @@ const PatientRegistrationForm: FC<PatientRegistrationFormProps> = ({
         <Input value={form.getValues("abha_address")} disabled />
       </div>
 
-      {abhaNumber && <ShowAbhaProfile abhaNumber={abhaNumber} />}
+      {abhaProfile && <ShowAbhaProfile abhaNumber={abhaProfile} />}
     </div>
   );
 };

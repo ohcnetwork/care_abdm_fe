@@ -1,3 +1,4 @@
+import { AbhaProfile, AbhaProfileProps } from "./ShowAbhaProfile";
 import { Button, ButtonWithTimer } from "@/components/ui/button";
 import { CircleCheckIcon, CircleIcon, CircleXIcon } from "lucide-react";
 import { FC, JSX, useEffect, useState } from "react";
@@ -27,7 +28,6 @@ import useMultiStepForm, { InjectedStepProps } from "./useMultiStepForm";
 
 import { AbhaNumber } from "@/types/abhaNumber";
 import { Checkbox } from "@/components/ui/checkbox";
-import { DatePicker } from "@/components/ui/date-picker";
 import { Input } from "@/components/ui/input";
 import { apis } from "@/apis";
 import { cn } from "@/lib/utils";
@@ -69,15 +69,13 @@ export const CreateWithAadhaar: FC<CreateWithAadhaarProps> = ({
         id: "verify-aadhaar-with-demographics",
         element: (
           <VerifyAadhaarWithDemographics
-            {...({ onSuccess } as VerifyAadhaarWithDemographicsProps)}
+            {...({} as VerifyAadhaarWithDemographicsProps)}
           />
         ),
       },
       {
         id: "handle-existing-abha",
-        element: (
-          <HandleExistingAbha {...({ onSuccess } as HandleExistingAbhaProps)} />
-        ),
+        element: <HandleExistingAbha {...({} as HandleExistingAbhaProps)} />,
       },
       {
         id: "link-mobile",
@@ -89,9 +87,11 @@ export const CreateWithAadhaar: FC<CreateWithAadhaarProps> = ({
       },
       {
         id: "choose-abha-address",
-        element: (
-          <ChooseAbhaAddress {...({ onSuccess } as ChooseAbhaAddressProps)} />
-        ),
+        element: <ChooseAbhaAddress {...({} as ChooseAbhaAddressProps)} />,
+      },
+      {
+        id: "show-abha-profile",
+        element: <AbhaProfile {...({ onSuccess } as AbhaProfileProps)} />,
       },
     ],
     {
@@ -426,9 +426,7 @@ const VerifyAadhaarWithOtp: FC<VerifyAadhaarWithOtpProps> = ({
   );
 };
 
-type VerifyAadhaarWithDemographicsProps = InjectedStepProps<FormMemory> & {
-  onSuccess: (abhaNumber: AbhaNumber) => void;
-};
+type VerifyAadhaarWithDemographicsProps = InjectedStepProps<FormMemory>;
 
 const verifyAadhaarWithDemographicsFormSchema = z.object({
   _aadhaar: z.string(),
@@ -445,7 +443,6 @@ const VerifyAadhaarWithDemographics: FC<VerifyAadhaarWithDemographicsProps> = ({
   memory,
   setMemory,
   goTo,
-  onSuccess,
 }) => {
   const { t } = useTranslation(I18NNAMESPACE);
 
@@ -467,7 +464,7 @@ const VerifyAadhaarWithDemographics: FC<VerifyAadhaarWithDemographicsProps> = ({
         }));
 
         if (!data.transaction_id) {
-          onSuccess(data.abha_number);
+          goTo("show-abha-profile");
           return;
         }
 
@@ -604,15 +601,9 @@ const VerifyAadhaarWithDemographics: FC<VerifyAadhaarWithDemographicsProps> = ({
   );
 };
 
-type HandleExistingAbhaProps = InjectedStepProps<FormMemory> & {
-  onSuccess: (abhaNumber: AbhaNumber) => void;
-};
+type HandleExistingAbhaProps = InjectedStepProps<FormMemory>;
 
-const HandleExistingAbha: FC<HandleExistingAbhaProps> = ({
-  memory,
-  goTo,
-  onSuccess,
-}) => {
+const HandleExistingAbha: FC<HandleExistingAbhaProps> = ({ memory, goTo }) => {
   const { t } = useTranslation(I18NNAMESPACE);
 
   useEffect(() => {
@@ -649,7 +640,7 @@ const HandleExistingAbha: FC<HandleExistingAbhaProps> = ({
               toast.error("No ABHA number found");
               return;
             }
-            onSuccess(memory.abhaNumber);
+            goTo("show-abha-profile");
           }}
         >
           {t("use_existing_abha_address")}
@@ -929,9 +920,7 @@ const validateRule = (
   );
 };
 
-type ChooseAbhaAddressProps = InjectedStepProps<FormMemory> & {
-  onSuccess: (abhaNumber: AbhaNumber) => void;
-};
+type ChooseAbhaAddressProps = InjectedStepProps<FormMemory>;
 
 const chooseAbhaAddressFormSchema = z.object({
   abhaAddress: z.string().regex(/^(?![\d.])[a-zA-Z0-9._]{4,}(?<!\.)$/, {
@@ -944,7 +933,7 @@ type ChooseAbhaAddressFormValues = z.infer<typeof chooseAbhaAddressFormSchema>;
 export const ChooseAbhaAddress: FC<ChooseAbhaAddressProps> = ({
   memory,
   setMemory,
-  onSuccess,
+  goTo,
 }) => {
   const { t } = useTranslation(I18NNAMESPACE);
 
@@ -987,7 +976,7 @@ export const ChooseAbhaAddress: FC<ChooseAbhaAddressProps> = ({
           abhaNumber: data.abha_number,
         }));
         toast.success("ABHA Address created successfully");
-        onSuccess(data.abha_number);
+        goTo("show-abha-profile");
       }
     },
   });
