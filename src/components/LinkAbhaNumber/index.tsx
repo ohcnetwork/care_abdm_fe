@@ -15,6 +15,8 @@ import { CreateWithAadhaar } from "./CreateWithAadhaar";
 import { IdCardIcon } from "lucide-react";
 import { LinkWithOtp } from "./LinkWithOtp";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { apis } from "@/apis";
+import { useQuery } from "@tanstack/react-query";
 
 type LinkAbhaNumberProps = ButtonProps & {
   onSuccess: (abhaNumber: AbhaNumber) => void;
@@ -32,6 +34,11 @@ export const LinkAbhaNumber: FC<LinkAbhaNumberProps> = ({
     setIsDrawerOpen(false);
     onSuccess(abhaNumber);
   };
+
+  const { data: currentUser } = useQuery({
+    queryKey: ["currentUser"],
+    queryFn: apis.user.getCurrentUser,
+  });
 
   return (
     <Drawer open={isDrawerOpen} onOpenChange={setIsDrawerOpen}>
@@ -77,10 +84,13 @@ export const LinkAbhaNumber: FC<LinkAbhaNumberProps> = ({
             </TabsList>
             <ScrollArea className="h-96 pb-6 pr-3">
               <TabsContent value="new">
-                <CreateWithAadhaar onSuccess={handleOnSuccess} />
+                <CreateWithAadhaar
+                  onSuccess={handleOnSuccess}
+                  user={currentUser}
+                />
               </TabsContent>
               <TabsContent value="existing">
-                <LinkWithOtp onSuccess={handleOnSuccess} />
+                <LinkWithOtp onSuccess={handleOnSuccess} user={currentUser} />
               </TabsContent>
             </ScrollArea>
           </Tabs>

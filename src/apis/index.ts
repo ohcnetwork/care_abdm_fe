@@ -11,6 +11,7 @@ import { AbhaNumber } from "../types/abhaNumber";
 import { HealthFacility } from "../types/healthFacility";
 import { HealthInformation } from "../types/healthInformation";
 import { PaginatedResponse } from "./types";
+import { User } from "@/types/user";
 
 // FIXME: Move all the api specific types to a ./types.ts file
 
@@ -301,6 +302,12 @@ export const apis = {
       return await request<Blob>(
         "/api/abdm/v3/health_id/abha_card/" + queryString(query)
       );
+    },
+  },
+
+  user: {
+    getCurrentUser: async () => {
+      return await request<User>("/api/v1/users/getcurrentuser/");
     },
   },
 };

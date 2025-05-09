@@ -29,6 +29,7 @@ import useMultiStepForm, { InjectedStepProps } from "./useMultiStepForm";
 import { AbhaNumber } from "@/types/abhaNumber";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
+import { User } from "@/types/user";
 import { apis } from "@/apis";
 import { toast } from "@/lib/utils";
 import { useForm } from "react-hook-form";
@@ -39,18 +40,20 @@ import { zodResolver } from "@hookform/resolvers/zod";
 
 type LinkWithOtpProps = {
   onSuccess: (abhaNumber: AbhaNumber) => void;
+  user?: User;
 };
 
 type FormMemory = {
   id: string;
   idType: "aadhaar" | "mobile" | "abha-number" | "abha-address";
   otpSystem: "aadhaar" | "abdm";
+  user?: User;
 
   transactionId: string;
   abhaNumber?: AbhaNumber;
 };
 
-export const LinkWithOtp: FC<LinkWithOtpProps> = ({ onSuccess }) => {
+export const LinkWithOtp: FC<LinkWithOtpProps> = ({ onSuccess, user }) => {
   const { currentStep } = useMultiStepForm<FormMemory>(
     [
       {
@@ -63,6 +66,7 @@ export const LinkWithOtp: FC<LinkWithOtpProps> = ({ onSuccess }) => {
       },
     ],
     {
+      user,
       id: "",
       idType: "aadhaar",
       otpSystem: "aadhaar",
@@ -102,11 +106,20 @@ const enterIdFormSchema = z.object({
   disclaimer_3: z.boolean().refine((value) => value === true, {
     message: "Please read and accept this policy",
   }),
+  disclaimer_4: z.boolean().refine((value) => value === true, {
+    message: "Please read and accept this policy",
+  }),
+  disclaimer_5: z.boolean().refine((value) => value === true, {
+    message: "Please read and accept this policy",
+  }),
+  disclaimer_6: z.boolean().refine((value) => value === true, {
+    message: "Please read and accept this policy",
+  }),
 });
 
 type EnterIdFormValues = z.infer<typeof enterIdFormSchema>;
 
-const EnterId: FC<EnterIdProps> = ({ setMemory, goTo }) => {
+const EnterId: FC<EnterIdProps> = ({ memory, setMemory, goTo }) => {
   const { t } = useTranslation(I18NNAMESPACE);
   const [showAuthMethods, setShowAuthMethods] = useState(false);
   const [authMethods, setAuthMethods] = useState<
@@ -120,6 +133,9 @@ const EnterId: FC<EnterIdProps> = ({ setMemory, goTo }) => {
       disclaimer_1: false,
       disclaimer_2: false,
       disclaimer_3: false,
+      disclaimer_4: false,
+      disclaimer_5: false,
+      disclaimer_6: false,
     },
   });
 
@@ -187,7 +203,7 @@ const EnterId: FC<EnterIdProps> = ({ setMemory, goTo }) => {
           )}
         />
 
-        {Array.from({ length: 3 }).map((_, index) => (
+        {Array.from({ length: 6 }).map((_, index) => (
           <FormField
             key={`disclaimer_${index + 1}`}
             control={form.control}
@@ -202,7 +218,10 @@ const EnterId: FC<EnterIdProps> = ({ setMemory, goTo }) => {
                 </FormControl>
                 <div className="space-y-1 leading-none">
                   <FormLabel className="text-sm font-normal">
-                    {t(`abha__disclaimer_${index + 2}`)}
+                    {t(`abha__disclaimer_${index + 2}`, {
+                      patient: "Beneficiary",
+                      user: memory?.user?.username ?? "User",
+                    })}
                   </FormLabel>
                   <FormMessage />
                 </div>

@@ -29,6 +29,7 @@ import useMultiStepForm, { InjectedStepProps } from "./useMultiStepForm";
 import { AbhaNumber } from "@/types/abhaNumber";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
+import { User } from "@/types/user";
 import { apis } from "@/apis";
 import { cn } from "@/lib/utils";
 import { toast } from "@/lib/utils";
@@ -40,9 +41,11 @@ import { zodResolver } from "@hookform/resolvers/zod";
 
 type CreateWithAadhaarProps = {
   onSuccess: (abhaNumber: AbhaNumber) => void;
+  user?: User;
 };
 
 type FormMemory = {
+  user?: User;
   aadhaarNumber: string;
   mobileNumber: string;
 
@@ -50,9 +53,7 @@ type FormMemory = {
   abhaNumber?: AbhaNumber;
 };
 
-export const CreateWithAadhaar: FC<CreateWithAadhaarProps> = ({
-  onSuccess,
-}) => {
+export const CreateWithAadhaar: FC<CreateWithAadhaarProps> = ({ onSuccess, user }) => {
   const { currentStep } = useMultiStepForm<FormMemory>(
     [
       {
@@ -95,6 +96,7 @@ export const CreateWithAadhaar: FC<CreateWithAadhaarProps> = ({
       },
     ],
     {
+      user,
       aadhaarNumber: "",
       mobileNumber: "",
 
@@ -125,11 +127,20 @@ const enterAadhaarFormSchema = z.object({
   disclaimer_4: z.boolean().refine((value) => value === true, {
     message: "Please read and accept this policy",
   }),
+  disclaimer_5: z.boolean().refine((value) => value === true, {
+    message: "Please read and accept this policy",
+  }),
+  disclaimer_6: z.boolean().refine((value) => value === true, {
+    message: "Please read and accept this policy",
+  }),
+  disclaimer_7: z.boolean().refine((value) => value === true, {
+    message: "Please read and accept this policy",
+  }),
 });
 
 type EnterAadhaarFormValues = z.infer<typeof enterAadhaarFormSchema>;
 
-const EnterAadhaar: FC<EnterAadhaarProps> = ({ setMemory, goTo }) => {
+const EnterAadhaar: FC<EnterAadhaarProps> = ({ memory, setMemory, goTo }) => {
   const { t } = useTranslation(I18NNAMESPACE);
 
   const form = useForm<EnterAadhaarFormValues>({
@@ -140,6 +151,9 @@ const EnterAadhaar: FC<EnterAadhaarProps> = ({ setMemory, goTo }) => {
       disclaimer_2: false,
       disclaimer_3: false,
       disclaimer_4: false,
+      disclaimer_5: false,
+      disclaimer_6: false,
+      disclaimer_7: false,
     },
   });
 
@@ -193,7 +207,7 @@ const EnterAadhaar: FC<EnterAadhaarProps> = ({ setMemory, goTo }) => {
           )}
         />
 
-        {Array.from({ length: 4 }).map((_, index) => (
+        {Array.from({ length: 7 }).map((_, index) => (
           <FormField
             key={`disclaimer_${index + 1}`}
             control={form.control}
@@ -208,7 +222,10 @@ const EnterAadhaar: FC<EnterAadhaarProps> = ({ setMemory, goTo }) => {
                 </FormControl>
                 <div className="space-y-1 leading-none">
                   <FormLabel className="text-sm font-normal">
-                    {t(`abha__disclaimer_${index + 1}`)}
+                    {t(`abha__disclaimer_${index + 1}`, {
+                      patient: "Beneficiary",
+                      user: memory?.user?.username ?? "User",
+                    })}
                   </FormLabel>
                   <FormMessage />
                 </div>
