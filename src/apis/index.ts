@@ -152,6 +152,12 @@ export const apis = {
       name: string;
       date_of_birth: string;
       gender: "M" | "F" | "O";
+      state_code: string;
+      district_code: string;
+      pin_code?: string;
+      address?: string;
+      mobile?: string;
+      profile_photo?: string;
       aadhaar: string;
     }) => {
       return await request<{
@@ -302,6 +308,26 @@ export const apis = {
       return await request<Blob>(
         "/api/abdm/v3/health_id/abha_card/" + queryString(query)
       );
+    },
+  },
+
+  utility: {
+    states: async () => {
+      return await request<
+        {
+          state_name: string;
+          state_code: number;
+        }[]
+      >("/api/abdm/v3/utility/states/");
+    },
+
+    districts: async (stateId: number) => {
+      return await request<
+        {
+          district_name: string;
+          district_code: number;
+        }[]
+      >(`/api/abdm/v3/utility/states/${stateId}/districts/`);
     },
   },
 

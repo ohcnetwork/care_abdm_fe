@@ -25,16 +25,17 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import useMultiStepForm, { InjectedStepProps } from "./useMultiStepForm";
+import { useMutation, useQuery } from "@tanstack/react-query";
 
 import { AbhaNumber } from "@/types/abhaNumber";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 import { User } from "@/types/user";
 import { apis } from "@/apis";
 import { cn } from "@/lib/utils";
 import { toast } from "@/lib/utils";
 import { useForm } from "react-hook-form";
-import { useMutation } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -53,7 +54,10 @@ type FormMemory = {
   abhaNumber?: AbhaNumber;
 };
 
-export const CreateWithAadhaar: FC<CreateWithAadhaarProps> = ({ onSuccess, user }) => {
+export const CreateWithAadhaar: FC<CreateWithAadhaarProps> = ({
+  onSuccess,
+  user,
+}) => {
   const { currentStep } = useMultiStepForm<FormMemory>(
     [
       {
@@ -148,7 +152,7 @@ const EnterAadhaar: FC<EnterAadhaarProps> = ({ memory, setMemory, goTo }) => {
     defaultValues: {
       aadhaar: "",
       disclaimer_1: false,
-      disclaimer_2: false,
+      disclaimer_2: true,
       disclaimer_3: false,
       disclaimer_4: false,
       disclaimer_5: false,
@@ -207,32 +211,38 @@ const EnterAadhaar: FC<EnterAadhaarProps> = ({ memory, setMemory, goTo }) => {
           )}
         />
 
-        {Array.from({ length: 7 }).map((_, index) => (
-          <FormField
-            key={`disclaimer_${index + 1}`}
-            control={form.control}
-            name={`disclaimer_${index + 1}` as keyof EnterAadhaarFormValues}
-            render={({ field }) => (
-              <FormItem className="flex flex-row items-start space-x-3 space-y-0">
-                <FormControl>
-                  <Checkbox
-                    checked={field.value as boolean}
-                    onCheckedChange={field.onChange}
-                  />
-                </FormControl>
-                <div className="space-y-1 leading-none">
-                  <FormLabel className="text-sm font-normal">
-                    {t(`abha__disclaimer_${index + 1}`, {
-                      patient: "Beneficiary",
-                      user: memory?.user?.username ?? "User",
-                    })}
-                  </FormLabel>
-                  <FormMessage />
-                </div>
-              </FormItem>
-            )}
-          />
-        ))}
+        {Array.from({ length: 7 }).map((_, index) => {
+          if (index === 1) {
+            return null;
+          }
+
+          return (
+            <FormField
+              key={`disclaimer_${index + 1}`}
+              control={form.control}
+              name={`disclaimer_${index + 1}` as keyof EnterAadhaarFormValues}
+              render={({ field }) => (
+                <FormItem className="flex flex-row items-start space-x-3 space-y-0">
+                  <FormControl>
+                    <Checkbox
+                      checked={field.value as boolean}
+                      onCheckedChange={field.onChange}
+                    />
+                  </FormControl>
+                  <div className="space-y-1 leading-none">
+                    <FormLabel className="text-sm font-normal">
+                      {t(`abha__disclaimer_${index + 1}`, {
+                        patient: "Beneficiary",
+                        user: memory?.user?.username ?? "User",
+                      })}
+                    </FormLabel>
+                    <FormMessage />
+                  </div>
+                </FormItem>
+              )}
+            />
+          );
+        })}
         <div className="flex items-center justify-center gap-2">
           <Button
             type="submit"
@@ -450,6 +460,22 @@ const verifyAadhaarWithDemographicsFormSchema = z.object({
   name: z.string().min(1),
   gender: z.enum(["M", "F", "O"]),
   date_of_birth: z.string().date(),
+  state_code: z.number().int(),
+  district_code: z.number().int(),
+  address: z.string().optional(),
+  pin_code: z
+    .string()
+    .length(6, {
+      message: "Pin code must be 6 digits",
+    })
+    .optional(),
+  mobile: z
+    .string()
+    .length(10, {
+      message: "Mobile number must be 10 digits",
+    })
+    .optional(),
+  profile_photo: z.string().optional(),
 });
 
 type VerifyAadhaarWithDemographicsFormValues = z.infer<
@@ -468,6 +494,17 @@ const VerifyAadhaarWithDemographics: FC<VerifyAadhaarWithDemographicsProps> = ({
     defaultValues: {
       _aadhaar: memory?.aadhaarNumber ?? "",
     },
+  });
+
+  const { data: states } = useQuery({
+    queryKey: ["states"],
+    queryFn: () => apis.utility.states(),
+  });
+
+  const { data: districts } = useQuery({
+    queryKey: ["districts", form.watch("state_code")],
+    queryFn: () => apis.utility.districts(form.watch("state_code")),
+    enabled: !!form.watch("state_code"),
   });
 
   const verifyAadhaarDemographicsMutation = useMutation({
@@ -505,6 +542,12 @@ const VerifyAadhaarWithDemographics: FC<VerifyAadhaarWithDemographicsProps> = ({
       name: values.name,
       gender: values.gender,
       date_of_birth: new Date(values.date_of_birth).toISOString().slice(0, 10),
+      state_code: values.state_code.toString(),
+      district_code: values.district_code.toString(),
+      pin_code: values.pin_code,
+      address: values.address,
+      mobile: values.mobile,
+      profile_photo: values.profile_photo,
     });
   }
 
@@ -544,7 +587,10 @@ const VerifyAadhaarWithDemographics: FC<VerifyAadhaarWithDemographicsProps> = ({
             name="name"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Name</FormLabel>
+                <FormLabel>
+                  Name
+                  <span className="text-xs text-danger-500">*</span>
+                </FormLabel>
                 <FormControl>
                   <Input
                     placeholder="Enter your name as per Aadhaar"
@@ -564,7 +610,9 @@ const VerifyAadhaarWithDemographics: FC<VerifyAadhaarWithDemographicsProps> = ({
             name="gender"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Gender</FormLabel>
+                <FormLabel>
+                  Gender <span className="text-xs text-danger-500">*</span>
+                </FormLabel>
                 <Select
                   onValueChange={field.onChange}
                   defaultValue={field.value}
@@ -596,9 +644,126 @@ const VerifyAadhaarWithDemographics: FC<VerifyAadhaarWithDemographicsProps> = ({
             name="date_of_birth"
             render={({ field }) => (
               <FormItem className="flex flex-col">
-                <FormLabel>Date of Birth</FormLabel>
+                <FormLabel>
+                  Date of Birth{" "}
+                  <span className="text-xs text-danger-500">*</span>
+                </FormLabel>
                 <FormControl>
                   <Input type="date" {...field} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          <FormField
+            control={form.control}
+            name="state_code"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>
+                  State <span className="text-xs text-danger-500">*</span>
+                </FormLabel>
+                <Select
+                  onValueChange={(value) => field.onChange(Number(value))}
+                  defaultValue={field.value?.toString()}
+                >
+                  <FormControl>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select a state" />
+                    </SelectTrigger>
+                  </FormControl>
+                  <SelectContent>
+                    {(states ?? []).map((state) => (
+                      <SelectItem
+                        key={state.state_code}
+                        value={state.state_code.toString()}
+                      >
+                        {state.state_name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          <FormField
+            control={form.control}
+            name="district_code"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>
+                  District <span className="text-xs text-danger-500">*</span>
+                </FormLabel>
+                <Select
+                  onValueChange={(value) => field.onChange(Number(value))}
+                  defaultValue={field.value?.toString()}
+                >
+                  <FormControl>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select a district" />
+                    </SelectTrigger>
+                  </FormControl>
+                  <SelectContent>
+                    {(districts ?? []).map((district) => (
+                      <SelectItem
+                        key={district.district_code}
+                        value={district.district_code.toString()}
+                      >
+                        {district.district_name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          <FormField
+            control={form.control}
+            name="pin_code"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Pin Code</FormLabel>
+                <FormControl>
+                  <Input placeholder="Enter 6 digit pin code" {...field} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          <FormField
+            control={form.control}
+            name="address"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Address</FormLabel>
+                <FormControl>
+                  <Textarea
+                    placeholder="Enter address as per aadhaar card"
+                    {...field}
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          <FormField
+            control={form.control}
+            name="mobile"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Mobile Number</FormLabel>
+                <FormControl>
+                  <Input
+                    placeholder="Enter 10 digit mobile number"
+                    {...field}
+                  />
                 </FormControl>
                 <FormMessage />
               </FormItem>
