@@ -24,6 +24,7 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
+import { Trans, useTranslation } from "react-i18next";
 import useMultiStepForm, { InjectedStepProps } from "./useMultiStepForm";
 
 import { AbhaNumber } from "@/types/abhaNumber";
@@ -34,7 +35,6 @@ import { apis } from "@/apis";
 import { toast } from "@/lib/utils";
 import { useForm } from "react-hook-form";
 import { useMutation } from "@tanstack/react-query";
-import { useTranslation } from "react-i18next";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 
@@ -112,9 +112,6 @@ const enterIdFormSchema = z.object({
   disclaimer_5: z.boolean().refine((value) => value === true, {
     message: "Please read and accept this policy",
   }),
-  disclaimer_6: z.boolean().refine((value) => value === true, {
-    message: "Please read and accept this policy",
-  }),
 });
 
 type EnterIdFormValues = z.infer<typeof enterIdFormSchema>;
@@ -135,7 +132,6 @@ const EnterId: FC<EnterIdProps> = ({ memory, setMemory, goTo }) => {
       disclaimer_3: false,
       disclaimer_4: false,
       disclaimer_5: false,
-      disclaimer_6: false,
     },
   });
 
@@ -203,7 +199,7 @@ const EnterId: FC<EnterIdProps> = ({ memory, setMemory, goTo }) => {
           )}
         />
 
-        {Array.from({ length: 6 }).map((_, index) => (
+        {Array.from({ length: 5 }).map((_, index) => (
           <FormField
             key={`disclaimer_${index + 1}`}
             control={form.control}
@@ -218,10 +214,19 @@ const EnterId: FC<EnterIdProps> = ({ memory, setMemory, goTo }) => {
                 </FormControl>
                 <div className="space-y-1 leading-none">
                   <FormLabel className="text-sm font-normal">
-                    {t(`abha__disclaimer_${index + 2}`, {
-                      patient: "Beneficiary",
-                      user: memory?.user?.username ?? "User",
-                    })}
+                    <Trans
+                      t={t}
+                      i18nKey={`abha__disclaimer_${index + 2}`}
+                      values={{ user: memory?.user?.username ?? "User" }}
+                      components={{
+                        input: (
+                          <Input
+                            className="inline w-auto ml-1"
+                            placeholder="Enter Beneficiary Name"
+                          />
+                        ),
+                      }}
+                    />
                   </FormLabel>
                   <FormMessage />
                 </div>

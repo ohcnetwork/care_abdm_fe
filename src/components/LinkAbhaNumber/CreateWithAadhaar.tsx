@@ -24,6 +24,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { Trans, useTranslation } from "react-i18next";
 import useMultiStepForm, { InjectedStepProps } from "./useMultiStepForm";
 import { useMutation, useQuery } from "@tanstack/react-query";
 
@@ -36,7 +37,6 @@ import { apis } from "@/apis";
 import { cn } from "@/lib/utils";
 import { toast } from "@/lib/utils";
 import { useForm } from "react-hook-form";
-import { useTranslation } from "react-i18next";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 
@@ -137,9 +137,6 @@ const enterAadhaarFormSchema = z.object({
   disclaimer_6: z.boolean().refine((value) => value === true, {
     message: "Please read and accept this policy",
   }),
-  disclaimer_7: z.boolean().refine((value) => value === true, {
-    message: "Please read and accept this policy",
-  }),
 });
 
 type EnterAadhaarFormValues = z.infer<typeof enterAadhaarFormSchema>;
@@ -152,12 +149,11 @@ const EnterAadhaar: FC<EnterAadhaarProps> = ({ memory, setMemory, goTo }) => {
     defaultValues: {
       aadhaar: "",
       disclaimer_1: false,
-      disclaimer_2: true,
+      disclaimer_2: false,
       disclaimer_3: false,
       disclaimer_4: false,
       disclaimer_5: false,
       disclaimer_6: false,
-      disclaimer_7: false,
     },
   });
 
@@ -211,38 +207,41 @@ const EnterAadhaar: FC<EnterAadhaarProps> = ({ memory, setMemory, goTo }) => {
           )}
         />
 
-        {Array.from({ length: 7 }).map((_, index) => {
-          if (index === 1) {
-            return null;
-          }
-
-          return (
-            <FormField
-              key={`disclaimer_${index + 1}`}
-              control={form.control}
-              name={`disclaimer_${index + 1}` as keyof EnterAadhaarFormValues}
-              render={({ field }) => (
-                <FormItem className="flex flex-row items-start space-x-3 space-y-0">
-                  <FormControl>
-                    <Checkbox
-                      checked={field.value as boolean}
-                      onCheckedChange={field.onChange}
+        {Array.from({ length: 6 }).map((_, index) => (
+          <FormField
+            key={`disclaimer_${index + 1}`}
+            control={form.control}
+            name={`disclaimer_${index + 1}` as keyof EnterAadhaarFormValues}
+            render={({ field }) => (
+              <FormItem className="flex flex-row items-start space-x-3 space-y-0">
+                <FormControl>
+                  <Checkbox
+                    checked={field.value as boolean}
+                    onCheckedChange={field.onChange}
+                  />
+                </FormControl>
+                <div className="space-y-1 leading-none">
+                  <FormLabel className="text-sm font-normal">
+                    <Trans
+                      t={t}
+                      i18nKey={`abha__disclaimer_${index + 1}`}
+                      values={{ user: memory?.user?.username ?? "User" }}
+                      components={{
+                        input: (
+                          <Input
+                            className="inline w-auto ml-1"
+                            placeholder="Enter Beneficiary Name"
+                          />
+                        ),
+                      }}
                     />
-                  </FormControl>
-                  <div className="space-y-1 leading-none">
-                    <FormLabel className="text-sm font-normal">
-                      {t(`abha__disclaimer_${index + 1}`, {
-                        patient: "Beneficiary",
-                        user: memory?.user?.username ?? "User",
-                      })}
-                    </FormLabel>
-                    <FormMessage />
-                  </div>
-                </FormItem>
-              )}
-            />
-          );
-        })}
+                  </FormLabel>
+                  <FormMessage />
+                </div>
+              </FormItem>
+            )}
+          />
+        ))}
         <div className="flex items-center justify-center gap-2">
           <Button
             type="submit"
