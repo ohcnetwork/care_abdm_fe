@@ -184,8 +184,6 @@ const EnterAadhaar: FC<EnterAadhaarProps> = ({ memory, setMemory, goTo }) => {
     });
   }
 
-  console.log("form", form.formState.errors, form.watch("name"));
-
   return (
     <Form {...form}>
       <form
