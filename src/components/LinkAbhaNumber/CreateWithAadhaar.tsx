@@ -49,6 +49,7 @@ type FormMemory = {
   user?: User;
   aadhaarNumber: string;
   mobileNumber: string;
+  patientName: string;
 
   transactionId: string;
   abhaNumber?: AbhaNumber;
@@ -103,6 +104,7 @@ export const CreateWithAadhaar: FC<CreateWithAadhaarProps> = ({
       user,
       aadhaarNumber: "",
       mobileNumber: "",
+      patientName: "",
 
       transactionId: "",
     }
@@ -119,6 +121,9 @@ const enterAadhaarFormSchema = z.object({
     .refine((value) => value.length === 12 || value.length === 16, {
       message: "Aadhaar number must be 12 or 16 digits",
     }),
+  name: z.string().min(1, {
+    message: "Name is required",
+  }),
   disclaimer_1: z.boolean().refine((value) => value === true, {
     message: "Please read and accept this policy",
   }),
@@ -148,6 +153,7 @@ const EnterAadhaar: FC<EnterAadhaarProps> = ({ memory, setMemory, goTo }) => {
     resolver: zodResolver(enterAadhaarFormSchema),
     defaultValues: {
       aadhaar: "",
+      name: "",
       disclaimer_1: false,
       disclaimer_2: false,
       disclaimer_3: false,
@@ -177,6 +183,8 @@ const EnterAadhaar: FC<EnterAadhaarProps> = ({ memory, setMemory, goTo }) => {
       aadhaar: values.aadhaar,
     });
   }
+
+  console.log("form", form.formState.errors, form.watch("name"));
 
   return (
     <Form {...form}>
@@ -228,9 +236,20 @@ const EnterAadhaar: FC<EnterAadhaarProps> = ({ memory, setMemory, goTo }) => {
                       values={{ user: memory?.user?.username ?? "User" }}
                       components={{
                         input: (
-                          <Input
-                            className="inline w-auto ml-1"
-                            placeholder="Enter Beneficiary Name"
+                          <FormField
+                            control={form.control}
+                            name="name"
+                            render={({ field }) => (
+                              <FormItem className="inline-block w-auto ml-1">
+                                <FormControl>
+                                  <Input
+                                    {...field}
+                                    placeholder="Enter Beneficiary Name"
+                                  />
+                                </FormControl>
+                                <FormMessage />
+                              </FormItem>
+                            )}
                           />
                         ),
                       }}
@@ -261,6 +280,7 @@ const EnterAadhaar: FC<EnterAadhaarProps> = ({ memory, setMemory, goTo }) => {
                 ...prev,
                 transactionId: "",
                 aadhaarNumber: form.getValues("aadhaar"),
+                patientName: form.getValues("name"),
               }));
               goTo("verify-aadhaar-with-demographics");
             }}
@@ -492,6 +512,7 @@ const VerifyAadhaarWithDemographics: FC<VerifyAadhaarWithDemographicsProps> = ({
     resolver: zodResolver(verifyAadhaarWithDemographicsFormSchema),
     defaultValues: {
       _aadhaar: memory?.aadhaarNumber ?? "",
+      name: memory?.patientName ?? "",
     },
   });
 
