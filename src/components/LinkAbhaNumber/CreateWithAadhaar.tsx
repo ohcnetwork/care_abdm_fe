@@ -1,22 +1,25 @@
-import * as Notify from "@/Utils/Notifications";
+import dayjs from "dayjs";
+import { useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
 
 import ButtonV2, { ButtonWithTimer } from "@/components/Common/ButtonV2";
-import { useEffect, useState } from "react";
-import useMultiStepForm, { InjectedStepProps } from "./useMultiStepForm";
-
-import { AbhaNumberModel } from "../../types";
 import CheckBoxFormField from "@/components/Form/FormFields/CheckBoxFormField";
 import DateFormField from "@/components/Form/FormFields/DateFormField";
 import OtpFormField from "@/components/Form/FormFields/OtpFormField";
 import PhoneNumberFormField from "@/components/Form/FormFields/PhoneNumberFormField";
 import { SelectFormField } from "@/components/Form/FormFields/SelectFormField";
+import TextAreaFormField from "@/components/Form/FormFields/TextAreaFormField";
 import TextFormField from "@/components/Form/FormFields/TextFormField";
-import { classNames } from "@/Utils/utils";
-import dayjs from "dayjs";
-import request from "@/Utils/request/request";
-import routes from "../../api";
-import { useTranslation } from "react-i18next";
 import { validateRule } from "@/components/Users/UserAdd";
+
+import * as Notify from "@/Utils/Notifications";
+import request from "@/Utils/request/request";
+import useQuery from "@/Utils/request/useQuery";
+import { classNames } from "@/Utils/utils";
+
+import routes from "../../api";
+import { AbhaNumberModel } from "../../types";
+import useMultiStepForm, { InjectedStepProps } from "./useMultiStepForm";
 
 const MAX_OTP_RESEND_ALLOWED = 2;
 
@@ -429,9 +432,19 @@ function VerifyAadhaarWithDemographics({
 
   const [name, setName] = useState("");
   const [gender, setGender] = useState<AbhaNumberModel["gender"]>();
-  const [date_of_birth, setDateOfBirth] = useState(
-    new Date().toISOString().slice(0, 10),
-  );
+  const [dob, setDob] = useState(new Date().toISOString().slice(0, 10));
+  const [districtCode, setDistrictCode] = useState<number>();
+  const [stateCode, setStateCode] = useState<number>();
+  const [address, setAddress] = useState("");
+  const [pincode, setPincode] = useState("");
+  const [mobile, setMobile] = useState("");
+
+  const { data: states } = useQuery(routes.utility.states);
+  const { data: districts } = useQuery(routes.utility.districts, {
+    pathParams: {
+      stateId: stateCode!,
+    },
+  });
 
   const validateInput = () => {
     if (!name) {
@@ -450,10 +463,26 @@ function VerifyAadhaarWithDemographics({
       return false;
     }
 
-    if (!date_of_birth) {
+    if (!dob) {
       setMemory((prev) => ({
         ...prev,
         validationError: "Date of birth is required",
+      }));
+      return false;
+    }
+
+    if (!districtCode) {
+      setMemory((prev) => ({
+        ...prev,
+        validationError: "District code is required",
+      }));
+      return false;
+    }
+
+    if (!stateCode) {
+      setMemory((prev) => ({
+        ...prev,
+        validationError: "State code is required",
       }));
       return false;
     }
@@ -474,7 +503,12 @@ function VerifyAadhaarWithDemographics({
           aadhaar: memory!.aadhaarNumber,
           name,
           gender: gender!,
-          date_of_birth,
+          date_of_birth: dob,
+          district_code: districtCode!.toString(),
+          state_code: stateCode!.toString(),
+          address,
+          pin_code: pincode,
+          mobile: mobile,
         },
       },
     );
@@ -536,42 +570,111 @@ function VerifyAadhaarWithDemographics({
           onChange={(e) => {
             setName(e.value);
           }}
+          required
         />
 
-        <SelectFormField
-          name="gender"
-          label="Gender"
+        <div className="flex items-center gap-2 max-sm:flex-col">
+          <SelectFormField
+            name="gender"
+            label="Gender"
+            className="flex-1 w-full"
+            errorClassName="hidden"
+            options={[
+              { label: "Male", value: "M" },
+              { label: "Female", value: "F" },
+              { label: "Other", value: "O" },
+            ]}
+            optionLabel={({ label }) => label}
+            optionValue={({ value }) => value}
+            value={gender}
+            onChange={({ value }) =>
+              setGender(value as AbhaNumberModel["gender"])
+            }
+            required
+          />
+
+          <DateFormField
+            label="Date of Birth"
+            name="date_of_birth"
+            className="flex-1 w-full"
+            errorClassName="hidden"
+            value={new Date(dob)}
+            max={new Date()}
+            onChange={(e) => {
+              setDob(dayjs(e.value).format("YYYY-MM-DD"));
+            }}
+            required
+          />
+        </div>
+
+        <div className="flex items-center gap-2 max-sm:flex-col">
+          <SelectFormField
+            label={t("state")}
+            className="flex-1 w-full"
+            errorClassName="hidden"
+            id="state"
+            name="state"
+            options={states ?? []}
+            optionLabel={(o) => o.state_name}
+            optionValue={(o) => o.state_code}
+            value={stateCode}
+            onChange={({ value }) => setStateCode(value)}
+            required
+          />
+
+          <SelectFormField
+            label={t("district")}
+            className="flex-1 w-full"
+            errorClassName="hidden"
+            id="district"
+            name="district"
+            options={districts ?? []}
+            optionLabel={(o) => o.district_name}
+            optionValue={(o) => o.district_code}
+            value={districtCode}
+            onChange={({ value }) => setDistrictCode(value)}
+            required
+          />
+        </div>
+
+        <TextAreaFormField
+          name="address"
+          label={t("address")}
+          value={address}
           errorClassName="hidden"
-          options={[
-            { label: "Male", value: "M" },
-            { label: "Female", value: "F" },
-            { label: "Other", value: "O" },
-          ]}
-          optionLabel={({ label }) => label}
-          optionValue={({ value }) => value}
-          value={gender}
-          onChange={({ value }) =>
-            setGender(value as AbhaNumberModel["gender"])
-          }
+          onChange={({ value }) => setAddress(value)}
         />
 
-        <DateFormField
-          label="Date of Birth"
-          name="date_of_birth"
-          errorClassName="hidden"
-          value={new Date(date_of_birth)}
-          max={new Date()}
-          onChange={(e) => {
-            setDateOfBirth(dayjs(e.value).format("YYYY-MM-DD"));
-          }}
-        />
+        <div className="flex items-center gap-2 max-sm:flex-col">
+          <TextFormField
+            name="pincode"
+            label={t("pincode")}
+            value={pincode}
+            className="flex-1 w-full"
+            errorClassName="hidden"
+            onChange={({ value }) => setPincode(value)}
+          />
+
+          <PhoneNumberFormField
+            label={t("mobile_number")}
+            labelSuffix={<></>}
+            name="mobile_number"
+            value={mobile}
+            onChange={({ value }) => {
+              setMobile(value);
+            }}
+            className="flex-1 w-full"
+            errorClassName="hidden"
+            types={["mobile"]}
+          />
+        </div>
       </div>
 
       <div className="mt-4 flex flex-col items-center gap-2">
         <ButtonV2
           className="w-full"
           loading={memory?.isLoading}
-          disabled={!name || !gender || !date_of_birth}
+          disabled={!name || !gender || !dob || !stateCode || !districtCode}
           onClick={handleSubmit}
         >
           Verify Demographics

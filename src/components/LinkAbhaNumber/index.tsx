@@ -70,6 +70,7 @@ export default function LinkAbhaNumber({
       title={t(ABHA_LINK_OPTIONS[currentAbhaLinkOption].title)}
       show={show}
       onClose={onClose}
+      className="!max-w-2xl"
     >
       {currentAbhaLinkOption === "create_with_aadhaar" && (
         <CreateWithAadhaar onSuccess={onSuccess} />

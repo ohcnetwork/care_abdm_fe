@@ -1,3 +1,6 @@
+import { Type } from "@/Utils/request/api";
+import { PaginatedResponse } from "@/Utils/request/types";
+
 import {
   AbhaNumberModel,
   ConsentRequestModel,
@@ -7,9 +10,6 @@ import {
   IcreateHealthFacilityTBody,
   IpartialUpdateHealthFacilityTBody,
 } from "./types";
-
-import { PaginatedResponse } from "@/Utils/request/types";
-import { Type } from "@/Utils/request/api";
 
 const routes = {
   consent: {
@@ -116,6 +116,11 @@ const routes = {
         date_of_birth: string;
         gender: "M" | "F" | "O";
         aadhaar: string;
+        mobile: string;
+        address: string;
+        state_code: string;
+        district_code: string;
+        pin_code: string;
       }>(),
       TRes: Type<{
         transaction_id: string;
@@ -264,6 +269,29 @@ const routes = {
       path: "/api/abdm/v3/health_id/abha_card",
       method: "GET",
       TRes: Type<Blob>(),
+    },
+  },
+
+  utility: {
+    states: {
+      path: "/api/abdm/v3/utility/states/",
+      method: "GET",
+      TRes: Type<
+        {
+          state_name: string;
+          state_code: number;
+        }[]
+      >(),
+    },
+    districts: {
+      path: "/api/abdm/v3/utility/states/{stateId}/districts/",
+      method: "GET",
+      TRes: Type<
+        {
+          district_name: string;
+          district_code: number;
+        }[]
+      >(),
     },
   },
 } as const;
