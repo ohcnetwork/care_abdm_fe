@@ -1,7 +1,7 @@
 import { AbhaProfile, AbhaProfileProps } from "./ShowAbhaProfile";
 import { Button, ButtonWithTimer } from "@/components/ui/button";
 import { CircleCheckIcon, CircleIcon, CircleXIcon } from "lucide-react";
-import { FC, JSX, useEffect, useState } from "react";
+import { FC, JSX, useEffect, useMemo, useState } from "react";
 import {
   Form,
   FormControl,
@@ -32,21 +32,19 @@ import { AbhaNumber } from "@/types/abhaNumber";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { User } from "@/types/user";
 import { apis } from "@/apis";
 import { cn } from "@/lib/utils";
 import { toast } from "@/lib/utils";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { useLinkAbhaNumberContext } from ".";
 
 type CreateWithAadhaarProps = {
   onSuccess: (abhaNumber: AbhaNumber) => void;
-  user?: User;
 };
 
 type FormMemory = {
-  user?: User;
   aadhaarNumber: string;
   mobileNumber: string;
   patientName: string;
@@ -57,7 +55,6 @@ type FormMemory = {
 
 export const CreateWithAadhaar: FC<CreateWithAadhaarProps> = ({
   onSuccess,
-  user,
 }) => {
   const { currentStep } = useMultiStepForm<FormMemory>(
     [
@@ -101,7 +98,6 @@ export const CreateWithAadhaar: FC<CreateWithAadhaarProps> = ({
       },
     ],
     {
-      user,
       aadhaarNumber: "",
       mobileNumber: "",
       patientName: "",
@@ -148,6 +144,7 @@ type EnterAadhaarFormValues = z.infer<typeof enterAadhaarFormSchema>;
 
 const EnterAadhaar: FC<EnterAadhaarProps> = ({ memory, setMemory, goTo }) => {
   const { t } = useTranslation(I18NNAMESPACE);
+  const { healthFacility, currentUser } = useLinkAbhaNumberContext();
 
   const form = useForm<EnterAadhaarFormValues>({
     resolver: zodResolver(enterAadhaarFormSchema),
@@ -183,6 +180,21 @@ const EnterAadhaar: FC<EnterAadhaarProps> = ({ memory, setMemory, goTo }) => {
       aadhaar: values.aadhaar,
     });
   }
+
+  const currentUserName = useMemo(
+    () =>
+      [
+        currentUser?.prefix,
+        currentUser?.first_name,
+        currentUser?.last_name,
+        currentUser?.suffix,
+      ]
+        .filter(Boolean)
+        .join(" ") ||
+      currentUser?.username ||
+      t("user"),
+    [currentUser]
+  );
 
   return (
     <Form {...form}>
@@ -231,7 +243,7 @@ const EnterAadhaar: FC<EnterAadhaarProps> = ({ memory, setMemory, goTo }) => {
                     <Trans
                       t={t}
                       i18nKey={`abha__disclaimer_${index + 1}`}
-                      values={{ user: memory?.user?.username ?? "User" }}
+                      values={{ user: currentUserName }}
                       components={{
                         input: (
                           <FormField
@@ -269,23 +281,25 @@ const EnterAadhaar: FC<EnterAadhaarProps> = ({ memory, setMemory, goTo }) => {
           >
             {t("verify_with_otp")}
           </Button>
-          <Button
-            type="button"
-            variant="default"
-            disabled={!form.formState.isValid}
-            onClick={() => {
-              setMemory((prev) => ({
-                ...prev,
-                transactionId: "",
-                aadhaarNumber: form.getValues("aadhaar"),
-                patientName: form.getValues("name"),
-              }));
-              goTo("verify-aadhaar-with-demographics");
-            }}
-            className="w-full"
-          >
-            {t("verify_with_demographics")}
-          </Button>
+          {healthFacility?.benefit_name && (
+            <Button
+              type="button"
+              variant="default"
+              disabled={!form.formState.isValid}
+              onClick={() => {
+                setMemory((prev) => ({
+                  ...prev,
+                  transactionId: "",
+                  aadhaarNumber: form.getValues("aadhaar"),
+                  patientName: form.getValues("name"),
+                }));
+                goTo("verify-aadhaar-with-demographics");
+              }}
+              className="w-full"
+            >
+              {t("verify_with_demographics")}
+            </Button>
+          )}
         </div>
       </form>
     </Form>

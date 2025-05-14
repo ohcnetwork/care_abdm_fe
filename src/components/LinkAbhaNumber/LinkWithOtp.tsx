@@ -1,5 +1,5 @@
 import { Button, ButtonWithTimer } from "@/components/ui/button";
-import { FC, useState } from "react";
+import { FC, useMemo, useState } from "react";
 import {
   Form,
   FormControl,
@@ -30,30 +30,28 @@ import useMultiStepForm, { InjectedStepProps } from "./useMultiStepForm";
 import { AbhaNumber } from "@/types/abhaNumber";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
-import { User } from "@/types/user";
 import { apis } from "@/apis";
 import { toast } from "@/lib/utils";
 import { useForm } from "react-hook-form";
 import { useMutation } from "@tanstack/react-query";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { useLinkAbhaNumberContext } from ".";
 
 type LinkWithOtpProps = {
   onSuccess: (abhaNumber: AbhaNumber) => void;
-  user?: User;
 };
 
 type FormMemory = {
   id: string;
   idType: "aadhaar" | "mobile" | "abha-number" | "abha-address";
   otpSystem: "aadhaar" | "abdm";
-  user?: User;
 
   transactionId: string;
   abhaNumber?: AbhaNumber;
 };
 
-export const LinkWithOtp: FC<LinkWithOtpProps> = ({ onSuccess, user }) => {
+export const LinkWithOtp: FC<LinkWithOtpProps> = ({ onSuccess }) => {
   const { currentStep } = useMultiStepForm<FormMemory>(
     [
       {
@@ -66,7 +64,6 @@ export const LinkWithOtp: FC<LinkWithOtpProps> = ({ onSuccess, user }) => {
       },
     ],
     {
-      user,
       id: "",
       idType: "aadhaar",
       otpSystem: "aadhaar",
@@ -118,6 +115,8 @@ type EnterIdFormValues = z.infer<typeof enterIdFormSchema>;
 
 const EnterId: FC<EnterIdProps> = ({ memory, setMemory, goTo }) => {
   const { t } = useTranslation(I18NNAMESPACE);
+  const { currentUser } = useLinkAbhaNumberContext();
+
   const [showAuthMethods, setShowAuthMethods] = useState(false);
   const [authMethods, setAuthMethods] = useState<
     (typeof SUPPORTED_AUTH_METHODS)[number][]
@@ -181,6 +180,21 @@ const EnterId: FC<EnterIdProps> = ({ memory, setMemory, goTo }) => {
     },
   });
 
+  const currentUserName = useMemo(
+    () =>
+      [
+        currentUser?.prefix,
+        currentUser?.first_name,
+        currentUser?.last_name,
+        currentUser?.suffix,
+      ]
+        .filter(Boolean)
+        .join(" ") ||
+      currentUser?.username ||
+      t("user"),
+    [currentUser]
+  );
+
   return (
     <Form {...form}>
       <form className="mt-6 space-y-4">
@@ -217,7 +231,7 @@ const EnterId: FC<EnterIdProps> = ({ memory, setMemory, goTo }) => {
                     <Trans
                       t={t}
                       i18nKey={`abha__disclaimer_${index + 2}`}
-                      values={{ user: memory?.user?.username ?? "User" }}
+                      values={{ user: currentUserName }}
                       components={{
                         input: (
                           <Input

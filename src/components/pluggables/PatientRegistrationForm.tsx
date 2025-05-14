@@ -1,10 +1,4 @@
 import { FC, useEffect } from "react";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
 import { Input } from "@/components/ui/input";
@@ -32,12 +26,6 @@ const PatientRegistrationForm: FC<PatientRegistrationFormProps> = ({
     queryKey: ["abhaNumber", patientId],
     queryFn: () => apis.abhaNumber.get(patientId!),
     enabled: !!patientId,
-  });
-
-  const { data: healthFacility } = useQuery({
-    queryKey: ["healthFacility", facilityId!],
-    queryFn: () => apis.healthFacility.get(facilityId!),
-    enabled: !!facilityId!,
   });
 
   useEffect(() => {
@@ -84,62 +72,47 @@ const PatientRegistrationForm: FC<PatientRegistrationFormProps> = ({
   if (!form.watch("abha_id")) {
     return (
       <div className="abdm-container flex justify-end w-full">
-        <TooltipProvider>
-          <Tooltip>
-            <TooltipTrigger>
-              <LinkAbhaNumber
-                type="button"
-                variant="outline"
-                className="text-primary border-primary-400"
-                disabled={!healthFacility}
-                onSuccess={(abhaNumber) => {
-                  form.setValue("abha", abhaNumber);
+        <LinkAbhaNumber
+          facilityId={facilityId}
+          type="button"
+          variant="outline"
+          className="text-primary border-primary-400"
+          onSuccess={(abhaNumber) => {
+            form.setValue("abha", abhaNumber);
 
-                  form.setValue("abha_id", abhaNumber.external_id);
-                  form.setValue("abha_number", abhaNumber.abha_number);
-                  form.setValue("abha_address", abhaNumber.health_id);
+            form.setValue("abha_id", abhaNumber.external_id);
+            form.setValue("abha_number", abhaNumber.abha_number);
+            form.setValue("abha_address", abhaNumber.health_id);
 
-                  if (patientId) {
-                    linkAbhaNumberAndPatientMutation.mutate({
-                      patient: patientId,
-                      abha_number: form.getValues("abha_id"),
-                    });
-                    return;
-                  }
+            if (patientId) {
+              linkAbhaNumberAndPatientMutation.mutate({
+                patient: patientId,
+                abha_number: form.getValues("abha_id"),
+              });
+              return;
+            }
 
-                  form.setValue("name", abhaNumber.name);
-                  form.setValue(
-                    "phone_number",
-                    "+91" + abhaNumber.mobile?.replace("+91", "")
-                  );
-                  form.setValue("yob_or_dob", "dob");
-                  form.setValue("date_of_birth", abhaNumber.date_of_birth);
-                  form.setValue("blood_group", "unknown");
-                  form.setValue(
-                    "gender",
-                    { M: "male", F: "female", O: "transgender" }[
-                      abhaNumber.gender
-                    ] ?? "transgender"
-                  );
-                  form.setValue("address", abhaNumber.address);
-                  form.setValue("permanent_address", abhaNumber.address);
-                  form.setValue(
-                    "pincode",
-                    abhaNumber.pincode && Number(abhaNumber.pincode)
-                  );
-                }}
-              />
-            </TooltipTrigger>
-            {!healthFacility && (
-              <TooltipContent>
-                <p>
-                  Abha linking is disabled for this facility as it doesn't have
-                  health facility id configured.
-                </p>
-              </TooltipContent>
-            )}
-          </Tooltip>
-        </TooltipProvider>
+            form.setValue("name", abhaNumber.name);
+            form.setValue(
+              "phone_number",
+              "+91" + abhaNumber.mobile?.replace("+91", "")
+            );
+            form.setValue("yob_or_dob", "dob");
+            form.setValue("date_of_birth", abhaNumber.date_of_birth);
+            form.setValue("blood_group", "unknown");
+            form.setValue(
+              "gender",
+              { M: "male", F: "female", O: "transgender" }[abhaNumber.gender] ??
+                "transgender"
+            );
+            form.setValue("address", abhaNumber.address);
+            form.setValue("permanent_address", abhaNumber.address);
+            form.setValue(
+              "pincode",
+              abhaNumber.pincode && Number(abhaNumber.pincode)
+            );
+          }}
+        />
       </div>
     );
   }
