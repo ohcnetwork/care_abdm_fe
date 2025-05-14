@@ -19,6 +19,7 @@ import request from "@/Utils/request/request";
 import useQuery from "@/Utils/request/useQuery";
 import { classNames } from "@/Utils/utils";
 
+import { useLinkAbhaNumberContext } from ".";
 import routes from "../../api";
 import { AbhaNumberModel } from "../../types";
 import { formatUsername } from "../../utils";
@@ -115,6 +116,7 @@ type IEnterAadhaarProps = InjectedStepProps<Memory>;
 function EnterAadhaar({ memory, setMemory, goTo }: IEnterAadhaarProps) {
   const { t } = useTranslation();
   const user = useAuthUser();
+  const { healthFacility } = useLinkAbhaNumberContext();
   const [disclaimerAccepted, setDisclaimerAccepted] = useState([
     false,
     false,
@@ -253,24 +255,26 @@ function EnterAadhaar({ memory, setMemory, goTo }: IEnterAadhaarProps) {
         >
           Verify with Otp
         </ButtonV2>
-        <ButtonV2
-          className="w-full"
-          disabled={
-            disclaimerAccepted.some((v) => !v) ||
-            memory?.aadhaarNumber.length !== 12 ||
-            memory?.patientName.length === 0 ||
-            memory?.isLoading
-          }
-          onClick={() => {
-            setMemory((prev) => ({
-              ...prev,
-              transactionId: "",
-            }));
-            goTo("verify-aadhaar-with-demographics");
-          }}
-        >
-          Verify with Demographics
-        </ButtonV2>
+        {healthFacility?.benefit_name && (
+          <ButtonV2
+            className="w-full"
+            disabled={
+              disclaimerAccepted.some((v) => !v) ||
+              memory?.aadhaarNumber.length !== 12 ||
+              memory?.patientName.length === 0 ||
+              memory?.isLoading
+            }
+            onClick={() => {
+              setMemory((prev) => ({
+                ...prev,
+                transactionId: "",
+              }));
+              goTo("verify-aadhaar-with-demographics");
+            }}
+          >
+            Verify with Demographics
+          </ButtonV2>
+        )}
       </div>
     </div>
   );

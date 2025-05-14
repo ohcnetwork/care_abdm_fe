@@ -1,14 +1,18 @@
-import * as Notification from "@/Utils/Notifications";
-import routes from "../api";
-import request from "@/Utils/request/request";
 import { useQueryParams } from "raviger";
-import { ExtendPatientInfoCardComponentType } from "@/pluginTypes";
 import { useTranslation } from "react-i18next";
+
 import { useConsultation } from "@/components/Facility/ConsultationDetails/ConsultationContext";
+
+import * as Notification from "@/Utils/Notifications";
+import request from "@/Utils/request/request";
+import useQuery from "@/Utils/request/useQuery";
+import { ExtendPatientInfoCardComponentType } from "@/pluginTypes";
+
+import routes from "../api";
 import { AbhaNumberModel } from "../types";
-import LinkAbhaNumber from "./LinkAbhaNumber";
 import ABHAProfileModal from "./ABHAProfileModal";
 import FetchRecordsModal from "./FetchRecordsModal";
+import LinkAbhaNumber from "./LinkAbhaNumber";
 
 const ExtendPatientInfoCard: ExtendPatientInfoCardComponentType = ({
   patient,
@@ -20,9 +24,15 @@ const ExtendPatientInfoCard: ExtendPatientInfoCardComponentType = ({
     abhaNumber?: AbhaNumberModel;
   }>();
 
+  const { data: healthFacility } = useQuery(routes.healthFacility.get, {
+    pathParams: { facility_id: patient.facility! },
+    silent: true,
+  });
+
   return (
     <>
       <LinkAbhaNumber
+        healthFacility={healthFacility}
         show={qParams.show_link_abha_number === "true"}
         onClose={() => {
           setQParams({ ...qParams, show_link_abha_number: undefined });
