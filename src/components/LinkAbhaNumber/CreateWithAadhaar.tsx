@@ -1,6 +1,6 @@
 import dayjs from "dayjs";
 import { useEffect, useState } from "react";
-import { useTranslation } from "react-i18next";
+import { Trans, useTranslation } from "react-i18next";
 
 import ButtonV2, { ButtonWithTimer } from "@/components/Common/ButtonV2";
 import CheckBoxFormField from "@/components/Form/FormFields/CheckBoxFormField";
@@ -12,6 +12,8 @@ import TextAreaFormField from "@/components/Form/FormFields/TextAreaFormField";
 import TextFormField from "@/components/Form/FormFields/TextFormField";
 import { validateRule } from "@/components/Users/UserAdd";
 
+import useAuthUser from "@/hooks/useAuthUser";
+
 import * as Notify from "@/Utils/Notifications";
 import request from "@/Utils/request/request";
 import useQuery from "@/Utils/request/useQuery";
@@ -19,6 +21,7 @@ import { classNames } from "@/Utils/utils";
 
 import routes from "../../api";
 import { AbhaNumberModel } from "../../types";
+import { formatUsername } from "../../utils";
 import useMultiStepForm, { InjectedStepProps } from "./useMultiStepForm";
 
 const MAX_OTP_RESEND_ALLOWED = 2;
@@ -38,6 +41,8 @@ type Memory = {
   abhaNumber: AbhaNumberModel | null;
 
   resendOtpCount: number;
+
+  patientName: string;
 };
 
 export default function CreateWithAadhaar({
@@ -98,6 +103,7 @@ export default function CreateWithAadhaar({
       transactionId: "",
       abhaNumber: null,
       resendOtpCount: 0,
+      patientName: "",
     },
   );
 
@@ -108,7 +114,10 @@ type IEnterAadhaarProps = InjectedStepProps<Memory>;
 
 function EnterAadhaar({ memory, setMemory, goTo }: IEnterAadhaarProps) {
   const { t } = useTranslation();
+  const user = useAuthUser();
   const [disclaimerAccepted, setDisclaimerAccepted] = useState([
+    false,
+    false,
     false,
     false,
     false,
@@ -196,7 +205,27 @@ function EnterAadhaar({ memory, setMemory, goTo }: IEnterAadhaarProps) {
           <CheckBoxFormField
             key={`abha_disclaimer_${i + 1}`}
             name={`abha_disclaimer_${i + 1}`}
-            label={t(`abha__disclaimer_${i + 1}`)}
+            label={
+              <Trans
+                t={t}
+                i18nKey={`abha__disclaimer_${i + 1}`}
+                values={{ user: formatUsername(user) }}
+                components={{
+                  input: (
+                    <TextFormField
+                      type="text"
+                      name="name"
+                      className="w-48 inline-block"
+                      placeholder="Enter beneficiary name"
+                      value={memory?.patientName}
+                      onChange={(e) =>
+                        setMemory((prev) => ({ ...prev, patientName: e.value }))
+                      }
+                    />
+                  ),
+                }}
+              />
+            }
             value={isAccepted}
             onChange={(e) => {
               setDisclaimerAccepted(
@@ -216,7 +245,9 @@ function EnterAadhaar({ memory, setMemory, goTo }: IEnterAadhaarProps) {
           loading={memory?.isLoading}
           disabled={
             disclaimerAccepted.some((v) => !v) ||
-            memory?.aadhaarNumber.length !== 12
+            memory?.aadhaarNumber.length !== 12 ||
+            memory?.patientName.length === 0 ||
+            memory?.isLoading
           }
           onClick={handleSubmit}
         >
@@ -227,6 +258,7 @@ function EnterAadhaar({ memory, setMemory, goTo }: IEnterAadhaarProps) {
           disabled={
             disclaimerAccepted.some((v) => !v) ||
             memory?.aadhaarNumber.length !== 12 ||
+            memory?.patientName.length === 0 ||
             memory?.isLoading
           }
           onClick={() => {
@@ -430,7 +462,7 @@ function VerifyAadhaarWithDemographics({
 }: IVerifyAadhaarWithDemographicsProps) {
   const { t } = useTranslation();
 
-  const [name, setName] = useState("");
+  const [name, setName] = useState(memory?.patientName ?? "");
   const [gender, setGender] = useState<AbhaNumberModel["gender"]>();
   const [dob, setDob] = useState(new Date().toISOString().slice(0, 10));
   const [districtCode, setDistrictCode] = useState<number>();
