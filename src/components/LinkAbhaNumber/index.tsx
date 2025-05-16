@@ -1,6 +1,7 @@
 import { createContext, useContext, useState } from "react";
 import { useTranslation } from "react-i18next";
 
+import ButtonV2 from "@/components/Common/ButtonV2";
 import DialogModal from "@/components/Common/Dialog";
 
 import { AbhaNumberModel, HealthFacilityModel } from "../../types";
@@ -82,6 +83,15 @@ export default function LinkAbhaNumber({
               : t("create_new_abha_profile")}
           </p>
         </div>
+        {onBack && (
+          <ButtonV2
+            ghost
+            className="w-full border border-gray-400 text-secondary-800 hover:bg-secondary-300 mt-4"
+            onClick={onBack}
+          >
+            Go Back
+          </ButtonV2>
+        )}
       </DialogModal>
     </LinkAbhaNumberContext.Provider>
   );
