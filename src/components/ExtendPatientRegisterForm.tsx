@@ -1,27 +1,31 @@
-import * as Notification from "@/Utils/Notifications";
-
-import { ExtendPatientRegisterFormComponentType } from "@/pluginTypes";
-import LinkAbhaNumber from "./LinkAbhaNumber";
-import { AbhaNumberModel } from "../types";
-import { FormContextValue } from "@/components/Form/FormContext";
-import { parsePhoneNumber } from "@/Utils/utils";
 import { useCallback, useEffect, useState } from "react";
-import TextFormField from "@/components/Form/FormFields/TextFormField";
-import { PatientForm } from "@/components/Patient/PatientRegister";
+import { useTranslation } from "react-i18next";
+
+import CareIcon from "@/CAREUI/icons/CareIcon";
+
+import { Button } from "@/components/ui/button";
 import {
   Tooltip,
   TooltipContent,
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-import { Button } from "@/components/ui/button";
-import CareIcon from "@/CAREUI/icons/CareIcon";
-import routes from "../api";
-import useQuery from "@/Utils/request/useQuery";
-import { useTranslation } from "react-i18next";
+
+import { FormContextValue } from "@/components/Form/FormContext";
+import TextFormField from "@/components/Form/FormFields/TextFormField";
+import { PatientForm } from "@/components/Patient/PatientRegister";
+import { PatientModel } from "@/components/Patient/models";
+
+import * as Notification from "@/Utils/Notifications";
 import { usePubSub } from "@/Utils/pubsubContext";
 import request from "@/Utils/request/request";
-import { PatientModel } from "@/components/Patient/models";
+import useQuery from "@/Utils/request/useQuery";
+import { parsePhoneNumber } from "@/Utils/utils";
+import { ExtendPatientRegisterFormComponentType } from "@/pluginTypes";
+
+import routes from "../api";
+import { AbhaNumberModel } from "../types";
+import LinkAbhaNumber from "./LinkAbhaNumber";
 
 const ExtendPatientRegisterForm: ExtendPatientRegisterFormComponentType = ({
   facilityId,
@@ -192,6 +196,7 @@ const ExtendPatientRegisterForm: ExtendPatientRegisterFormComponentType = ({
       <div className="mb-8 overflow-visible">
         {showLinkAbhaNumberModal && (
           <LinkAbhaNumber
+            healthFacility={healthFacility}
             show={showLinkAbhaNumberModal}
             onClose={() => setShowLinkAbhaNumberModal(false)}
             onSuccess={(data) => {
