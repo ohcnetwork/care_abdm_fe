@@ -23,6 +23,7 @@ import { useLinkAbhaNumberContext } from ".";
 import routes from "../../api";
 import { AbhaNumberModel } from "../../types";
 import { formatUsername } from "../../utils";
+import { abhaDisclaimers } from "./disclaimers";
 import useMultiStepForm, { InjectedStepProps } from "./useMultiStepForm";
 
 const MAX_OTP_RESEND_ALLOWED = 2;
@@ -210,7 +211,7 @@ function EnterAadhaar({ memory, setMemory, goTo }: IEnterAadhaarProps) {
             label={
               <Trans
                 t={t}
-                i18nKey={`abha__disclaimer_${i + 1}`}
+                i18nKey={abhaDisclaimers[i]}
                 values={{ user: formatUsername(user) }}
                 components={{
                   input: (
