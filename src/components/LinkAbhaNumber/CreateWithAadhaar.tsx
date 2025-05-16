@@ -544,7 +544,7 @@ function VerifyAadhaarWithDemographics({
           state_code: stateCode!.toString(),
           address,
           pin_code: pincode,
-          mobile: mobile,
+          mobile: mobile.replace("+91", "").replace(/ /g, ""),
         },
       },
     );
