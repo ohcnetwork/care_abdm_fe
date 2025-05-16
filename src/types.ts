@@ -141,6 +141,7 @@ export type HealthFacilityModel = {
   hf_id: string;
   facility: string;
   detail?: string;
+  benefit_name?: string;
 };
 
 export type IcreateHealthFacilityTBody = {

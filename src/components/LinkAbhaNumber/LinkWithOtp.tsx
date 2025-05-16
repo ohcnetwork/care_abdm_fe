@@ -1,5 +1,5 @@
 import { useMemo, useState } from "react";
-import { useTranslation } from "react-i18next";
+import { Trans, useTranslation } from "react-i18next";
 
 import ButtonV2, { ButtonWithTimer } from "@/components/Common/ButtonV2";
 import DropdownMenu, { DropdownItem } from "@/components/Common/Menu";
@@ -7,12 +7,15 @@ import CheckBoxFormField from "@/components/Form/FormFields/CheckBoxFormField";
 import OtpFormField from "@/components/Form/FormFields/OtpFormField";
 import TextFormField from "@/components/Form/FormFields/TextFormField";
 
+import useAuthUser from "@/hooks/useAuthUser";
+
 import * as Notify from "@/Utils/Notifications";
 import request from "@/Utils/request/request";
 import { classNames } from "@/Utils/utils";
 
 import routes from "../../api";
 import { AbhaNumberModel } from "../../types";
+import { formatUsername } from "../../utils";
 import useMultiStepForm, { InjectedStepProps } from "./useMultiStepForm";
 
 const MAX_OTP_RESEND_ALLOWED = 2;
@@ -33,13 +36,20 @@ type Memory = {
   abhaNumber: AbhaNumberModel | null;
 
   resendOtpCount: number;
+  patientName: string;
 };
 
 export default function LinkWithOtp({ onSuccess }: ILoginWithOtpProps) {
   const { currentStep } = useMultiStepForm<Memory>(
     [
-      <EnterId {...({} as IEnterIdProps)} />,
-      <VerifyId {...({ onSuccess } as IVerifyIdProps)} />,
+      {
+        id: "enter-id",
+        element: <EnterId {...({} as IEnterIdProps)} />,
+      },
+      {
+        id: "verify-id",
+        element: <VerifyId {...({ onSuccess } as IVerifyIdProps)} />,
+      },
     ],
     {
       id: "",
@@ -50,6 +60,7 @@ export default function LinkWithOtp({ onSuccess }: ILoginWithOtpProps) {
       otp_system: "aadhaar",
       abhaNumber: null,
       resendOtpCount: 0,
+      patientName: "",
     },
   );
 
@@ -60,9 +71,13 @@ type IEnterIdProps = InjectedStepProps<Memory>;
 
 const supportedAuthMethods = ["AADHAAR_OTP", "MOBILE_OTP"];
 
-function EnterId({ memory, setMemory, next }: IEnterIdProps) {
+function EnterId({ memory, setMemory, goTo }: IEnterIdProps) {
   const { t } = useTranslation();
+  const user = useAuthUser();
+
   const [disclaimerAccepted, setDisclaimerAccepted] = useState([
+    false,
+    false,
     false,
     false,
     false,
@@ -148,7 +163,7 @@ function EnterId({ memory, setMemory, next }: IEnterIdProps) {
         transactionId: data.transaction_id,
       }));
       Notify.Success({ msg: data.detail ?? t("send_otp_success") });
-      next();
+      goTo("verify-id");
     }
 
     setMemory((prev) => ({ ...prev, isLoading: false }));
@@ -186,7 +201,27 @@ function EnterId({ memory, setMemory, next }: IEnterIdProps) {
           <CheckBoxFormField
             key={`abha_disclaimer_${i + 2}`}
             name={`abha_disclaimer_${i + 2}`}
-            label={t(`abha__disclaimer_${i + 2}`)}
+            label={
+              <Trans
+                t={t}
+                i18nKey={`abha__disclaimer_${i + 2}`}
+                values={{ user: formatUsername(user) }}
+                components={{
+                  input: (
+                    <TextFormField
+                      type="text"
+                      name="name"
+                      className="w-48 inline-block"
+                      placeholder="Enter beneficiary name"
+                      value={memory?.patientName}
+                      onChange={(e) =>
+                        setMemory((prev) => ({ ...prev, patientName: e.value }))
+                      }
+                    />
+                  ),
+                }}
+              />
+            }
             value={isAccepted}
             onChange={(e) => {
               setDisclaimerAccepted(

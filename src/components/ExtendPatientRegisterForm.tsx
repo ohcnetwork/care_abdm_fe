@@ -1,5 +1,5 @@
 import { useNavigate } from "raviger";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect } from "react";
 import { useTranslation } from "react-i18next";
 
 import CareIcon from "@/CAREUI/icons/CareIcon";
@@ -71,7 +71,7 @@ const ExtendPatientRegisterForm: ExtendPatientRegisterFormComponentType = ({
               patient: patient.id,
               abha_number: state.form.abha_number,
             },
-          },
+          }
         );
 
         if (res?.status === 200 && data) {
@@ -81,7 +81,7 @@ const ExtendPatientRegisterForm: ExtendPatientRegisterFormComponentType = ({
         }
       }
     },
-    [state.form.abha_number, t],
+    [state.form.abha_number, t]
   );
 
   useEffect(() => {
@@ -92,7 +92,7 @@ const ExtendPatientRegisterForm: ExtendPatientRegisterFormComponentType = ({
     // manually setting the subscribers (old instance of linkAbhaNumberAndPatient is replaced with new instance) as subscribe and unsubscribe cannot be used here because this component is not rendered while PatientForm is in loading state
     setSubscribers((prev) => {
       const handlers = Array.from(prev[topic] ?? []).filter(
-        (handler) => handler.toString() !== linkAbhaNumberAndPatient.toString(),
+        (handler) => handler.toString() !== linkAbhaNumberAndPatient.toString()
       );
 
       handlers.push(linkAbhaNumberAndPatient);
@@ -107,7 +107,7 @@ const ExtendPatientRegisterForm: ExtendPatientRegisterFormComponentType = ({
 
   const populateAbhaValues = (
     abhaProfile: AbhaNumberModel,
-    field: FormContextValue<PatientForm>,
+    field: FormContextValue<PatientForm>
   ) => {
     const values = {
       abha_number: abhaProfile.external_id,
@@ -197,6 +197,7 @@ const ExtendPatientRegisterForm: ExtendPatientRegisterFormComponentType = ({
       <div className="mb-8 overflow-visible">
         {showLinkAbhaNumberModal && (
           <LinkAbhaNumber
+            healthFacility={healthFacility}
             show={showLinkAbhaNumberModal}
             onClose={() => {}}
             onSuccess={(data) => {

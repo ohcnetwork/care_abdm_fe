@@ -1,8 +1,8 @@
 import {
-  cloneElement,
   Dispatch,
   ReactElement,
   SetStateAction,
+  cloneElement,
   useCallback,
   useMemo,
   useState,
@@ -12,38 +12,32 @@ export interface InjectedStepProps<T> {
   currentStepIndex: number;
   isFirstStep: boolean;
   isLastStep: boolean;
-  next: () => void;
-  prev: () => void;
-  goTo: (step: number) => void;
+  goTo: (step: string) => void;
   memory: T | null;
   setMemory: Dispatch<SetStateAction<T>>;
 }
 
+export type MultiStepFormStep = {
+  id: string;
+  element: ReactElement;
+};
+
 export default function useMultiStepForm<T>(
-  steps: ReactElement[],
+  steps: MultiStepFormStep[],
   initialValues?: T,
 ) {
   const [currentStepIndex, setCurrentStepIndex] = useState(0);
   const [memory, setMemory] = useState<T>(initialValues as T);
 
-  const next = useCallback(
-    () =>
-      setCurrentStepIndex((prev) =>
-        steps.length - 1 > prev ? prev + 1 : prev,
-      ),
-    [steps.length],
-  );
-
-  const prev = useCallback(
-    () => setCurrentStepIndex((prev) => (prev > 0 ? prev - 1 : prev)),
-    [],
-  );
-
   const goTo = useCallback(
-    (step: number) =>
-      setCurrentStepIndex((prev) =>
-        step >= 0 && step <= steps.length - 1 ? step : prev,
-      ),
+    (stepId: string) => {
+      const stepIndex = steps.findIndex((step) => step.id === stepId);
+      if (stepIndex === -1) {
+        throw new Error(`Step with id ${stepId} not found`);
+      }
+
+      setCurrentStepIndex(stepIndex);
+    },
     [steps.length],
   );
 
@@ -52,18 +46,16 @@ export default function useMultiStepForm<T>(
       currentStepIndex,
       isFirstStep: currentStepIndex === 0,
       isLastStep: currentStepIndex === steps.length - 1,
-      next,
-      prev,
       goTo,
       memory,
       setMemory,
     }),
-    [currentStepIndex, memory, next, prev, goTo, steps.length],
+    [currentStepIndex, memory, goTo, steps.length],
   );
 
-  const currentStep = cloneElement(steps[currentStepIndex], {
+  const currentStep = cloneElement(steps[currentStepIndex].element, {
     ...options,
-    ...steps[currentStepIndex].props,
+    ...steps[currentStepIndex].element.props,
   });
 
   return { currentStep, ...options };

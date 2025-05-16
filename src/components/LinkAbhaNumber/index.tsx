@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { createContext, useContext, useState } from "react";
 import { useTranslation } from "react-i18next";
 
 import ButtonV2 from "@/components/Common/ButtonV2";
@@ -6,12 +6,13 @@ import DialogModal from "@/components/Common/Dialog";
 
 import { classNames } from "@/Utils/utils";
 
-import { AbhaNumberModel } from "../../types";
+import { AbhaNumberModel, HealthFacilityModel } from "../../types";
 import CreateWithAadhaar from "./CreateWithAadhaar";
 import LinkWithOtp from "./LinkWithOtp";
 import LinkWithQr from "./LinkWithQr";
 
 interface ILinkAbhaNumberProps {
+  healthFacility?: HealthFacilityModel;
   show: boolean;
   onClose: () => void;
   onSuccess: (abhaNumber: AbhaNumberModel) => void;
@@ -56,7 +57,14 @@ const ABHA_LINK_OPTIONS = {
   },
 };
 
+type LinkAbhaNumberContextValue = {
+  healthFacility?: HealthFacilityModel;
+};
+
+const LinkAbhaNumberContext = createContext<LinkAbhaNumberContextValue>({});
+
 export default function LinkAbhaNumber({
+  healthFacility,
   show,
   onClose,
   onSuccess,
@@ -68,87 +76,141 @@ export default function LinkAbhaNumber({
   >("create_with_aadhaar");
 
   return (
-    <DialogModal
-      title={t(ABHA_LINK_OPTIONS[currentAbhaLinkOption].title)}
-      show={show}
-      onClose={onClose}
-    >
-      {currentAbhaLinkOption === "create_with_aadhaar" && (
-        <CreateWithAadhaar onSuccess={onSuccess} />
-      )}
+    <LinkAbhaNumberContext.Provider value={{ healthFacility }}>
+      <DialogModal
+        title={t(ABHA_LINK_OPTIONS[currentAbhaLinkOption].title)}
+        show={show}
+        onClose={onClose}
+        className="!max-w-2xl"
+      >
+        {currentAbhaLinkOption === "create_with_aadhaar" && (
+          <CreateWithAadhaar onSuccess={onSuccess} />
+        )}
 
-      {currentAbhaLinkOption === "link_with_otp" && (
-        <LinkWithOtp onSuccess={onSuccess} />
-      )}
+        {currentAbhaLinkOption === "link_with_otp" && (
+          <LinkWithOtp onSuccess={onSuccess} />
+        )}
 
-      {currentAbhaLinkOption === "link_with_qr" && (
-        <LinkWithQr onSuccess={onSuccess} />
-      )}
+        {currentAbhaLinkOption === "link_with_qr" && (
+          <LinkWithQr onSuccess={onSuccess} />
+        )}
 
-      <div className="mt-6">
-        <p
-          onClick={() =>
-            setCurrentAbhaLinkOption(
-              ABHA_LINK_OPTIONS[currentAbhaLinkOption].create
-                ? "link_with_otp"
-                : "create_with_aadhaar",
-            )
-          }
-          className="cursor-pointer text-center text-sm text-blue-800"
-        >
-          {ABHA_LINK_OPTIONS[currentAbhaLinkOption].create
-            ? t("link_existing_abha_profile")
-            : t("create_new_abha_profile")}
-        </p>
-      </div>
-
-      <div>
-        <p className="mt-6 text-sm text-secondary-800">
-          {t("try_different_abha_linking_option")}
-        </p>
-        <div className="mt-2 flex flex-wrap items-center justify-start gap-2">
-          {Object.values(ABHA_LINK_OPTIONS)
-            .filter(
-              (option) =>
-                option.value !== currentAbhaLinkOption &&
-                ABHA_LINK_OPTIONS[currentAbhaLinkOption]?.create ===
-                  option.create,
-            )
-            .sort((a) => (a.disabled ? 1 : -1))
-            .map((option) => (
-              <ButtonV2
-                onClick={() =>
-                  setCurrentAbhaLinkOption(
-                    option.value as keyof typeof ABHA_LINK_OPTIONS,
-                  )
-                }
-                ghost
-                tooltip={
-                  option.disabled
-                    ? t("abha_link_options__disabled_tooltip")
-                    : t(option.description)
-                }
-                disabled={option.disabled}
-                tooltipClassName="top-full mt-1"
-                className={classNames(
-                  "w-full border border-gray-400 text-secondary-800",
-                  !option.disabled && "hover:border-primary-100",
-                )}
-              >
-                {t(option.title)}
-              </ButtonV2>
-            ))}
-          {onBack && (
-            <ButtonV2
-              ghost
-              className="w-full border border-gray-400 text-secondary-800 hover:bg-secondary-300"
-              onClick={onBack}
-            >
-              Go Back
-            </ButtonV2>
-          )}
+        <div className="mt-6">
+          <p
+            onClick={() =>
+              setCurrentAbhaLinkOption(
+                ABHA_LINK_OPTIONS[currentAbhaLinkOption].create
+                  ? "link_with_otp"
+                  : "create_with_aadhaar"
+              )
+            }
+            className="cursor-pointer text-center text-sm text-blue-800"
+          >
+            {ABHA_LINK_OPTIONS[currentAbhaLinkOption].create
+              ? t("link_existing_abha_profile")
+              : t("create_new_abha_profile")}
+          </p>
         </div>
-      </div>
-    </DialogModal>
+
+        <div>
+          <p className="mt-6 text-sm text-secondary-800">
+            {t("try_different_abha_linking_option")}
+          </p>
+          <div className="mt-2 flex flex-wrap items-center justify-start gap-2">
+            {Object.values(ABHA_LINK_OPTIONS)
+              .filter(
+                (option) =>
+                  option.value !== currentAbhaLinkOption &&
+                  ABHA_LINK_OPTIONS[currentAbhaLinkOption]?.create ===
+                    option.create
+              )
+              .sort((a) => (a.disabled ? 1 : -1))
+              .map((option) => (
+                <ButtonV2
+                  onClick={() =>
+                    setCurrentAbhaLinkOption(
+                      option.value as keyof typeof ABHA_LINK_OPTIONS
+                    )
+                  }
+                  ghost
+                  tooltip={
+                    option.disabled
+                      ? t("abha_link_options__disabled_tooltip")
+                      : t(option.description)
+                  }
+                  disabled={option.disabled}
+                  tooltipClassName="top-full mt-1"
+                  className={classNames(
+                    "w-full border border-gray-400 text-secondary-800",
+                    !option.disabled && "hover:border-primary-100"
+                  )}
+                >
+                  {t(option.title)}
+                </ButtonV2>
+              ))}
+            {onBack && (
+              <ButtonV2
+                ghost
+                className="w-full border border-gray-400 text-secondary-800 hover:bg-secondary-300"
+                onClick={onBack}
+              >
+                Go Back
+              </ButtonV2>
+            )}
+          </div>
+        </div>
+
+        <div>
+          <p className="mt-6 text-sm text-secondary-800">
+            {t("try_different_abha_linking_option")}
+          </p>
+          <div className="mt-2 flex flex-wrap items-center justify-start gap-2">
+            {Object.values(ABHA_LINK_OPTIONS)
+              .filter(
+                (option) =>
+                  option.value !== currentAbhaLinkOption &&
+                  ABHA_LINK_OPTIONS[currentAbhaLinkOption]?.create ===
+                    option.create
+              )
+              .sort((a) => (a.disabled ? 1 : -1))
+              .map((option) => (
+                <ButtonV2
+                  onClick={() =>
+                    setCurrentAbhaLinkOption(
+                      option.value as keyof typeof ABHA_LINK_OPTIONS
+                    )
+                  }
+                  ghost
+                  tooltip={
+                    option.disabled
+                      ? t("abha_link_options__disabled_tooltip")
+                      : t(option.description)
+                  }
+                  disabled={option.disabled}
+                  tooltipClassName="top-full mt-1"
+                  className={classNames(
+                    "w-full border border-gray-400 text-secondary-800",
+                    !option.disabled && "hover:border-primary-100"
+                  )}
+                >
+                  {t(option.title)}
+                </ButtonV2>
+              ))}
+          </div>
+        </div>
+      </DialogModal>
+    </LinkAbhaNumberContext.Provider>
   );
 }
+
+export const useLinkAbhaNumberContext = () => {
+  const context = useContext(LinkAbhaNumberContext);
+
+  if (!context) {
+    throw new Error(
+      "useLinkAbhaNumberContext must be used within a LinkAbhaNumberProvider"
+    );
+  }
+
+  return context;
+};

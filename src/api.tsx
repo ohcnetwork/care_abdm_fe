@@ -107,6 +107,28 @@ const routes = {
   },
 
   healthId: {
+    abhaCreateVerifyAadhaarDemographics: {
+      path: "/api/abdm/v3/health_id/create/verify_aadhaar_demographics/",
+      method: "POST",
+      TBody: Type<{
+        transaction_id?: string;
+        name: string;
+        date_of_birth: string;
+        gender: "M" | "F" | "O";
+        aadhaar: string;
+        mobile: string;
+        address: string;
+        state_code: string;
+        district_code: string;
+        pin_code: string;
+      }>(),
+      TRes: Type<{
+        transaction_id: string;
+        is_new: boolean;
+        abha_number: AbhaNumberModel;
+      }>(),
+    },
+
     abhaCreateSendAadhaarOtp: {
       path: "/api/abdm/v3/health_id/create/send_aadhaar_otp/",
       method: "POST",
@@ -247,6 +269,29 @@ const routes = {
       path: "/api/abdm/v3/health_id/abha_card",
       method: "GET",
       TRes: Type<Blob>(),
+    },
+  },
+
+  utility: {
+    states: {
+      path: "/api/abdm/v3/utility/states/",
+      method: "GET",
+      TRes: Type<
+        {
+          state_name: string;
+          state_code: number;
+        }[]
+      >(),
+    },
+    districts: {
+      path: "/api/abdm/v3/utility/states/{stateId}/districts/",
+      method: "GET",
+      TRes: Type<
+        {
+          district_name: string;
+          district_code: number;
+        }[]
+      >(),
     },
   },
 } as const;
