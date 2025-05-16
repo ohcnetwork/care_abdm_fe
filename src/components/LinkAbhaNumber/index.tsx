@@ -103,39 +103,41 @@ export const LinkAbhaNumber: FC<LinkAbhaNumberProps> = ({
           </TooltipProvider>
         </DrawerTrigger>
         <DrawerContent className="abdm-container">
-          <div className="md:mx-auto max-w-screen md:max-w-md max-md:p-4 max-h-svh">
-            <DrawerHeader>
-              <DrawerTitle>Generate/Link ABHA Number</DrawerTitle>
-              <DrawerDescription>
-                Generate/link patient's ABHA details for easy access to
-                healthcare services.
-              </DrawerDescription>
-            </DrawerHeader>
-            <Tabs defaultValue={defaultMode} orientation="vertical">
-              <TabsList className="w-full">
-                <TabsTrigger
-                  className="flex-1 w-1/2 truncate justify-start"
-                  value="new"
-                >
-                  Generate new ABHA number
-                </TabsTrigger>
-                <TabsTrigger
-                  className="flex-1 w-1/2 truncate justify-start"
-                  value="existing"
-                >
-                  Link existing ABHA number
-                </TabsTrigger>
-              </TabsList>
-              <ScrollArea className="h-96 pb-6 pr-3">
-                <TabsContent value="new">
-                  <CreateWithAadhaar onSuccess={handleOnSuccess} />
-                </TabsContent>
-                <TabsContent value="existing">
-                  <LinkWithOtp onSuccess={handleOnSuccess} />
-                </TabsContent>
-              </ScrollArea>
-            </Tabs>
-          </div>
+          <ScrollArea className="h-[90vh]">
+            <div className="md:mx-auto max-w-screen md:max-w-md max-md:p-4">
+              <DrawerHeader>
+                <DrawerTitle>Generate/Link ABHA Number</DrawerTitle>
+                <DrawerDescription>
+                  Generate/link patient's ABHA details for easy access to
+                  healthcare services.
+                </DrawerDescription>
+              </DrawerHeader>
+              <Tabs defaultValue={defaultMode} orientation="vertical">
+                <TabsList className="w-full sticky top-0 bg-gray-200 z-10 py-6">
+                  <TabsTrigger
+                    className="flex-1 w-1/2 truncate justify-center"
+                    value="new"
+                  >
+                    Generate new ABHA
+                  </TabsTrigger>
+                  <TabsTrigger
+                    className="flex-1 w-1/2 truncate justify-center"
+                    value="existing"
+                  >
+                    Link existing ABHA
+                  </TabsTrigger>
+                </TabsList>
+                <div className="pb-6 pr-3">
+                  <TabsContent value="new">
+                    <CreateWithAadhaar onSuccess={handleOnSuccess} />
+                  </TabsContent>
+                  <TabsContent value="existing">
+                    <LinkWithOtp onSuccess={handleOnSuccess} />
+                  </TabsContent>
+                </div>
+              </Tabs>
+            </div>
+          </ScrollArea>
         </DrawerContent>
       </Drawer>
     </LinkAbhaNumberContext.Provider>

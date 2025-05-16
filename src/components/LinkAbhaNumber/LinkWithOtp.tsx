@@ -197,7 +197,7 @@ const EnterId: FC<EnterIdProps> = ({ memory, setMemory, goTo }) => {
 
   return (
     <Form {...form}>
-      <form className="mt-6 space-y-4">
+      <form className="mt-4 space-y-4">
         <FormField
           control={form.control}
           name="id"

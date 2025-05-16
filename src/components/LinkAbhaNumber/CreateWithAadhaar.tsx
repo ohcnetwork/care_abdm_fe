@@ -203,7 +203,7 @@ const EnterAadhaar: FC<EnterAadhaarProps> = ({ memory, setMemory, goTo }) => {
           e.stopPropagation();
           form.handleSubmit(onSubmit)(e);
         }}
-        className="mt-6 space-y-4"
+        className="mt-4 space-y-4"
       >
         <FormField
           control={form.control}
