@@ -471,7 +471,7 @@ function VerifyAadhaarWithDemographics({
   const [gender, setGender] = useState<AbhaNumberModel["gender"]>();
   const [dob, setDob] = useState(new Date().toISOString().slice(0, 10));
   const [districtCode, setDistrictCode] = useState<number>();
-  const [stateCode, setStateCode] = useState<number>();
+  const [stateCode, setStateCode] = useState<number>(0);
   const [address, setAddress] = useState("");
   const [pincode, setPincode] = useState("");
   const [mobile, setMobile] = useState("");
@@ -479,8 +479,9 @@ function VerifyAadhaarWithDemographics({
   const { data: states } = useQuery(routes.utility.states);
   const { data: districts } = useQuery(routes.utility.districts, {
     pathParams: {
-      stateId: stateCode!,
+      stateId: stateCode,
     },
+    silent: true,
   });
 
   const validateInput = () => {
