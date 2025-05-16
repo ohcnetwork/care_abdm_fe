@@ -16,6 +16,7 @@ import { classNames } from "@/Utils/utils";
 import routes from "../../api";
 import { AbhaNumberModel } from "../../types";
 import { formatUsername } from "../../utils";
+import { abhaDisclaimers } from "./disclaimers";
 import useMultiStepForm, { InjectedStepProps } from "./useMultiStepForm";
 
 const MAX_OTP_RESEND_ALLOWED = 2;
@@ -204,7 +205,7 @@ function EnterId({ memory, setMemory, goTo }: IEnterIdProps) {
             label={
               <Trans
                 t={t}
-                i18nKey={`abha__disclaimer_${i + 2}`}
+                i18nKey={abhaDisclaimers[i + 1]}
                 values={{ user: formatUsername(user) }}
                 components={{
                   input: (
