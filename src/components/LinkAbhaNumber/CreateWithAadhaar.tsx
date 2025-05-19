@@ -1,6 +1,11 @@
 import { AbhaProfile, AbhaProfileProps } from "./ShowAbhaProfile";
 import { Button, ButtonWithTimer } from "@/components/ui/button";
-import { CircleCheckIcon, CircleIcon, CircleXIcon } from "lucide-react";
+import {
+  CircleCheckIcon,
+  CircleIcon,
+  CircleXIcon,
+  FingerprintIcon,
+} from "lucide-react";
 import { FC, JSX, useEffect, useMemo, useState } from "react";
 import {
   Form,
@@ -74,6 +79,12 @@ export const CreateWithAadhaar: FC<CreateWithAadhaarProps> = ({
           <VerifyAadhaarWithDemographics
             {...({} as VerifyAadhaarWithDemographicsProps)}
           />
+        ),
+      },
+      {
+        id: "verify-aadhaar-with-bio",
+        element: (
+          <VerifyAadhaarWithBio {...({} as VerifyAadhaarWithBioProps)} />
         ),
       },
       {
@@ -213,7 +224,7 @@ const EnterAadhaar: FC<EnterAadhaarProps> = ({ memory, setMemory, goTo }) => {
               <FormLabel>Aadhaar Number / Virtual ID</FormLabel>
               <FormControl>
                 <Input
-                  placeholder="Enter 12 digital Aadhaar  number OR 16 digit virtual ID"
+                  placeholder="Enter 12 digital Aadhaar number OR 16 digit virtual ID"
                   {...field}
                 />
               </FormControl>
@@ -300,6 +311,23 @@ const EnterAadhaar: FC<EnterAadhaarProps> = ({ memory, setMemory, goTo }) => {
               {t("verify_with_demographics")}
             </Button>
           )}
+          <Button
+            type="button"
+            variant="default"
+            disabled={!form.formState.isValid}
+            onClick={() => {
+              setMemory((prev) => ({
+                ...prev,
+                transactionId: "",
+                aadhaarNumber: form.getValues("aadhaar"),
+                patientName: form.getValues("name"),
+              }));
+              goTo("verify-aadhaar-with-bio");
+            }}
+            className="w-full"
+          >
+            {t("verify_with_bio")}
+          </Button>
         </div>
       </form>
     </Form>
@@ -809,6 +837,150 @@ const VerifyAadhaarWithDemographics: FC<VerifyAadhaarWithDemographicsProps> = ({
           loading={verifyAadhaarDemographicsMutation.isPending}
         >
           {t("verify_demographics")}
+        </Button>
+      </form>
+    </Form>
+  );
+};
+
+type VerifyAadhaarWithBioProps = InjectedStepProps<FormMemory>;
+
+const verifyAadhaarWithBioFormSchema = z.object({
+  _aadhaar: z.string(),
+});
+
+type VerifyAadhaarWithBioFormValues = z.infer<
+  typeof verifyAadhaarWithBioFormSchema
+>;
+
+const VerifyAadhaarWithBio: FC<VerifyAadhaarWithBioProps> = ({
+  memory,
+  goTo,
+}) => {
+  const { t } = useTranslation(I18NNAMESPACE);
+
+  const form = useForm<VerifyAadhaarWithBioFormValues>({
+    resolver: zodResolver(verifyAadhaarWithBioFormSchema),
+    defaultValues: {
+      _aadhaar: memory?.aadhaarNumber ?? "",
+    },
+  });
+
+  const verifyAadhaarBioMutation = useMutation({
+    mutationFn: apis.healthId.abhaCreateVerifyAadhaarOtp,
+    onSuccess: (data) => {
+      if (data) {
+        toast.success("Fingerprint verified successfully");
+        goTo("show-abha-profile");
+      }
+    },
+  });
+
+  useEffect(() => {
+    // TODO: create verify with bio mutation
+    // TODO: call local rd service to verify fingerprint
+    // TODO: move to mobile verification or show abha profile based of if transaction id is present in response
+  }, []);
+
+  return (
+    <Form {...form}>
+      <form
+        onSubmit={(e) => {
+          e.stopPropagation();
+        }}
+        className="mt-6 space-y-4"
+      >
+        <FormField
+          control={form.control}
+          disabled
+          name="_aadhaar"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Aadhaar Number / Virtual ID</FormLabel>
+              <FormControl>
+                <Input
+                  placeholder="Enter 12 digital Aadhaar  number OR 16 digit virtual ID"
+                  {...field}
+                />
+              </FormControl>
+              <FormDescription>
+                Aadhaar number will not be stored by CARE.
+              </FormDescription>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        <div className="flex flex-col gap-2">
+          <div className="flex flex-col items-center justify-center gap-4 rounded-lg border border-dashed border-secondary-200 p-8">
+            <div
+              className={cn(
+                "flex h-32 w-32 items-center justify-center rounded-full bg-primary-50 transition-all duration-500",
+                verifyAadhaarBioMutation.isSuccess && "bg-green-50",
+                verifyAadhaarBioMutation.isError && "bg-red-50"
+              )}
+            >
+              <div className="relative w-16 h-16">
+                <FingerprintIcon
+                  className={cn(
+                    "w-full h-full",
+                    verifyAadhaarBioMutation.isSuccess
+                      ? "text-primary-500"
+                      : verifyAadhaarBioMutation.isError
+                      ? "text-danger-500"
+                      : "text-gray-300"
+                  )}
+                />
+                <FingerprintIcon
+                  className="absolute inset-0 text-gray-300 w-full h-full animate-fill-up"
+                  style={{
+                    maskImage:
+                      "linear-gradient(to top, black 50%, transparent 50%)",
+                    WebkitMaskImage:
+                      "linear-gradient(to top, black 50%, transparent 50%)",
+                    maskSize: "100% 200%",
+                    WebkitMaskSize: "100% 200%",
+                    maskRepeat: "no-repeat",
+                    WebkitMaskRepeat: "no-repeat",
+                    maskPosition: "0% 100%",
+                    WebkitMaskPosition: "0% 100%",
+                  }}
+                />
+              </div>
+            </div>
+            <div className="text-center">
+              <h3
+                className={cn(
+                  "text-lg font-medium transition-colors duration-500",
+                  verifyAadhaarBioMutation.isSuccess && "text-green-600",
+                  verifyAadhaarBioMutation.isError && "text-red-600",
+                  !verifyAadhaarBioMutation.isSuccess &&
+                    !verifyAadhaarBioMutation.isError &&
+                    "text-secondary-900"
+                )}
+              >
+                {verifyAadhaarBioMutation.isSuccess
+                  ? t("fingerprint_verified")
+                  : verifyAadhaarBioMutation.isError
+                  ? t("fingerprint_verification_failed")
+                  : t("place_finger_on_scanner")}
+              </h3>
+              {!verifyAadhaarBioMutation.isSuccess &&
+                !verifyAadhaarBioMutation.isError && (
+                  <p className="mt-1 text-sm text-secondary-500">
+                    {t("fingerprint_scan_instructions")}
+                  </p>
+                )}
+            </div>
+          </div>
+        </div>
+
+        <Button
+          type="submit"
+          variant="default"
+          loading={verifyAadhaarBioMutation.isPending}
+        >
+          {t("verify_bio")}
         </Button>
       </form>
     </Form>
