@@ -41,9 +41,9 @@ import { apis } from "@/apis";
 import { cn } from "@/lib/utils";
 import { toast } from "@/lib/utils";
 import { useForm } from "react-hook-form";
+import { useLinkAbhaNumberContext } from ".";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useLinkAbhaNumberContext } from ".";
 
 type CreateWithAadhaarProps = {
   onSuccess: (abhaNumber: AbhaNumber) => void;
@@ -153,7 +153,7 @@ const enterAadhaarFormSchema = z.object({
 
 type EnterAadhaarFormValues = z.infer<typeof enterAadhaarFormSchema>;
 
-const EnterAadhaar: FC<EnterAadhaarProps> = ({ memory, setMemory, goTo }) => {
+const EnterAadhaar: FC<EnterAadhaarProps> = ({ setMemory, goTo }) => {
   const { t } = useTranslation(I18NNAMESPACE);
   const { healthFacility, currentUser } = useLinkAbhaNumberContext();
 
