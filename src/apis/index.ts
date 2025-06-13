@@ -8,6 +8,7 @@ import {
 import { queryString, request } from "./request";
 
 import { AbhaNumber } from "../types/abhaNumber";
+import { GovtOrganization } from "@/types/govtOrganization";
 import { HealthFacility } from "../types/healthFacility";
 import { HealthInformation } from "../types/healthInformation";
 import { PaginatedResponse } from "./types";
@@ -361,6 +362,21 @@ export const apis = {
       });
 
       return response.text();
+    },
+  },
+
+  govtOrganization: {
+    list: async (query?: {
+      level_cache?: number;
+      name?: string;
+      org_type?: "govt";
+      limit?: number;
+      offset?: number;
+      parent?: string;
+    }) => {
+      return await request<PaginatedResponse<GovtOrganization>>(
+        "/api/v1/govt/organization/" + queryString(query)
+      );
     },
   },
 };
